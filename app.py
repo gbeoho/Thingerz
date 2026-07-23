@@ -15,11 +15,11 @@ ADMIN_PASSWORD = 'Gabriel00!'
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
 PLATFORM_CONFIG = {
-    'youtube': {
+'youtube': {
         'name': 'YouTube',
-        'embed_base': 'https://www.youtube-nocookie.com/embed/',
+        'embed_base': 'https://www.youtube-nocookie.com/embed/{id}',
         'embed_params': '?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=1',
-        'watch_base': 'https://www.youtube.com/watch?v=',
+        'watch_base': 'https://www.youtube.com/watch?v={id}',
         'thumb_base': 'https://img.youtube.com/vi/{id}/hqdefault.jpg',
         'aspect_ratio': '16:9', 'color': '#FF0000',
     },
@@ -192,8 +192,37 @@ def increment_view(video_id):
     write_csv('view_counts.csv', vc, ['video_id', 'count'])
 
 
-def generate_id(prefix):
-    return f"{prefix}{uuid.uuid4().hex[:8]}"
+def extract_youtube_id(url):
+    """Extract YouTube video ID from various URL formats."""
+    import re
+    if not url:
+        return ''
+    patterns = [
+        r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/|youtube\.com/embed/|m\.youtube\.com/watch\?v=)([a-zA-Z0-9_-]{11})',
+        r'youtube\.com/live/([a-zA-Z0-9_-]{11})',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    # If the input itself looks like a valid ID (11 chars)
+    if re.match(r'^[a-zA-Z0-9_-]{11}$', url.strip()):
+        return url.strip()
+    return ''
+
+def extract_instagram_id(url):
+    if not url:
+        return ''
+    import re
+    match = re.search(r'instagram\.com/(?:p|reel)/([a-zA-Z0-9_-]+)', url)
+    return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
+
+def extract_tiktok_id(url):
+    if not url:
+        return ''
+    import re
+    match = re.search(r'tiktok\.com/@[\w.-]+/video/(\d+)', url)
+    return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
 
 
 def admin_required(f):
@@ -500,17 +529,31 @@ def admin_videos():
 def admin_video_add():
     vids = read_csv('videos.csv')
     max_num = max(int(v['id'].replace('v', '')) for v in vids) if vids else 0
+    platform = request.form.get('platform', 'youtube')
+    platform_id_raw = request.form.get('platform_id', '').strip()
+    if platform == 'youtube':
+        platform_id = extract_youtube_id(platform_id_raw) or platform_id_raw
+        thumb = request.form.get('thumbnail_url', '') or f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
+    elif platform == 'instagram':
+        platform_id = extract_instagram_id(platform_id_raw) or platform_id_raw
+        thumb = request.form.get('thumbnail_url', '') or f"https://picsum.photos/seed/{platform_id}/400/711"
+    elif platform == 'tiktok':
+        platform_id = extract_tiktok_id(platform_id_raw) or platform_id_raw
+        thumb = request.form.get('thumbnail_url', '') or f"https://picsum.photos/seed/{platform_id}/400/711"
+    else:
+        platform_id = platform_id_raw
+        thumb = request.form.get('thumbnail_url', '')
     vid = {
         'id': f"v{max_num + 1:03d}",
         'subcategory_id': request.form.get('subcategory_id', ''),
         'category_id': request.form.get('category_id', ''),
-        'platform': request.form.get('platform', 'youtube'),
-        'platform_id': request.form.get('platform_id', ''),
+        'platform': platform,
+        'platform_id': platform_id,
         'title_zh': request.form.get('title_zh', ''),
         'title_en': request.form.get('title_en', ''),
         'description_zh': request.form.get('description_zh', ''),
         'description_en': request.form.get('description_en', ''),
-        'thumbnail_url': request.form.get('thumbnail_url', ''),
+        'thumbnail_url': thumb,
         'aspect_ratio': request.form.get('aspect_ratio', '16:9'),
         'tags': request.form.get('tags', ''),
         'status': request.form.get('status', 'approved'),
@@ -578,19 +621,21 @@ def admin_approve_submission(submission_id):
             break
     write_csv('submissions.csv', subs, ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date'])
     if submission:
-        platform_id = ''
         platform = submission.get('platform', 'youtube')
         url = submission.get('platform_url', '')
-        if platform == 'youtube' and 'watch?v=' in url:
-            platform_id = url.split('watch?v=')[-1].split('&')[0]
-        elif platform == 'instagram' and '/p/' in url:
-            platform_id = url.split('/p/')[-1].split('/')[0].split('?')[0]
-        elif platform == 'tiktok' and '/video/' in url:
-            platform_id = url.split('/video/')[-1].split('?')[0]
-        elif platform == 'threads' and '/post/' in url:
-            platform_id = url.split('/post/')[-1].split('?')[0]
+        if platform == 'youtube':
+            platform_id = extract_youtube_id(url)
+        elif platform == 'instagram':
+            platform_id = extract_instagram_id(url)
+        elif platform == 'tiktok':
+            platform_id = extract_tiktok_id(url)
         else:
-            platform_id = url.split('/')[-1]
+            platform_id = url.split('/')[-1].split('?')[0]
+
+        if platform == 'youtube':
+            thumb = f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
+        else:
+            thumb = f"https://picsum.photos/seed/{platform_id}/400/711"
 
         vids = read_csv('videos.csv')
         max_num = max(int(v['id'].replace('v', '')) for v in vids) if vids else 0
@@ -604,7 +649,7 @@ def admin_approve_submission(submission_id):
             'title_en': submission.get('title_en', ''),
             'description_zh': submission.get('description_zh', ''),
             'description_en': '',
-            'thumbnail_url': f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg" if platform == 'youtube' else f"https://picsum.photos/seed/{platform_id}/400/711",
+            'thumbnail_url': thumb,
             'aspect_ratio': PLATFORM_CONFIG.get(platform, {}).get('aspect_ratio', '16:9'),
             'tags': '',
             'status': 'approved',
