@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 import uuid
 from datetime import datetime
 from functools import wraps
@@ -194,7 +195,6 @@ def increment_view(video_id):
 
 def extract_youtube_id(url):
     """Extract YouTube video ID from various URL formats."""
-    import re
     if not url:
         return ''
     patterns = [
@@ -213,16 +213,18 @@ def extract_youtube_id(url):
 def extract_instagram_id(url):
     if not url:
         return ''
-    import re
     match = re.search(r'instagram\.com/(?:p|reel)/([a-zA-Z0-9_-]+)', url)
     return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
 
 def extract_tiktok_id(url):
     if not url:
         return ''
-    import re
     match = re.search(r'tiktok\.com/@[\w.-]+/video/(\d+)', url)
     return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
+
+
+def generate_id(prefix):
+    return f"{prefix}{uuid.uuid4().hex[:8]}"
 
 
 def admin_required(f):
@@ -787,6 +789,12 @@ def inject_globals():
 def add_utf8_header(response):
     response.headers['Content-Type'] = 'text/html; charset=utf-8'
     return response
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    import traceback
+    return f"<pre>500 Internal Server Error\n\n{traceback.format_exc()}</pre>", 500
 
 
 if __name__ == '__main__':
