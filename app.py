@@ -9,8 +9,9 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['SECRET_KEY'] = 'thingerz-dian-zhao-ni-2026-secret-key'
+app.config['SECRET_KEY'] = os.urandom(24).hex()
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
 
 ADMIN_PASSWORD = 'Gabriel00!'
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
