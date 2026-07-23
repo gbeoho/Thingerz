@@ -234,6 +234,12 @@
         .trust-num{display:block;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#818cf8,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .trust-label{font-size:.78rem;color:#9898b0;margin-top:2px;display:block}
 
+        .banner-ad{padding:8px 0;background:rgba(99,102,241,.03);border-bottom:1px solid rgba(255,255,255,.04)}
+        .banner-placeholder{display:flex;align-items:center;justify-content:center;gap:16px;min-height:60px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:12px;padding:16px}
+        .banner-label{font-size:.78rem;font-weight:600;color:#6a6a80}
+        .banner-size{font-size:.68rem;color:rgba(255,255,255,.15)}
+        @media(max-width:768px){.banner-placeholder{min-height:70px;flex-direction:column;gap:4px}}
+
         .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 30px;border-radius:28px;font-size:.9rem;font-weight:600;border:none;cursor:pointer;transition:all .25s}
         .btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.25)}
         .btn-primary:hover{background:linear-gradient(135deg,#818cf8,#a78bfa);box-shadow:0 6px 28px rgba(99,102,241,.4);transform:translateY(-2px)}
@@ -420,6 +426,15 @@
             <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
         </div>
     </nav>
+    <!-- Banner Ad 位置預留 -->
+    <div class="banner-ad" style="display:none">
+        <div class="container">
+            <div class="banner-placeholder">
+                <span class="banner-label">廣告位置</span>
+                <span class="banner-size">728 × 90 / 手機 320 × 100</span>
+            </div>
+        </div>
+    </div>
     <main>{% block content %}{% endblock %}</main>
     <a href="{{ url_for('contact') }}" class="cs-bot" title="需要幫忙？聯絡我們">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
