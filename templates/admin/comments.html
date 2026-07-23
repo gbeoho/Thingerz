@@ -1,0 +1,23 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>評論管理</h1>
+<table>
+    <thead><tr><th>ID</th><th>影片</th><th>作者</th><th>內容</th><th>日期</th><th>狀態</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for c in comments %}
+    <tr>
+        <td>{{ c['id'] }}</td>
+        <td>{{ c['video_id'] }}</td>
+        <td>{{ c.get('author','') }}</td>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.get('content','') }}</td>
+        <td>{{ c.get('date','') }}</td>
+        <td><span class="badge badge-{{ c.get('status','approved') }}">{{ c.get('status','approved') }}</span></td>
+        <td>
+            {% if c.get('status') == 'pending' %}<a href="{{ url_for('admin_comment_approve', comment_id=c['id']) }}" class="btn btn-success btn-sm">批准</a>{% endif %}
+            <a href="{{ url_for('admin_comment_delete', comment_id=c['id']) }}" class="btn btn-danger btn-sm" onclick="return confirm('確定刪除？')">刪除</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>影片管理</h1>
+<div class="mb"><a href="#" onclick="toggleAddForm()" class="btn btn-primary">+ 新增影片</a></div>
+
+<div id="addForm" style="display:none;background:#11111d;padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,.06);margin-bottom:24px">
+    <h3 style="margin-bottom:14px">新增影片</h3>
+    <form method="POST" action="{{ url_for('admin_video_add') }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div class="form-group">
+                <label>類別</label>
+                <select id="catSelectAdd" class="input" onchange="loadSubcategories('catSelectAdd','subSelectAdd')">
+                    <option value="">選擇類別</option>
+                    {% for c in categories %}<option value="{{ c['category_id'] }}">{{ c['name_zh'] }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>子類別</label>
+                <select name="subcategory_id" id="subSelectAdd" class="input"><option value="">先選類別</option></select>
+            </div>
+            <div class="form-group"><label>類別ID（自動）</label><input name="category_id" class="input" placeholder="根據子類別自動填入" readonly></div>
+            <div class="form-group"><label>平台</label><select name="platform" class="input">{% for k,v in platform_config.items() %}<option value="{{ k }}">{{ v.name }}</option>{% endfor %}</select></div>
+            <div class="form-group"><label>平台 ID</label><input name="platform_id" class="input" placeholder="YouTube video ID"></div>
+            <div class="form-group"><label>中文標題</label><input name="title_zh" class="input" required></div>
+            <div class="form-group"><label>英文標題</label><input name="title_en" class="input"></div>
+            <div class="form-group"><label>縮圖 URL</label><input name="thumbnail_url" class="input" placeholder="https://img.youtube.com/vi/ID/hqdefault.jpg"></div>
+            <div class="form-group"><label>比例</label><select name="aspect_ratio" class="input"><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option></select></div>
+            <div class="form-group"><label>標籤（空格分隔）</label><input name="tags" class="input" placeholder="香港 美食 街頭"></div>
+            <div class="form-group"><label>Track</label><select name="track" class="input"><option value="fun">Fun</option><option value="learning">Learning</option></select></div>
+            <div class="form-group"><label>Direction</label><select name="direction" class="input">{% for k,v in directions.items() %}<option value="{{ k }}">{{ v.name_zh }}</option>{% endfor %}</select></div>
+            <div class="form-group"><label>狀態</label><select name="status" class="input"><option value="approved">已批准</option><option value="pending">待審核</option></select></div>
+        </div>
+        <div class="form-group mb"><label>中文描述</label><input name="description_zh" class="input"></div>
+        <div class="form-group mb"><label>英文描述</label><input name="description_en" class="input"></div>
+        <button type="submit" class="btn btn-primary">新增影片</button>
+        <button type="button" onclick="toggleAddForm()" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,.1);color:#e4e4ed;margin-left:8px">取消</button>
+    </form>
+</div>
+
+<table>
+    <thead><tr><th>ID</th><th>標題</th><th>平台</th><th>類別</th><th>狀態</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for v in videos %}
+    <tr>
+        <td>{{ v['id'] }}</td>
+        <td><strong>{{ v['title_zh'] }}</strong></td>
+        <td>{{ platform_config.get(v['platform'],{}).get('name',v['platform']) }}</td>
+        <td>{{ v['category_id'] }} / {{ v['subcategory_id'] }}</td>
+        <td><span class="badge badge-{{ v.get('status','approved') }}">{{ v.get('status','approved') }}</span></td>
+        <td>
+            <button onclick="quickEdit('{{ v['id'] }}')" class="btn btn-primary btn-sm">快速編輯</button>
+            <form method="POST" action="{{ url_for('admin_video_delete', video_id=v['id']) }}" style="display:inline" onsubmit="return confirm('確定刪除？')"><button class="btn btn-danger btn-sm">刪除</button></form>
+            <a href="{{ url_for('video_detail', video_id=v['id']) }}" target="_blank" class="btn btn-sm" style="background:rgba(255,255,255,.05);color:#9898b0">預覽</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<script>
+function toggleAddForm(){var f=document.getElementById('addForm');f.style.display=f.style.display==='none'?'block':'none';}
+function loadSubcategories(catSelectId, subSelectId){
+    var catId=document.getElementById(catSelectId).value;
+    var sub=document.getElementById(subSelectId);
+    sub.innerHTML='<option value="">載入中...</option>';
+    if(!catId){sub.innerHTML='<option value="">先選類別</option>';return;}
+    fetch('/api/subcategories/'+catId).then(function(r){return r.json()}).then(function(d){
+        var html='<option value="">選擇子類別</option>';
+        d.forEach(function(x){html+='<option value="'+x.id+'">'+x.name_zh+' ('+x.name_en+')</option>'});
+        sub.innerHTML=html;
+    });
+}
+document.getElementById('subSelectAdd').addEventListener('change',function(){
+    var catSelect=document.getElementById('catSelectAdd');
+    document.querySelector('[name=category_id]').value=catSelect.value;
+});
+function quickEdit(id){
+    var title=prompt('新標題');
+    if(!title)return;
+    var plat=prompt('平台ID');
+    if(!plat)return;
+    var status=prompt('狀態 (approved/pending)','approved');
+    var f=document.createElement('form');f.method='POST';f.action='/admin/videos/edit/'+id;
+    f.innerHTML='<input name="title_zh" value="'+title+'"><input name="platform_id" value="'+plat+'"><input name="status" value="'+status+'"><input name="subcategory_id" value=""><input name="category_id" value=""><input name="platform" value="youtube"><input name="title_en" value=""><input name="thumbnail_url" value=""><input name="aspect_ratio" value="16:9"><input name="tags" value=""><input name="track" value="fun"><input name="direction" value="fun"><input name="description_zh" value=""><input name="description_en" value="">';
+    document.body.appendChild(f);f.submit();
+}
+</script>
+{% endblock %}

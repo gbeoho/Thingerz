@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}{{ video['title_zh'] }} - Thingerz{% endblock %}
+
+{% block content %}
+{% set plat_cfg = platform_config.get(video['platform'], platform_config['youtube']) %}
+<article class="video-detail-page">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <span>/</span>
+            <a href="{{ url_for('track_page', track=category.get('track', 'fun')) }}">{{ 'Fun' if category.get('track', '') == 'fun' else 'Learning' }}</a>
+            <span>/</span>
+            <a href="{{ url_for('category_page', slug=category['name_slug']) }}">{{ category['name_zh'] }}</a>
+            <span>/</span>
+            <a href="{{ url_for('subcategory_page', subcategory_id=sub['id']) }}">{{ sub['name_zh'] }}</a>
+        </div>
+    </div>
+
+    <div class="video-detail-layout">
+        <div class="video-main">
+            <div class="video-player-wrapper {{ 'portrait-player' if video['aspect_ratio'] == '9:16' else 'square-player' if video['aspect_ratio'] == '1:1' else 'landscape-player' }}">
+                <div class="video-facade" data-platform="{{ video['platform'] }}" data-platform-id="{{ video['platform_id'] }}" data-aspect="{{ video['aspect_ratio'] }}" data-embed-url="{{ plat_cfg['embed_base'] | replace('{id}', video['platform_id']) | replace('{user}', '') }}">
+                    <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" class="facade-thumb">
+                    <div class="facade-overlay">
+                        <div class="facade-play-btn" style="background: {{ plat_cfg['color'] }}cc;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <p class="facade-hint">點擊播放影片</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="video-info-section">
+                <div class="video-title-row">
+                    <h1 class="video-title">{{ video['title_zh'] }}</h1>
+                    <div class="video-platform-link">
+                        <a href="{{ plat_cfg['watch_base'] | replace('{id}', video['platform_id']) | replace('{user}', '') }}" target="_blank" rel="noopener" class="external-link">在 {{ plat_cfg['name'] }} 觀看 &nearr;</a>
+                    </div>
+                </div>
+                <p class="video-subtitle">{{ video['title_en'] }}</p>
+                {% if video['description_zh'] %}
+                <div class="video-desc">
+                    <p>{{ video['description_zh'] }}</p>
+                </div>
+                {% endif %}
+                <div class="video-meta">
+                    <div class="meta-tags">
+                        {% for tag in video['tags'].split('|') %}
+                        <span class="tag tag-lg">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="meta-info">
+                        <span class="meta-item">
+                            <span class="meta-label">平台</span>
+                            {{ plat_cfg['name'] }}
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-label">頻道</span>
+                            {{ 'Fun' if video.get('track', '') == 'fun' else 'Learning' }}
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-label">觀看次數</span>
+                            {{ views }}
+                        </span>
+                        <span class="meta-item">
+                            <span class="meta-label">提交日期</span>
+                            {{ video['submitted_date'] }}
+                        </span>
+                    </div>
+                    <div class="share-buttons">
+                        <span class="meta-label" style="margin-bottom:8px">分享</span>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" target="_blank" rel="noopener" class="share-btn share-fb">Facebook</a>
+                            <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="share-btn share-ig">Instagram</a>
+                            <a href="https://www.threads.net/intent/post?text={{ (video['title_zh'] + ' ' + request.url)|urlencode }}" target="_blank" rel="noopener" class="share-btn share-th">Threads</a>
+                            <a href="https://www.tiktok.com/" target="_blank" rel="noopener" class="share-btn share-tt">TikTok</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comments-section" id="comments">
+                <h2 class="comments-title">評論 ({{ comments|length }})</h2>
+                <div class="comments-list">
+                    {% for comment in comments %}
+                    <div class="comment-card">
+                        <div class="comment-avatar">{{ comment['author'][0] }}</div>
+                        <div class="comment-body">
+                            <div class="comment-header">
+                                <span class="comment-author">{{ comment['author'] }}</span>
+                                <time class="comment-date">{{ comment['date'] }}</time>
+                            </div>
+                            <p class="comment-text">{{ comment['content'] }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if not comments %}
+                    <p class="no-comments">暫無評論，成為第一個留言的人！</p>
+                    {% endif %}
+                </div>
+                <form class="comment-form" method="POST" action="{{ url_for('add_comment', video_id=video['id']) }}">
+                    <h3>發表評論</h3>
+                    <div class="form-row">
+                        <input type="text" name="author" placeholder="你的名字（選填）" class="input" maxlength="50">
+                    </div>
+                    <div class="form-row">
+                        <textarea name="content" placeholder="寫下你的評論..." class="input textarea" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">發佈評論</button>
+                </form>
+            </div>
+        </div>
+
+        <aside class="video-sidebar">
+            <div class="sidebar-card contact-card">
+                <h3>想了解更多？</h3>
+                <p>對這個主題感興趣？聯絡我們獲取更多資訊或專業服務</p>
+                <a href="{{ url_for('contact') }}" class="btn btn-outline btn-block">聯絡我們</a>
+            </div>
+
+            {% if related_videos %}
+            <div class="sidebar-card related-card">
+                <h3>相關推薦</h3>
+                <div class="related-list">
+                    {% for rv in related_videos[:3] %}
+                    <a href="{{ url_for('video_detail', video_id=rv['id']) }}" class="related-item">
+                        <div class="related-thumb">
+                            <img src="{{ rv['thumbnail_url'] }}" alt="{{ rv['title_zh'] }}" loading="lazy">
+                            <div class="related-play-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
+                        </div>
+                        <div class="related-info">
+                            <h4>{{ rv['title_zh'] }}</h4>
+                            <span class="related-platform">{{ platform_config.get(rv['platform'], {}).get('name', rv['platform'] | capitalize) }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </aside>
+    </div>
+</article>
+
+{% if related_videos %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent"></span>
+            更多推薦影片
+        </h2>
+        <div class="masonry-grid">
+            {% for rv in related_videos %}
+            <a href="{{ url_for('video_detail', video_id=rv['id']) }}" class="video-card {{ 'portrait' if rv['aspect_ratio'] == '9:16' else 'square' if rv['aspect_ratio'] == '1:1' else 'landscape' }}">
+                <div class="card-media">
+                    <img src="{{ rv['thumbnail_url'] }}" alt="{{ rv['title_zh'] }}" loading="lazy" class="card-thumb">
+                    <div class="card-overlay">
+                        <div class="play-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ rv['title_zh'] }}</h3>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    var facade = document.querySelector('.video-facade');
+    if (!facade) return;
+    facade.addEventListener('click', function() {
+        var embedUrl = this.dataset.embedUrl.replace('youtube.com','youtube-nocookie.com');
+        var platform = this.dataset.platform;
+        var wrapper = this.parentElement;
+        var iframe = document.createElement('iframe');
+        if (platform === 'youtube') {
+            embedUrl += '?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=1';
+            iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
+            iframe.setAttribute('allowfullscreen', '');
+        } else if (platform === 'tiktok') {
+            iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
+        }
+        iframe.src = embedUrl;
+        iframe.setAttribute('scrolling', 'no');
+        iframe.className = 'video-iframe';
+        iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:12px;';
+        this.style.display = 'none';
+        wrapper.appendChild(iframe);
+    });
+})();
+</script>
+{% endblock %}

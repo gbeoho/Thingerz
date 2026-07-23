@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員登入 - Thingerz</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:#06060d;color:#e4e4ed;display:flex;align-items:center;justify-content:center;min-height:100vh}
+        .login-box{background:#11111d;border-radius:18px;padding:48px 40px;border:1px solid rgba(255,255,255,.06);width:100%;max-width:400px}
+        .login-box h1{font-size:1.5rem;font-weight:800;margin-bottom:8px;text-align:center}
+        .login-box p{color:#9898b0;text-align:center;margin-bottom:32px;font-size:.9rem}
+        .input{width:100%;padding:14px 18px;background:#0e0e1a;border:1px solid rgba(255,255,255,.08);border-radius:14px;color:#e4e4ed;font-size:.95rem;outline:none;margin-bottom:16px}
+        .input:focus{border-color:#6366f1}
+        .btn{width:100%;padding:14px;border-radius:14px;font-size:.95rem;font-weight:600;border:none;cursor:pointer;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;transition:all .2s}
+        .btn:hover{background:linear-gradient(135deg,#818cf8,#a78bfa)}
+        .error{color:#f472b6;text-align:center;margin-bottom:16px;font-size:.85rem}
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>Thingerz 管理後台</h1>
+        <p>請輸入管理員密碼</p>
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+        <form method="POST">
+            <input type="password" name="password" class="input" placeholder="密碼" required autofocus>
+            <button type="submit" class="btn">登入</button>
+        </form>
+    </div>
+</body>
+</html>

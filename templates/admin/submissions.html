@@ -1,0 +1,27 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>提交審核</h1>
+<table>
+    <thead><tr><th>ID</th><th>標題</th><th>平台</th><th>提交者</th><th>日期</th><th>狀態</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for s in submissions %}
+    <tr>
+        <td>{{ s['id'] }}</td>
+        <td><strong>{{ s['title_zh'] }}</strong></td>
+        <td>{{ platform_config.get(s.get('platform','youtube'),{}).get('name',s.get('platform','')) }}</td>
+        <td>{{ s.get('submitter_name','') }}</td>
+        <td>{{ s.get('submitted_date','') }}</td>
+        <td><span class="badge badge-{{ s.get('status','pending') }}">{{ s.get('status','pending') }}</span></td>
+        <td>
+            {% if s.get('status') == 'pending' %}
+            <form method="POST" action="{{ url_for('admin_approve_submission', submission_id=s['id']) }}" style="display:inline"><button class="btn btn-success btn-sm">批准</button></form>
+            <form method="POST" action="{{ url_for('admin_reject_submission', submission_id=s['id']) }}" style="display:inline"><button class="btn btn-danger btn-sm">拒絕</button></form>
+            {% else %}
+            <span class="text-muted">已處理</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

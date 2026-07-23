@@ -1,0 +1,38 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>類別管理</h1>
+<div class="mb"><a href="#" onclick="document.getElementById('addForm').style.display='block';return false" class="btn btn-primary">+ 新增類別</a></div>
+<div id="addForm" style="display:none;background:#11111d;padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,.06);margin-bottom:24px">
+    <h3 style="margin-bottom:14px">新增類別</h3>
+    <form method="POST" class="form-inline">
+        <div class="form-group"><label>ID (例: cat009)</label><input name="category_id" class="input" required style="width:120px"></div>
+        <div class="form-group"><label>Slug (例: technology)</label><input name="name_slug" class="input" required style="width:160px"></div>
+        <div class="form-group"><label>中文名稱</label><input name="name_zh" class="input" required style="width:160px"></div>
+        <div class="form-group"><label>英文名稱</label><input name="name_en" class="input" required style="width:200px"></div>
+        <div class="form-group"><label>Track</label><select name="track" class="input" style="width:120px"><option value="fun">Fun</option><option value="learning">Learning</option></select></div>
+        <div class="form-group"><label>Direction</label><select name="direction" class="input" style="width:140px"><option value="fun">Fun</option><option value="learning">Learning</option><option value="business">商業配對</option><option value="skills_exchange">技能互換</option></select></div>
+        <div class="form-group"><label>中文描述</label><input name="description_zh" class="input" style="width:300px"></div>
+        <div class="form-group"><label>英文描述</label><input name="description_en" class="input" style="width:300px"></div>
+        <input type="hidden" name="action" value="add">
+        <button type="submit" class="btn btn-primary">新增</button>
+    </form>
+</div>
+<table>
+    <thead><tr><th>ID</th><th>名稱</th><th>英文</th><th>Track</th><th>Direction</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for c in categories %}
+    <tr>
+        <td>{{ c['category_id'] }}</td>
+        <td><strong>{{ c['name_zh'] }}</strong></td>
+        <td>{{ c['name_en'] }}</td>
+        <td>{{ c.get('track','') }}</td>
+        <td>{{ c.get('direction','') }}</td>
+        <td>
+            <a href="{{ url_for('admin_category_edit', category_id=c['category_id']) }}" class="btn btn-primary btn-sm">編輯</a>
+            <form method="POST" style="display:inline" onsubmit="return confirm('確定刪除 {{ c['name_zh'] }}？')"><input type="hidden" name="action" value="delete"><input type="hidden" name="cat_id" value="{{ c['category_id'] }}"><button class="btn btn-danger btn-sm">刪除</button></form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

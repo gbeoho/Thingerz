@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Fun 頻道' if track == 'fun' else 'Learning 頻道' }} - Thingerz{% endblock %}
+
+{% block content %}
+<section class="track-hero {{ track }}-hero">
+    <div class="container">
+        <h1>{{ 'Fun' if track == 'fun' else 'Learning' }} 頻道</h1>
+        <p>{{ '探索娛樂、興趣與創作的無限可能' if track == 'fun' else '深入學習、行業知識與專業發展' }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="sticky-categories">
+            {% for cat in categories %}
+            <a href="{{ url_for('category_page', slug=cat['name_slug']) }}" class="sticky-cat-chip">{{ cat['name_zh'] }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent {{ 'fun-accent' if track == 'fun' else 'learning-accent' }}"></span>
+            精選內容
+        </h2>
+        <div class="masonry-grid">
+            {% for video in videos %}
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}">
+                <div class="card-media">
+                    <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
+                    <div class="card-overlay">
+                        <div class="play-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    {% include "_platform_badge.html" %}
+                    <div class="card-stamp">{{ video['track'] }}</div>
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    <div class="card-tags">
+                        {% for tag in video['tags'].split('|')[:2] %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,55 @@
+﻿id,category_id,name_slug,name_zh,name_en
+s001,cat001,market-research,市場研究與分析,Market Research & Analysis
+s002,cat001,branding,品牌推廣,Branding & Promotion
+s003,cat001,online-business,網上生意,Online Business
+s004,cat001,consulting,專業顧問,Professional Consulting
+s005,cat001,interior-design,室內設計,Interior Design
+s006,cat001,medical,醫療服務,Medical Services
+s007,cat001,food-beverage,餐飲與酒類,Food & Beverage
+s008,cat001,events,活動與配對,Events & Networking
+s009,cat002,skills,技能教學,Skills Tutorial
+s010,cat002,performance-coaching,表演教練,Performance Coaching
+s011,cat002,music-learning,音樂學習,Music Learning
+s012,cat002,visual-arts,視覺創作課程,Visual Arts Course
+s013,cat002,language,語言與翻譯,Language & Translation
+s014,cat002,self-improvement,心理／自我提升,Self Improvement
+s015,cat003,graphic-design,平面設計,Graphic Design
+s016,cat003,fashion-design,服飾設計,Fashion Design
+s017,cat003,handmade-crafts,手作工藝,Handmade Crafts
+s018,cat003,accessories,配件設計,Accessories Design
+s019,cat003,photography,攝影與影像,Photography & Imaging
+s020,cat003,printmaking,印刷與工藝,Printmaking & Crafts
+s021,cat003,art-installation,藝術裝置,Art Installation
+s022,cat003,drawing,繪畫與素描,Drawing & Sketching
+s023,cat004,music-performance,音樂演出,Music Performance
+s024,cat004,dance-performance,舞蹈表演,Dance Performance
+s025,cat004,drama,戲劇與短劇,Drama & Skits
+s026,cat004,magic,魔術與奇技,Magic & Tricks
+s027,cat004,stunts,特技與雜耍,Stunts & Acrobatics
+s028,cat004,interactive-entertainment,互動娛樂,Interactive Entertainment
+s029,cat005,baking,烘焙,Baking
+s030,cat005,cooking-tutorial,餐飲教學,Cooking Tutorial
+s031,cat005,beverages,飲品與品味,Beverages & Tasting
+s032,cat005,food-creation,食物創作,Food Creation
+s033,cat005,fragrance,香氛與感官,Fragrance & Sensory
+s034,cat005,gardening,園藝與種植,Gardening
+s035,cat005,food-brands,飲食品牌,Food Brands
+s036,cat006,wedding-planning,婚禮策劃,Wedding Planning
+s037,cat006,wedding-design,婚禮設計,Wedding Design
+s038,cat006,wedding-styling,婚禮造型,Wedding Styling
+s039,cat006,wedding-cakes,婚禮甜點,Wedding Desserts
+s040,cat006,parenting,親子活動,Parent-Child Activities
+s041,cat006,lifestyle,日常生活美學,Daily Life Aesthetics
+s042,cat006,seasonal-gifts,節慶與禮品,Seasonal Gifts
+s043,cat007,cosmetics,化妝,Cosmetics
+s044,cat007,skincare,護膚,Skincare
+s045,cat007,styling,造型與形象,Styling & Image
+s046,cat007,beauty-content,美感內容,Beauty Content
+s047,cat007,personal-branding,個人品牌形象,Personal Branding
+s048,cat007,beauty-service,美容服務,Beauty Service
+s049,cat008,parenting-education,親子教育,Parenting Education
+s050,cat008,children-activities,兒童活動,Children Activities
+s051,cat008,community-groups,社區組織,Community Groups
+s052,cat008,public-participation,公共參與,Public Participation
+s053,cat008,social-networking,社交配對,Social Networking
+s054,cat008,public-talks,公眾講座,Public Talks

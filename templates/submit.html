@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}提交影片 - Thingerz{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>提交影片</h1>
+        <p class="page-subtitle">分享你的影片，支援 YouTube / Instagram / TikTok / Threads</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container form-container">
+        {% if success %}
+        <div class="success-message">
+            <div class="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            </div>
+            <h2>提交成功！</h2>
+            <p>你的影片已成功提交，正在等待審核。審核通過後將自動顯示在對應的分類頁面中。</p>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交另一部影片</a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
+        </div>
+        {% else %}
+        <form method="POST" class="submit-form">
+            <div class="form-section">
+                <h3>影片資訊</h3>
+                <div class="form-row">
+                    <label for="platform">平台 <span class="required">*</span></label>
+                    <select name="platform" id="platform" class="input" required>
+                        {% for key, cfg in platform_config.items() %}
+                        <option value="{{ key }}">{{ cfg.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="platform_url">影片網址 <span class="required">*</span></label>
+                    <input type="url" name="platform_url" id="platform_url" class="input" placeholder="貼上 YouTube / Instagram / TikTok / Threads 的影片連結" required>
+                </div>
+                <div class="form-row">
+                    <label for="title_zh">中文標題 <span class="required">*</span></label>
+                    <input type="text" name="title_zh" id="title_zh" class="input" placeholder="為你的影片取一個吸引人的中文標題" required maxlength="100">
+                </div>
+                <div class="form-row">
+                    <label for="title_en">英文標題</label>
+                    <input type="text" name="title_en" id="title_en" class="input" placeholder="English title (optional)" maxlength="200">
+                </div>
+                <div class="form-row">
+                    <label for="description_zh">影片描述</label>
+                    <textarea name="description_zh" id="description_zh" class="input textarea" rows="4" placeholder="簡單描述影片內容（選填）" maxlength="500"></textarea>
+                </div>
+                <div class="form-row">
+                    <label for="direction">內容方向</label>
+                    <select name="direction" id="direction" class="input">
+                        <option value="">自動（根據分類決定）</option>
+                        <option value="fun">Fun 頻道</option>
+                        <option value="learning">Learning 頻道</option>
+                        <option value="business">商業配對</option>
+                        <option value="skills_exchange">技能互換</option>
+                    </select>
+                    <small class="form-hint">選擇內容的主要方向，方便日後分類與配對</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>分類設定</h3>
+                <div class="form-row">
+                    <label for="category_id">主分類 <span class="required">*</span></label>
+                    <select name="category_id" id="category_id" class="input" required>
+                        <option value="">請選擇主分類</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat['category_id'] }}" data-track="{{ cat.get('track', '') }}" data-direction="{{ cat.get('direction', '') }}">{{ cat['name_zh'] }} ({{ cat['name_en'] }}) - {{ 'Fun' if cat.get('track', '') == 'fun' else 'Learning' }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="subcategory_id">子分類 <span class="required">*</span></label>
+                    <select name="subcategory_id" id="subcategory_id" class="input" required disabled>
+                        <option value="">請先選擇主分類</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>你的資料</h3>
+                <div class="form-row">
+                    <label for="submitter_name">你的名字 <span class="required">*</span></label>
+                    <input type="text" name="submitter_name" id="submitter_name" class="input" placeholder="如何稱呼你？" required maxlength="50">
+                </div>
+                <div class="form-row">
+                    <label for="submitter_email">電郵地址</label>
+                    <input type="email" name="submitter_email" id="submitter_email" class="input" placeholder="your@email.com（選填）">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">提交影片</button>
+        </form>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    var categorySelect = document.getElementById('category_id');
+    var subcategorySelect = document.getElementById('subcategory_id');
+    if (!categorySelect || !subcategorySelect) return;
+
+    categorySelect.addEventListener('change', function() {
+        var categoryId = this.value;
+        subcategorySelect.disabled = true;
+        subcategorySelect.innerHTML = '<option value="">載入中...</option>';
+        if (!categoryId) {
+            subcategorySelect.innerHTML = '<option value="">請先選擇主分類</option>';
+            subcategorySelect.disabled = true;
+            return;
+        }
+        fetch('/api/subcategories/' + categoryId)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                subcategorySelect.innerHTML = '<option value="">請選擇子分類</option>';
+                data.forEach(function(s) {
+                    var opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.name_zh + ' (' + s.name_en + ')';
+                    subcategorySelect.appendChild(opt);
+                });
+                subcategorySelect.disabled = false;
+            })
+            .catch(function() {
+                subcategorySelect.innerHTML = '<option value="">載入失敗，請重試</option>';
+            });
+    });
+})();
+</script>
+{% endblock %}

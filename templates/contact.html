@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}聯絡我們 - Thingerz{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>聯絡我們</h1>
+        <p class="page-subtitle">有任何問題或建議？歡迎與我們聯絡</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container form-container">
+        {% if success %}
+        <div class="success-message">
+            <div class="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            </div>
+            <h2>訊息已送出！</h2>
+            <p>感謝你的查詢，我們會盡快回覆。</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">返回首頁</a>
+        </div>
+        {% else %}
+        <div class="contact-layout">
+            <div class="contact-info-sidebar">
+                <h3>聯絡方式</h3>
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                        <div>
+                            <h4>電郵</h4>
+                            <p>contact@thingers.hk</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="method-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <div>
+                            <h4>地址</h4>
+                            <p>香港九龍尖沙咀</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-social">
+                    <h4>追蹤我們</h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Instagram">IG</a>
+                        <a href="#" class="social-link" aria-label="YouTube">YT</a>
+                        <a href="#" class="social-link" aria-label="Facebook">FB</a>
+                    </div>
+                </div>
+            </div>
+            <form method="POST" class="submit-form">
+                <div class="form-section">
+                    <h3>發送訊息</h3>
+                    <div class="form-row">
+                        <label for="name">你的名字 <span class="required">*</span></label>
+                        <input type="text" name="name" id="name" class="input" required placeholder="如何稱呼你？" maxlength="50">
+                    </div>
+                    <div class="form-row">
+                        <label for="email">電郵地址 <span class="required">*</span></label>
+                        <input type="email" name="email" id="email" class="input" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-row">
+                        <label for="subject">主旨 <span class="required">*</span></label>
+                        <input type="text" name="subject" id="subject" class="input" required placeholder="查詢主旨" maxlength="200">
+                    </div>
+                    <div class="form-row">
+                        <label for="message">訊息內容 <span class="required">*</span></label>
+                        <textarea name="message" id="message" class="input textarea" rows="6" required placeholder="請輸入你的查詢內容..." maxlength="2000"></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">發送訊息</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

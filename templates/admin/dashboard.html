@@ -1,0 +1,18 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>儀表板</h1>
+<div class="stats">
+    <div class="stat-card"><h3>類別</h3><div class="num">{{ cat_count }}</div></div>
+    <div class="stat-card"><h3>影片</h3><div class="num">{{ vid_count }}</div></div>
+    <div class="stat-card"><h3>新聞</h3><div class="num">{{ news_count }}</div></div>
+    <div class="stat-card"><h3>待審核</h3><div class="num" style="color:#fbbf24">{{ pending_count }}</div></div>
+    <div class="stat-card"><h3>聯絡查詢</h3><div class="num">{{ contact_count }}</div></div>
+</div>
+<h2 style="font-size:1.1rem;margin-bottom:16px">快速連結</h2>
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="{{ url_for('admin_categories') }}" class="btn btn-primary">管理類別</a>
+    <a href="{{ url_for('admin_videos') }}" class="btn btn-primary">管理影片</a>
+    <a href="{{ url_for('admin_news') }}" class="btn btn-primary">管理新聞</a>
+    <a href="{{ url_for('admin_submissions') }}" class="btn btn-primary">審核提交 ({{ pending_count }})</a>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ news_item['title_zh'] }} - 新聞中心 - Thingerz{% endblock %}
+
+{% block content %}
+<article class="news-article-page">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <span>/</span>
+            <a href="{{ url_for('news_list') }}">新聞中心</a>
+            <span>/</span>
+            <span class="current">{{ news_item['title_zh'] }}</span>
+        </div>
+    </div>
+    <div class="news-article-hero">
+        <div class="container">
+            <img src="{{ news_item['image_url'] }}" alt="{{ news_item['title_zh'] }}" class="news-hero-image">
+        </div>
+    </div>
+    <div class="container">
+        <div class="news-article-content">
+            <header class="article-header">
+                <time class="news-date">{{ news_item['date'] }}</time>
+                <h1>{{ news_item['title_zh'] }}</h1>
+                <p class="article-subtitle">{{ news_item['title_en'] }}</p>
+            </header>
+            <div class="article-body">
+                {{ news_item['content_zh'] | safe }}
+            </div>
+        </div>
+
+        <div class="article-footer">
+            <h3>更多新聞</h3>
+            <div class="news-grid">
+                {% for item in all_news %}
+                {% if item['id'] != news_item['id'] %}
+                <article class="news-card">
+                    <div class="news-image">
+                        <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                    </div>
+                    <div class="news-info">
+                        <time class="news-date">{{ item['date'] }}</time>
+                        <h3><a href="{{ url_for('news_detail', news_id=item['id']) }}">{{ item['title_zh'] }}</a></h3>
+                        <p>{{ item['summary_zh'] }}</p>
+                    </div>
+                </article>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</article>
+{% endblock %}

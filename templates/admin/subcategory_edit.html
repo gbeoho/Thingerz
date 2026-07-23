@@ -1,0 +1,12 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>編輯子類別: {{ sub['name_zh'] }}</h1>
+<form method="POST" style="max-width:600px;background:#11111d;padding:24px;border-radius:14px;border:1px solid rgba(255,255,255,.06)">
+    <div class="form-group mb"><label>所屬類別</label><select name="category_id" class="input">{% for c in categories %}<option value="{{ c['category_id'] }}" {% if c['category_id']==sub['category_id'] %}selected{% endif %}>{{ c['name_zh'] }}</option>{% endfor %}</select></div>
+    <div class="form-group mb"><label>Slug</label><input name="name_slug" class="input" value="{{ sub['name_slug'] }}"></div>
+    <div class="form-group mb"><label>中文名稱</label><input name="name_zh" class="input" value="{{ sub['name_zh'] }}"></div>
+    <div class="form-group mb"><label>英文名稱</label><input name="name_en" class="input" value="{{ sub['name_en'] }}"></div>
+    <button type="submit" class="btn btn-primary">儲存</button>
+    <a href="{{ url_for('admin_subcategories') }}" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,.1);color:#e4e4ed">取消</a>
+</form>
+{% endblock %}

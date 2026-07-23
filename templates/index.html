@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Thingerz - 探索興趣與行業的精彩影音{% endblock %}
+
+{% block content %}
+<section class="hero-split">
+    <a href="{{ url_for('track_page', track='fun') }}" class="hero-half hero-fun">
+        <div class="hero-bg-glow"></div>
+        <div class="hero-content">
+            <h2 class="hero-track-label">Fun</h2>
+            <p class="hero-track-desc">娛樂 · 興趣 · 創作</p>
+            <div class="hero-cta-circle">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+            </div>
+            <span class="hero-hint">探索精彩內容</span>
+        </div>
+    </a>
+    <a href="{{ url_for('track_page', track='learning') }}" class="hero-half hero-learning">
+        <div class="hero-bg-glow"></div>
+        <div class="hero-content">
+            <h2 class="hero-track-label">Learning</h2>
+            <p class="hero-track-desc">學習 · 行業 · 專業</p>
+            <div class="hero-cta-circle">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+            </div>
+            <span class="hero-hint">深入專業領域</span>
+        </div>
+    </a>
+</section>
+
+<section class="trust-bar">
+    <div class="container">
+        <div class="trust-items">
+            <div class="trust-item"><span class="trust-num">500+</span><span class="trust-label">精選影片</span></div>
+            <div class="trust-item"><span class="trust-num">8</span><span class="trust-label">興趣行業分類</span></div>
+            <div class="trust-item"><span class="trust-num">4</span><span class="trust-label">支援平台</span></div>
+            <div class="trust-item"><span class="trust-num">24/7</span><span class="trust-label">隨時探索</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="section featured-section">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent"></span>
+            精選策展影片
+        </h2>
+        <div class="masonry-grid">
+            {% for video in featured_videos %}
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}" data-track="{{ video['track'] }}">
+                <div class="card-media">
+                    <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
+                    <div class="card-overlay">
+<div class="play-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    {% include "_platform_badge.html" %}
+                    <div class="card-stamp">{{ video['track'] }}</div>
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    <div class="card-tags">
+                        {% for tag in video['tags'].split('|')[:2] %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section categories-section">
+    <div class="container">
+        <div class="categories-split">
+            <div class="cat-group">
+                <h2 class="section-title">
+                    <span class="title-accent fun-accent"></span>
+                    Fun 頻道
+                </h2>
+                <div class="cat-grid">
+                    {% for cat in fun_categories %}
+                    <a href="{{ url_for('category_page', slug=cat['name_slug']) }}" class="cat-card fun-card">
+                        <span class="cat-icon">{{ cat['name_zh'][0] }}</span>
+                        <div class="cat-info">
+                            <h3>{{ cat['name_zh'] }}</h3>
+                            <p>{{ cat['name_en'] }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="cat-group">
+                <h2 class="section-title">
+                    <span class="title-accent learning-accent"></span>
+                    Learning 頻道
+                </h2>
+                <div class="cat-grid">
+                    {% for cat in learning_categories %}
+                    <a href="{{ url_for('category_page', slug=cat['name_slug']) }}" class="cat-card learning-card">
+                        <span class="cat-icon">{{ cat['name_zh'][0] }}</span>
+                        <div class="cat-info">
+                            <h3>{{ cat['name_zh'] }}</h3>
+                            <p>{{ cat['name_en'] }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if latest_news %}
+<section class="section news-section">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent"></span>
+            最新消息
+            <a href="{{ url_for('news_list') }}" class="section-link">查看全部 &rarr;</a>
+        </h2>
+        <div class="news-grid">
+            {% for item in latest_news %}
+            <article class="news-card">
+                <div class="news-image">
+                    <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                </div>
+                <div class="news-info">
+                    <time class="news-date">{{ item['date'] }}</time>
+                    <h3><a href="{{ url_for('news_detail', news_id=item['id']) }}">{{ item['title_zh'] }}</a></h3>
+                    <p>{{ item['summary_zh'] }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <h2>分享你的精彩內容</h2>
+            <p>提交你的 YouTube / Instagram 影片，讓更多人看到你的創作</p>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary btn-lg">立即提交影片</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+    var funEl = document.querySelector('.hero-fun .hero-track-label');
+    var learnEl = document.querySelector('.hero-learning .hero-track-label');
+    if(!funEl || !learnEl) return;
+    var funTexts = ['Fun', '娛樂', '創意', 'Fun'];
+    var learnTexts = ['Learning', '學習', '專業', 'Learning'];
+    var i = 0;
+    setInterval(function(){
+        i = (i + 1) % funTexts.length;
+        funEl.style.transition = 'opacity .5s';
+        learnEl.style.transition = 'opacity .5s';
+        funEl.style.opacity = '0';
+        learnEl.style.opacity = '0';
+        setTimeout(function(){
+            funEl.textContent = funTexts[i];
+            learnEl.textContent = learnTexts[i];
+            funEl.style.opacity = '1';
+            learnEl.style.opacity = '1';
+        }, 500);
+    }, 5000);
+})();
+</script>
+{% endblock %}

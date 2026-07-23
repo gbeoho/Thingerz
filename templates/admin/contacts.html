@@ -1,0 +1,22 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>聯絡查詢</h1>
+<table>
+    <thead><tr><th>ID</th><th>姓名</th><th>電郵</th><th>主旨</th><th>日期</th><th>狀態</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for c in contacts %}
+    <tr>
+        <td>{{ c['id'] }}</td>
+        <td>{{ c.get('name','') }}</td>
+        <td>{{ c.get('email','') }}</td>
+        <td>{{ c.get('subject','') }}</td>
+        <td>{{ c.get('date','') }}</td>
+        <td><span class="badge badge-{{ 'approved' if c.get('status')=='read' else 'pending' }}">{{ c.get('status','new') }}</span></td>
+        <td>
+            <a href="{{ url_for('admin_contact_mark', contact_id=c['id'], status='read') }}" class="btn btn-success btn-sm">標記已讀</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
