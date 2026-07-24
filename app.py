@@ -27,6 +27,30 @@ DB_PATH = os.path.join(DATA_DIR, 'thingerz.db')
 ADMIN_PASSWORD = 'Gabriel00!'
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
+BLOCKED_WORDS = [
+    'porn', 'xxx', 'sex', 'nude', 'naked', 'escort', 'onlyfans', 'camgirl', 'adult',
+    '色情', '成人', '裸體', '裸露', '三級', '艷照', '援交', '一夜情', '約炮',
+    '共產黨', '國民黨', '民進黨', '習近平', '蔡英文', '賴清德', '特朗普', '拜登',
+    '政治', '示威', '抗議', '遊行', '港獨', '台獨', '藏獨', '疆獨', '六四', '天安門',
+    '反送中', '國安法', '光復', '革命', '罷工', '佔中', '雨傘', '暴徒', '黑警',
+    'isis', 'terrorist', 'jihad', 'nazi', 'hitler',
+]
+
+def filter_profanity(text):
+    result = text
+    for word in FOUL_WORDS:
+        result = result.replace(word, '*' * len(word))
+    return result
+
+def contains_blocked(text):
+    if not text:
+        return False
+    tl = text.lower()
+    for w in BLOCKED_WORDS:
+        if w.lower() in tl:
+            return True
+    return False
+
 HK_DISTRICTS = [
     '中西區', '灣仔區', '東區', '南區',
     '油尖旺區', '深水埗區', '九龍城區', '黃大仙區', '觀塘區',
@@ -442,6 +466,10 @@ def submit_video():
             sub = get_subcategory(subcategory_id)
             if sub:
                 category_id = sub['category_id']
+        title_zh = request.form.get('title_zh', '')
+        desc_zh = request.form.get('description_zh', '')
+        if contains_blocked(title_zh) or contains_blocked(desc_zh):
+            return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=False, blocked=True)
         submission = {
             'id': generate_id('sub_'),
             'platform': request.form.get('platform', 'youtube'),
@@ -460,7 +488,7 @@ def submit_video():
         fieldnames = ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date']
         append_csv('submissions.csv', submission, fieldnames)
         return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=True)
-    return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=False)
+    return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=False, blocked=False)
 
 
 @app.route('/news')
@@ -544,10 +572,14 @@ def contact():
 
 @app.route('/video/<video_id>/comment', methods=['POST'])
 def add_comment(video_id):
-    content = filter_profanity(request.form.get('content', '').strip())
-    author = filter_profanity(request.form.get('author', '').strip()) or '匿名用戶'
+    content = request.form.get('content', '').strip()
+    author = request.form.get('author', '').strip() or '匿名用戶'
     if not content:
         return redirect(url_for('video_detail', video_id=video_id))
+    if contains_blocked(content) or contains_blocked(author):
+        return redirect(url_for('video_detail', video_id=video_id))
+    content = filter_profanity(content)
+    author = filter_profanity(author)
     append_csv('comments.csv', {
         'id': generate_id('cm_'), 'video_id': video_id, 'author': author,
         'content': content, 'date': datetime.now().strftime('%Y-%m-%d'), 'status': 'approved'
