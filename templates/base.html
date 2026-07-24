@@ -29,8 +29,14 @@
         .nav-search input{background:#11111d;border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:6px 14px;font-size:.82rem;color:#e4e4ed;outline:none;width:160px;transition:all .2s}
         .nav-search input:focus{border-color:#6366f1;width:180px}
         .nav-search button{background:none;border:none;color:#9898b0;cursor:pointer;padding:4px}
-        #google_translate_element select{background:#11111d;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:5px 10px;font-size:.75rem;color:#9898b0;outline:none}
-        .skiptranslate iframe{display:none!important}
+        .lang-select{position:relative;flex-shrink:0}
+        .lang-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#11111d;border:1px solid rgba(255,255,255,.08);border-radius:20px;font-size:.78rem;color:#9898b0;cursor:pointer;white-space:nowrap;transition:all .2s}
+        .lang-btn:hover{border-color:rgba(99,102,241,.4);color:#e4e4ed}
+        .lang-dropdown{display:none;position:absolute;top:100%;right:0;margin-top:6px;background:#11111d;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:8px;min-width:180px;max-height:340px;overflow-y:auto;z-index:200;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+        .lang-select.open .lang-dropdown{display:block}
+        .lang-dropdown a{display:block;padding:8px 14px;font-size:.8rem;color:#9898b0;border-radius:8px;transition:all .15s}
+        .lang-dropdown a:hover{background:rgba(99,102,241,.1);color:#fff}
+        .skiptranslate iframe, #google_translate_hidden{display:none!important}
         body{top:0!important}
         .nav-link::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:0;height:2px;background:linear-gradient(90deg,#6366f1,#ec4899);border-radius:2px;transition:width .3s}
         .nav-link:hover{color:#fff}.nav-link:hover::after{width:100%}
@@ -427,7 +433,7 @@
             </a>
             <div class="nav-links">
                 <a href="{{ url_for('index') }}" class="nav-link">首頁</a>
-                <a href="{{ url_for('news_list') }}" class="nav-link">新聞</a>
+                <a href="{{ url_for('news_list') }}" class="nav-link">好去處</a>
                 <a href="{{ url_for('submit_video') }}" class="nav-link">提交影片</a>
                 <a href="{{ url_for('contact') }}" class="nav-link">聯絡我們</a>
                 <form action="{{ url_for('search') }}" method="GET" class="nav-search">
@@ -435,7 +441,32 @@
                     <input type="text" name="q" placeholder="搜尋..." value="{{ query if query else '' }}">
                     <button type="submit" style="display:none"></button>
                 </form>
-                <div id="google_translate_element" style="flex-shrink:0"></div>
+                <div class="lang-select" id="langSelect">
+                    <button class="lang-btn" onclick="event.preventDefault();document.getElementById('langSelect').classList.toggle('open')">
+                        <span id="currentLang">中文(繁)</span>
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5l3 3 3-3"/></svg>
+                    </button>
+                    <div class="lang-dropdown">
+                        <a href="#" onclick="event.preventDefault();switchLang('zh-HK','中文(繁)')">中文(繁)</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('zh-CN','中文(简)')">中文(简)</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('en','English')">English</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('ja','日本語')">日本語</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('ko','한국어')">한국어</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('es','Español')">Español</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('fr','Français')">Français</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('hi','हिन्दी')">हिन्दी</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('ar','العربية')">العربية</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('bn','বাংলা')">বাংলা</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('ru','Русский')">Русский</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('pt','Português')">Português</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('id','Bahasa Indonesia')">Bahasa Indonesia</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('th','ไทย')">ไทย</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('vi','Tiếng Việt')">Tiếng Việt</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('ms','Bahasa Melayu')">Bahasa Melayu</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('tl','Tagalog')">Tagalog</a>
+                        <a href="#" onclick="event.preventDefault();switchLang('de','Deutsch')">Deutsch</a>
+                    </div>
+                </div>
                 <a href="{{ url_for('submit_video') }}" class="btn btn-primary" style="padding:8px 16px;font-size:.78rem;border-radius:20px">加入成為夥伴</a>
             </div>
             <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
@@ -458,7 +489,7 @@
         <div class="footer-container">
             <div class="footer-grid">
                 <div class="footer-brand"><h3>Thingerz 點搵你</h3><p>高效能社交媒體策展平台</p><p>探索興趣與行業的精彩影音內容</p><div class="app-badges" style="margin-top:14px"><span style="font-size:.7rem;color:#6a6a80;display:block;margin-bottom:6px">即將推出</span><div style="display:flex;gap:8px"><span style="background:#1a1a2e;padding:6px 12px;border-radius:8px;font-size:.68rem;color:#9898b0">App Store</span><span style="background:#1a1a2e;padding:6px 12px;border-radius:8px;font-size:.68rem;color:#9898b0">Google Play</span></div></div></div>
-                <div class="footer-links"><h4>探索</h4><a href="{{ url_for('track_page', track='fun') }}">Fun 頻道</a><a href="{{ url_for('track_page', track='learning') }}">Learning 頻道</a><a href="{{ url_for('news_list') }}">新聞中心</a><a href="{{ url_for('search') }}">搜尋影片</a></div>
+                <div class="footer-links"><h4>探索</h4><a href="{{ url_for('track_page', track='fun') }}">Fun 頻道</a><a href="{{ url_for('track_page', track='learning') }}">Learning 頻道</a><a href="{{ url_for('news_list') }}">好去處</a><a href="{{ url_for('search') }}">搜尋影片</a></div>
                 <div class="footer-links"><h4>參與</h4><a href="{{ url_for('submit_video') }}">提交影片</a><a href="{{ url_for('contact') }}">聯絡我們</a><a href="{{ url_for('submit_video') }}">加入成為夥伴</a></div>
                 <div class="footer-links"><h4>分類</h4>{% for cat in categories %}<a href="{{ url_for('category_page', slug=cat['name_slug']) }}">{{ cat['name_zh'] }}</a>{% endfor %}</div>
             </div>
@@ -466,9 +497,44 @@
         </div>
     </footer>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <div class="lang-select" id="langSelect">
+        <button class="lang-btn" onclick="document.getElementById('langSelect').classList.toggle('open')">
+            <span id="currentLang">中文(繁)</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5l3 3 3-3"/></svg>
+        </button>
+        <div class="lang-dropdown">
+            <a href="#" onclick="switchLang('zh-HK','中文(繁)')">中文(繁)</a>
+            <a href="#" onclick="switchLang('zh-CN','中文(简)')">中文(简)</a>
+            <a href="#" onclick="switchLang('en','English')">English</a>
+            <a href="#" onclick="switchLang('ja','日本語')">日本語</a>
+            <a href="#" onclick="switchLang('ko','한국어')">한국어</a>
+            <a href="#" onclick="switchLang('es','Español')">Español</a>
+            <a href="#" onclick="switchLang('fr','Français')">Français</a>
+            <a href="#" onclick="switchLang('hi','हिन्दी')">हिन्दी</a>
+            <a href="#" onclick="switchLang('ar','العربية')">العربية</a>
+            <a href="#" onclick="switchLang('bn','বাংলা')">বাংলা</a>
+            <a href="#" onclick="switchLang('ru','Русский')">Русский</a>
+            <a href="#" onclick="switchLang('pt','Português')">Português</a>
+            <a href="#" onclick="switchLang('id','Bahasa Indonesia')">Bahasa Indonesia</a>
+            <a href="#" onclick="switchLang('th','ไทย')">ไทย</a>
+            <a href="#" onclick="switchLang('vi','Tiếng Việt')">Tiếng Việt</a>
+            <a href="#" onclick="switchLang('ms','Bahasa Melayu')">Bahasa Melayu</a>
+            <a href="#" onclick="switchLang('tl','Tagalog')">Tagalog</a>
+            <a href="#" onclick="switchLang('de','Deutsch')">Deutsch</a>
+        </div>
+    </div>
     <script>
-    function googleTranslateInit(){new google.translate.TranslateElement({pageLanguage:'zh-HK',includedLanguages:'zh-HK,zh-CN,en,ja,ko,es,fr,hi,ar,bn,ru,pt,id,th,vi,ms,tl,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_element')}
+    function switchLang(code,label){
+        document.getElementById('currentLang').textContent=label;
+        document.getElementById('langSelect').classList.remove('open');
+        var g=document.querySelector('.goog-te-combo');
+        if(g){g.value=code;g.dispatchEvent(new Event('change'))}
+    }
+    function googleTranslateInit(){
+        new google.translate.TranslateElement({pageLanguage:'zh-HK',includedLanguages:'zh-HK,zh-CN,en,ja,ko,es,fr,hi,ar,bn,ru,pt,id,th,vi,ms,tl,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_hidden')
+    }
     </script>
+    <div id="google_translate_hidden" style="display:none"></div>
     <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateInit" async></script>
     {% block extra_scripts %}{% endblock %}
 </body>
