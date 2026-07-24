@@ -343,11 +343,16 @@
             .hero-track-label{font-size:3.2rem}
             .hero-cta-circle{width:64px;height:64px}
             .nav-container{padding:0 16px}
-            .nav-links{display:none;position:fixed;top:64px;left:0;right:0;bottom:0;background:rgba(6,6,13,.98);border-bottom:1px solid rgba(255,255,255,.06);padding:24px;flex-direction:column;gap:8px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);overflow-y:auto;z-index:99}
+            .nav-links{display:none;position:fixed;top:64px;left:0;right:0;bottom:0;background:rgba(6,6,13,.98);border-top:1px solid rgba(255,255,255,.06);padding:20px 0 40px 0;flex-direction:column;gap:0;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:99}
             .nav-links.active{display:flex}
-            .nav-link{font-size:1.1rem;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-            .nav-search{margin-top:8px;width:100%}
+            .nav-link{font-size:1.1rem;padding:14px 24px;border-bottom:1px solid rgba(255,255,255,.04);width:100%}
+            .nav-search{margin:8px 24px;width:auto}
             .nav-search input{width:100%;padding:12px 16px;font-size:.95rem}
+            .lang-select{margin:8px 24px}
+            .lang-btn{width:100%;justify-content:space-between}
+            .lang-dropdown{position:relative;margin-top:4px;width:100%}
+            .nav-links .btn{margin:12px 24px;display:flex;justify-content:center;width:auto}
+            .nav-toggle{display:flex;z-index:101}
             .nav-toggle{display:flex}
             .masonry-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
             .news-grid,.news-grid-full{grid-template-columns:1fr}
@@ -467,7 +472,7 @@
                         <a href="#" onclick="event.preventDefault();switchLang('de','Deutsch')">Deutsch</a>
                     </div>
                 </div>
-                <a href="{{ url_for('submit_video') }}" class="btn btn-primary" style="padding:8px 16px;font-size:.78rem;border-radius:20px">加入成為夥伴</a>
+                <a href="{{ url_for('submit_video') }}" class="btn btn-primary" style="padding:8px 16px;font-size:.78rem;border-radius:20px">上載有趣內容</a>
             </div>
             <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
         </div>
@@ -490,7 +495,7 @@
             <div class="footer-grid">
                 <div class="footer-brand"><h3>Thingerz 點搵你</h3><p>高效能社交媒體策展平台</p><p>探索興趣與行業的精彩影音內容</p><div class="app-badges" style="margin-top:14px"><span style="font-size:.7rem;color:#6a6a80;display:block;margin-bottom:6px">即將推出</span><div style="display:flex;gap:8px"><span style="background:#1a1a2e;padding:6px 12px;border-radius:8px;font-size:.68rem;color:#9898b0">App Store</span><span style="background:#1a1a2e;padding:6px 12px;border-radius:8px;font-size:.68rem;color:#9898b0">Google Play</span></div></div></div>
                 <div class="footer-links"><h4>探索</h4><a href="{{ url_for('track_page', track='fun') }}">Fun 頻道</a><a href="{{ url_for('track_page', track='learning') }}">Learning 頻道</a><a href="{{ url_for('news_list') }}">好去處</a><a href="{{ url_for('search') }}">搜尋影片</a></div>
-                <div class="footer-links"><h4>參與</h4><a href="{{ url_for('submit_video') }}">提交影片</a><a href="{{ url_for('contact') }}">聯絡我們</a><a href="{{ url_for('submit_video') }}">加入成為夥伴</a></div>
+                <div class="footer-links"><h4>參與</h4><a href="{{ url_for('submit_video') }}">提交影片</a><a href="{{ url_for('contact') }}">聯絡我們</a><a href="{{ url_for('submit_video') }}">上載有趣內容</a></div>
                 <div class="footer-links"><h4>分類</h4>{% for cat in categories %}<a href="{{ url_for('category_page', slug=cat['name_slug']) }}">{{ cat['name_zh'] }}</a>{% endfor %}</div>
             </div>
             <div class="footer-bottom"><p>&copy; {{ now.year }} Thingerz. All rights reserved.</p></div>
