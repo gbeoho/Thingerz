@@ -114,7 +114,7 @@ TABLE_SCHEMAS = {
     'contacts': '''CREATE TABLE IF NOT EXISTS contacts (
         id TEXT UNIQUE, name TEXT, email TEXT, subject TEXT, message TEXT, date TEXT, status TEXT)''',
     'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (
-        video_id TEXT UNIQUE, count INTEGER DEFAULT 0)''',
+        video_id TEXT UNIQUE, count INTEGER DEFAULT 0, clicks INTEGER DEFAULT 0)''',
 }
 
 
@@ -576,6 +576,72 @@ def admin_login():
 def admin_logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('admin_login'))
+
+
+@app.route('/api/track-click/<video_id>', methods=['POST'])
+def track_click(video_id):
+    vc = read_csv('view_counts.csv')
+    found = False
+    for r in vc:
+        if r['video_id'] == video_id:
+            r['count'] = str(int(r.get('count', 0)) + 1)
+            r['clicks'] = str(int(r.get('clicks', 0)) + 1)
+            found = True
+            break
+    if not found:
+        vc.append({'video_id': video_id, 'count': '1', 'clicks': '1'})
+    else:
+        fieldnames = list(vc[0].keys())
+        if 'clicks' not in fieldnames:
+            for r in vc:
+                r['clicks'] = r.get('clicks', '0')
+    write_csv('view_counts.csv', vc, ['video_id', 'count', 'clicks'] if 'clicks' in vc[0] else ['video_id', 'count'])
+    return jsonify({'ok': True})
+
+
+@app.route('/admin/statistics')
+@admin_required
+def admin_statistics():
+    vids = read_csv('videos.csv')
+    vc = read_csv('view_counts.csv')
+    vc_map = {}
+    for r in vc:
+        vc_map[r['video_id']] = {'views': int(r.get('count', 0)), 'clicks': int(r.get('clicks', 0))}
+    video_stats = []
+    total_views = 0
+    total_clicks = 0
+    for v in vids:
+        s = vc_map.get(v['id'], {'views': 0, 'clicks': 0})
+        video_stats.append({
+            'id': v['id'],
+            'title': v.get('title_zh', ''),
+            'platform': v.get('platform', ''),
+            'views': s['views'],
+            'clicks': s['clicks'],
+            'track': v.get('track', ''),
+            'category_id': v.get('category_id', ''),
+        })
+        total_views += s['views']
+        total_clicks += s['clicks']
+    video_stats.sort(key=lambda x: x['views'], reverse=True)
+    cats = get_categories()
+    cat_stats = []
+    for cat in cats:
+        cat_vids = [vs for vs in video_stats if vs['category_id'] == cat['category_id']]
+        cat_stats.append({
+            'name': cat['name_zh'],
+            'views': sum(v['views'] for v in cat_vids),
+            'clicks': sum(v['clicks'] for v in cat_vids),
+            'count': len(cat_vids),
+            'track': cat.get('track', ''),
+        })
+    return render_template('admin/statistics.html',
+                           video_stats=video_stats[:20],
+                           total_views=total_views,
+                           total_clicks=total_clicks,
+                           total_videos=len(vids),
+                            cat_stats=cat_stats,
+                            platform_config=PLATFORM_CONFIG)
 
 
 @app.route('/admin/dashboard')
