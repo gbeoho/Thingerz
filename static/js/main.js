@@ -46,6 +46,17 @@
 
     var videoCards = document.querySelectorAll('.video-card');
     videoCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            var href = this.getAttribute('href');
+            if (href && href.includes('/video/')) {
+                var videoId = href.split('/video/')[1];
+                try {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/track-click/' + videoId, true);
+                    xhr.send();
+                } catch(e) {}
+            }
+        });
         card.addEventListener('mouseenter', function() {
             var stamp = card.querySelector('.card-stamp');
             if (stamp) {
