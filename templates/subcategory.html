@@ -36,6 +36,7 @@
                 <span class="title-accent {{ 'fun-accent' if category['track'] == 'fun' else 'learning-accent' }}"></span>
                 影片列表
             </h2>
+            {% include "_district_filter.html" %}
             <span class="result-count">{{ videos|length }} 個影片</span>
         </div>
         <div class="masonry-grid">

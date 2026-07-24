@@ -25,7 +25,7 @@
                         <div class="facade-play-btn" style="background: {{ plat_cfg['color'] }}cc;">
                             <svg width="64" height="64" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
                         </div>
-                        <p class="facade-hint">點擊播放影片</p>
+                        <p class="facade-hint">點擊播放影片（如無法播放請用下方連結）</p>
                     </div>
                 </div>
             </div>
@@ -33,9 +33,10 @@
             <div class="video-info-section">
                 <div class="video-title-row">
                     <h1 class="video-title">{{ video['title_zh'] }}</h1>
-                    <div class="video-platform-link">
-                        <a href="{{ plat_cfg['watch_base'] | replace('{id}', video['platform_id']) | replace('{user}', '') }}" target="_blank" rel="noopener" class="external-link">在 {{ plat_cfg['name'] }} 觀看 &nearr;</a>
-                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+                    <a href="{{ plat_cfg['watch_base'] | replace('{id}', video['platform_id']) | replace('{user}', '') }}" target="_blank" rel="noopener" class="external-link">在 {{ plat_cfg['name'] }} 觀看 &nearr;</a>
+                    <span style="font-size:.78rem;color:#6a6a80">如嵌入播放器無法載入，請按此連結直接觀看</span>
                 </div>
                 <p class="video-subtitle">{{ video['title_en'] }}</p>
                 {% if video['description_zh'] %}
@@ -178,14 +179,15 @@
     var facade = document.querySelector('.video-facade');
     if (!facade) return;
     facade.addEventListener('click', function() {
-        var embedUrl = this.dataset.embedUrl.replace('youtube.com','youtube-nocookie.com');
+        var embedUrl = this.dataset.embedUrl;
         var platform = this.dataset.platform;
         var wrapper = this.parentElement;
         var iframe = document.createElement('iframe');
         if (platform === 'youtube') {
-            embedUrl += '?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=1';
-            iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
+            embedUrl += '?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=1&hl=zh-HK';
+            iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; picture-in-picture');
             iframe.setAttribute('allowfullscreen', '');
+            iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
         } else if (platform === 'tiktok') {
             iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
         }
@@ -195,6 +197,15 @@
         iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:12px;';
         this.style.display = 'none';
         wrapper.appendChild(iframe);
+        if (platform === 'youtube') {
+            iframe.onerror = function() {
+                this.style.display = 'none';
+                var fallback = document.createElement('div');
+                fallback.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;color:#fff;gap:12px;border-radius:12px';
+                fallback.innerHTML = '<p style=font-size:.9rem>無法載入嵌入播放器</p><a href=' + embedUrl.replace('/embed/','/watch?v=').split('?')[0] + ' target=_blank rel=noopener style=color:#6366f1;font-size:.85rem>在 YouTube 觀看 &nearr;</a>';
+                wrapper.appendChild(fallback);
+            };
+        }
     });
 })();
 </script>

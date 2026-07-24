@@ -27,8 +27,11 @@
         .nav-link{font-size:.85rem;font-weight:500;color:#9898b0;transition:color .2s;position:relative}
         .nav-search{display:flex;align-items:center;gap:6px}
         .nav-search input{background:#11111d;border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:6px 14px;font-size:.82rem;color:#e4e4ed;outline:none;width:160px;transition:all .2s}
-        .nav-search input:focus{border-color:#6366f1;width:200px}
+        .nav-search input:focus{border-color:#6366f1;width:180px}
         .nav-search button{background:none;border:none;color:#9898b0;cursor:pointer;padding:4px}
+        #google_translate_element select{background:#11111d;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:5px 10px;font-size:.75rem;color:#9898b0;outline:none}
+        .skiptranslate iframe{display:none!important}
+        body{top:0!important}
         .nav-link::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:0;height:2px;background:linear-gradient(90deg,#6366f1,#ec4899);border-radius:2px;transition:width .3s}
         .nav-link:hover{color:#fff}.nav-link:hover::after{width:100%}
         .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:4px;cursor:pointer}
@@ -105,6 +108,16 @@
         .sticky-cat-chip{flex-shrink:0;padding:9px 22px;border-radius:24px;background:#11111d;border:1px solid rgba(255,255,255,.05);font-size:.84rem;font-weight:500;color:#9898b0;transition:all .25s;white-space:nowrap}
         .sticky-cat-chip:hover{color:#fff;border-color:rgba(129,140,248,.35);background:#1a1a2e}
         .sticky-cat-chip.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3)}
+
+        .district-filter{position:relative;margin-bottom:16px}
+        .district-toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;background:#11111d;border:1px solid rgba(255,255,255,.06);border-radius:24px;font-size:.84rem;color:#9898b0;cursor:pointer;transition:all .2s}
+        .district-toggle:hover{color:#fff;border-color:rgba(99,102,241,.3)}
+        .district-chips{display:none;flex-wrap:wrap;gap:8px;margin-top:12px}
+        .district-filter.open .district-chips{display:flex}
+        .district-chip{padding:6px 14px;border-radius:20px;font-size:.76rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);color:#9898b0;transition:all .2s;text-decoration:none}
+        .district-chip:hover{color:#fff;border-color:rgba(34,211,238,.4)}
+        .district-chip.active{background:rgba(34,211,238,.15);color:#22d3ee;border-color:rgba(34,211,238,.3)}
+        @media(max-width:768px){.district-chip{padding:5px 10px;font-size:.7rem}}
 
         .page-hero{padding:56px 0 28px;text-align:center}
         .page-hero h1{font-size:2.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:8px;background:linear-gradient(135deg,#e4e4ed,#9898b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -418,9 +431,11 @@
                 <a href="{{ url_for('submit_video') }}" class="nav-link">提交影片</a>
                 <a href="{{ url_for('contact') }}" class="nav-link">聯絡我們</a>
                 <form action="{{ url_for('search') }}" method="GET" class="nav-search">
-                    <input type="text" name="q" placeholder="搜尋影片..." value="{{ query if query else '' }}">
-                    <button type="submit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9898b0" stroke-width="2" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <input type="text" name="q" placeholder="搜尋..." value="{{ query if query else '' }}">
+                    <button type="submit" style="display:none"></button>
                 </form>
+                <div id="google_translate_element" style="flex-shrink:0"></div>
                 <a href="{{ url_for('submit_video') }}" class="btn btn-primary" style="padding:8px 16px;font-size:.78rem;border-radius:20px">加入成為夥伴</a>
             </div>
             <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
@@ -451,6 +466,10 @@
         </div>
     </footer>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+    function googleTranslateInit(){new google.translate.TranslateElement({pageLanguage:'zh-HK',includedLanguages:'zh-HK,zh-CN,en,ja,ko,es,fr,hi,ar,bn,ru,pt,id,th,vi,ms,tl,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_element')}
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateInit" async></script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
