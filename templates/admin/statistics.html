@@ -1,0 +1,43 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>統計數據</h1>
+
+<div class="stats">
+    <div class="stat-card"><h3>總觀看次數</h3><div class="num" style="color:#22d3ee">{{ total_views }}</div></div>
+    <div class="stat-card"><h3>總點擊次數</h3><div class="num" style="color:#a78bfa">{{ total_clicks }}</div></div>
+    <div class="stat-card"><h3>總影片數</h3><div class="num">{{ total_videos }}</div></div>
+    <div class="stat-card"><h3>轉化率</h3><div class="num" style="color:#34d399">{{ "%.1f"|format(total_clicks / total_videos * 100 if total_videos else 0) }}%</div></div>
+</div>
+
+<h2 style="font-size:1rem;margin:32px 0 12px">類別觀看分佈</h2>
+<table>
+    <thead><tr><th>類別</th><th>頻道</th><th>影片數</th><th>觀看</th><th>點擊</th></tr></thead>
+    <tbody>
+    {% for c in cat_stats %}
+    <tr>
+        <td><strong>{{ c['name'] }}</strong></td>
+        <td>{{ 'Fun' if c['track']=='fun' else 'Learning' }}</td>
+        <td>{{ c['count'] }}</td>
+        <td>{{ c['views'] }}</td>
+        <td>{{ c['clicks'] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h2 style="font-size:1rem;margin:32px 0 12px">熱門影片 Top 20</h2>
+<table>
+    <thead><tr><th>#</th><th>影片</th><th>平台</th><th>觀看</th><th>點擊</th></tr></thead>
+    <tbody>
+    {% for v in video_stats %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td><strong>{{ v['title'] }}</strong></td>
+        <td>{{ platform_config.get(v['platform'],{}).get('name',v['platform']) }}</td>
+        <td style="color:#22d3ee">{{ v['views'] }}</td>
+        <td style="color:#a78bfa">{{ v['clicks'] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
