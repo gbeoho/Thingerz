@@ -2,19 +2,36 @@ import csv
 import os
 import re
 import uuid
+import sqlite3
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SECRET_KEY'] = os.urandom(24).hex()
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data'))
 os.makedirs(DATA_DIR, exist_ok=True)
+
+SEED_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+if DATA_DIR != SEED_DIR:
+    for f in os.listdir(SEED_DIR):
+        src = os.path.join(SEED_DIR, f)
+        dst = os.path.join(DATA_DIR, f)
+        if f.endswith('.csv') and os.path.isfile(src) and not os.path.exists(dst):
+            import shutil
+            shutil.copy2(src, dst)
+DB_PATH = os.path.join(DATA_DIR, 'thingerz.db')
 
 ADMIN_PASSWORD = 'Gabriel00!'
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
+
+HK_DISTRICTS = [
+    '中西區', '灣仔區', '東區', '南區',
+    '油尖旺區', '深水埗區', '九龍城區', '黃大仙區', '觀塘區',
+    '葵青區', '荃灣區', '屯門區', '元朗區', '北區', '大埔區', '沙田區', '西貢區', '離島區',
+]
 
 PLATFORM_CONFIG = {
 'youtube': {
@@ -52,39 +69,141 @@ DIRECTIONS = {
     'skills_exchange': {'name_zh': '技能互換', 'name_en': 'Skills Exchange', 'color': 'skills'},
 }
 
+HK_DISTRICTS = [
+    '中西區', '灣仔區', '東區', '南區', '油尖旺區', '深水埗區',
+    '九龍城區', '黃大仙區', '觀塘區', '荃灣區', '屯門區', '元朗區',
+    '北區', '大埔區', '沙田區', '西貢區', '葵青區', '離島區'
+]
 
-def filter_profanity(text):
-    result = text
-    for word in FOUL_WORDS:
-        result = result.replace(word, '*' * len(word))
-    return result
+LANGUAGES = {
+    'zh-HK': {'name': '繁體中文', 'flag': '🇭🇰'},
+    'zh-CN': {'name': '简体中文', 'flag': '🇨🇳'},
+    'en': {'name': 'English', 'flag': '🇬🇧'},
+    'ja': {'name': '日本語', 'flag': '🇯🇵'},
+    'ko': {'name': '한국어', 'flag': '🇰🇷'},
+    'es': {'name': 'Español', 'flag': '🇪🇸'},
+    'fr': {'name': 'Français', 'flag': '🇫🇷'},
+    'hi': {'name': 'हिन्दी', 'flag': '🇮🇳'},
+    'ar': {'name': 'العربية', 'flag': '🇸🇦'},
+    'bn': {'name': 'বাংলা', 'flag': '🇧🇩'},
+    'ru': {'name': 'Русский', 'flag': '🇷🇺'},
+    'pt': {'name': 'Português', 'flag': '🇧🇷'},
+    'id': {'name': 'Bahasa Indonesia', 'flag': '🇮🇩'},
+}
+
+TABLE_SCHEMAS = {
+    'categories': '''CREATE TABLE IF NOT EXISTS categories (
+        id TEXT, category_id TEXT UNIQUE, name_slug TEXT, name_zh TEXT, name_en TEXT,
+        track TEXT, direction TEXT, description_zh TEXT, description_en TEXT)''',
+    'subcategories': '''CREATE TABLE IF NOT EXISTS subcategories (
+        id TEXT UNIQUE, category_id TEXT, name_slug TEXT, name_zh TEXT, name_en TEXT)''',
+    'videos': '''CREATE TABLE IF NOT EXISTS videos (
+        id TEXT UNIQUE, subcategory_id TEXT, category_id TEXT, platform TEXT, platform_id TEXT,
+        title_zh TEXT, title_en TEXT, description_zh TEXT, description_en TEXT,
+        thumbnail_url TEXT, aspect_ratio TEXT, tags TEXT, status TEXT,
+        track TEXT, direction TEXT, submitted_date TEXT)''',
+    'news': '''CREATE TABLE IF NOT EXISTS news (
+        id TEXT UNIQUE, title_zh TEXT, title_en TEXT, content_zh TEXT, content_en TEXT,
+        summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT)''',
+    'comments': '''CREATE TABLE IF NOT EXISTS comments (
+        id TEXT UNIQUE, video_id TEXT, author TEXT, content TEXT, date TEXT, status TEXT)''',
+    'submissions': '''CREATE TABLE IF NOT EXISTS submissions (
+        id TEXT UNIQUE, platform TEXT, platform_url TEXT, title_zh TEXT, title_en TEXT,
+        category_id TEXT, subcategory_id TEXT, submitter_name TEXT, submitter_email TEXT,
+        description_zh TEXT, direction TEXT, status TEXT, submitted_date TEXT)''',
+    'contacts': '''CREATE TABLE IF NOT EXISTS contacts (
+        id TEXT UNIQUE, name TEXT, email TEXT, subject TEXT, message TEXT, date TEXT, status TEXT)''',
+    'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (
+        video_id TEXT UNIQUE, count INTEGER DEFAULT 0)''',
+}
+
+
+def get_db():
+    db = sqlite3.connect(DB_PATH)
+    db.row_factory = sqlite3.Row
+    db.execute("PRAGMA journal_mode=WAL")
+    return db
+
+
+def init_db():
+    db = get_db()
+    for table, schema in TABLE_SCHEMAS.items():
+        db.execute(schema)
+    db.commit()
+
+    csv_to_table = {
+        'categories.csv': ('categories', ['id','category_id','name_slug','name_zh','name_en','track','direction','description_zh','description_en']),
+        'subcategories.csv': ('subcategories', ['id','category_id','name_slug','name_zh','name_en']),
+        'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']),
+        'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status']),
+        'comments.csv': ('comments', ['id','video_id','author','content','date','status']),
+        'submissions.csv': ('submissions', ['id','platform','platform_url','title_zh','title_en','category_id','subcategory_id','submitter_name','submitter_email','description_zh','direction','status','submitted_date']),
+        'contacts.csv': ('contacts', ['id','name','email','subject','message','date','status']),
+    }
+
+    for csv_file, (table_name, fields) in csv_to_table.items():
+        count = db.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+        if count > 0:
+            continue
+        csv_path = os.path.join(DATA_DIR, csv_file)
+        if not os.path.exists(csv_path):
+            continue
+        with open(csv_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                values = {k: row.get(k, '') for k in fields}
+                placeholders = ', '.join(['?' for _ in fields])
+                columns = ', '.join(fields)
+                db.execute(f"INSERT OR IGNORE INTO {table_name} ({columns}) VALUES ({placeholders})",
+                           [values[k] for k in fields])
+    db.commit()
+    db.close()
+
+
+init_db()
+
+
+def read_table(table_name):
+    db = get_db()
+    rows = [dict(r) for r in db.execute(f"SELECT * FROM {table_name}").fetchall()]
+    db.close()
+    return rows
+
+
+def write_table(table_name, rows, fieldnames):
+    db = get_db()
+    db.execute(f"DELETE FROM {table_name}")
+    for row in rows:
+        values = {k: row.get(k, '') for k in fieldnames}
+        placeholders = ', '.join(['?' for _ in fieldnames])
+        columns = ', '.join(fieldnames)
+        db.execute(f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({placeholders})",
+                   [values[k] for k in fieldnames])
+    db.commit()
+    db.close()
+
+
+def append_table(table_name, row, fieldnames):
+    db = get_db()
+    values = {k: row.get(k, '') for k in fieldnames}
+    placeholders = ', '.join(['?' for _ in fieldnames])
+    columns = ', '.join(fieldnames)
+    db.execute(f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({placeholders})",
+               [values[k] for k in fieldnames])
+    db.commit()
+    db.close()
 
 
 def read_csv(filename):
-    filepath = os.path.join(DATA_DIR, filename)
-    if not os.path.exists(filepath):
-        return []
-    with open(filepath, 'r', encoding='utf-8-sig') as f:
-        reader = csv.DictReader(f)
-        return list(reader)
+    return read_table(filename.replace('.csv', ''))
 
 
 def write_csv(filename, rows, fieldnames):
-    filepath = os.path.join(DATA_DIR, filename)
-    with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+    write_table(filename.replace('.csv', ''), rows, fieldnames)
 
 
 def append_csv(filename, row, fieldnames):
-    filepath = os.path.join(DATA_DIR, filename)
-    file_exists = os.path.exists(filepath)
-    with open(filepath, 'a', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(row)
+    append_table(filename.replace('.csv', ''), row, fieldnames)
 
 
 def get_categories(track=None, direction=None):
@@ -124,7 +243,7 @@ def get_subcategory(subcategory_id):
     return None
 
 
-def get_videos(subcategory_id=None, category_id=None, track=None, direction=None, status='approved', limit=None):
+def get_videos(subcategory_id=None, category_id=None, track=None, direction=None, status='approved', district=None, limit=None):
     videos = read_csv('videos.csv')
     result = [v for v in videos if v.get('status', '') == status]
     if subcategory_id:
@@ -135,6 +254,8 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
         result = [v for v in result if v.get('track', '') == track]
     if direction:
         result = [v for v in result if v.get('direction', '') == direction]
+    if district:
+        result = [v for v in result if district in v.get('tags', '')]
     result.sort(key=lambda v: v.get('submitted_date', ''), reverse=True)
     if limit:
         result = result[:limit]
@@ -177,21 +298,17 @@ def get_related_videos(video, limit=4):
 
 
 def get_view_counts():
-    vc = read_csv('view_counts.csv')
-    return {r['video_id']: int(r.get('count', 0)) for r in vc}
+    db = get_db()
+    rows = db.execute("SELECT video_id, count FROM view_counts").fetchall()
+    db.close()
+    return {r['video_id']: r['count'] for r in rows}
 
 
 def increment_view(video_id):
-    vc = read_csv('view_counts.csv')
-    found = False
-    for r in vc:
-        if r['video_id'] == video_id:
-            r['count'] = str(int(r.get('count', 0)) + 1)
-            found = True
-            break
-    if not found:
-        vc.append({'video_id': video_id, 'count': '1'})
-    write_csv('view_counts.csv', vc, ['video_id', 'count'])
+    db = get_db()
+    db.execute("INSERT INTO view_counts (video_id, count) VALUES (?, 1) ON CONFLICT(video_id) DO UPDATE SET count = count + 1", (video_id,))
+    db.commit()
+    db.close()
 
 
 def extract_youtube_id(url):
@@ -270,7 +387,10 @@ def category_page(slug):
         return redirect(url_for('index'))
     subcategories = get_subcategories(category['category_id'])
     videos = get_videos(category_id=category['category_id'])
-    return render_template('category.html', category=category, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG)
+    district = request.args.get('district', '').strip()
+    if district:
+        videos = [v for v in videos if district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', '')]
+    return render_template('category.html', category=category, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
 @app.route('/subcategory/<subcategory_id>')
@@ -281,7 +401,10 @@ def subcategory_page(subcategory_id):
     category = get_category(sub['category_id'])
     subcategories = get_subcategories(sub['category_id'])
     videos = get_videos(subcategory_id=subcategory_id)
-    return render_template('subcategory.html', category=category, sub=sub, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG)
+    district = request.args.get('district', '').strip()
+    if district:
+        videos = [v for v in videos if district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', '')]
+    return render_template('subcategory.html', category=category, sub=sub, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
 @app.route('/video/<video_id>')
@@ -830,6 +953,142 @@ def admin_comment_delete(comment_id):
     return redirect(url_for('admin_comments'))
 
 
+# --- Backup / Restore ---
+@app.route('/admin/backup')
+@admin_required
+def admin_backup():
+    import json, io
+    all_data = {}
+    for f in os.listdir(DATA_DIR):
+        if f.endswith('.csv'):
+            all_data[f] = read_csv(f)
+    backup = {'data': all_data, 'backup_date': datetime.now().isoformat()}
+    content = json.dumps(backup, ensure_ascii=False, indent=2)
+    buf = io.BytesIO()
+    buf.write(content.encode('utf-8'))
+    buf.seek(0)
+    return send_file(buf, mimetype='application/json', as_attachment=True, download_name=f'thingerz_backup_{datetime.now().strftime("%Y%m%d_%H%M")}.json')
+
+
+@app.route('/admin/restore', methods=['POST'])
+@admin_required
+def admin_restore():
+    import json
+    file = request.files.get('backup_file')
+    if not file:
+        return redirect(url_for('admin_dashboard'))
+    content = file.read().decode('utf-8')
+    backup = json.loads(content)
+    if 'data' not in backup:
+        return 'Invalid backup file', 400
+    for filename, rows in backup['data'].items():
+        if rows:
+            write_csv(filename, rows, list(rows[0].keys()))
+    return redirect(url_for('admin_dashboard'))
+
+
+# --- Content Freshness ---
+@app.route('/admin/freshness')
+@admin_required
+def admin_freshness():
+    today = datetime.now()
+    vids = read_csv('videos.csv')
+    news = read_csv('news.csv')
+    def age_days(date_str):
+        try:
+            return (today - datetime.strptime(date_str, '%Y-%m-%d')).days
+        except:
+            return 999
+    stale_videos = []
+    stale_news = []
+    fresh_videos = []
+    for v in vids:
+        d = age_days(v.get('submitted_date', ''))
+        if d > 60:
+            stale_videos.append({**v, 'age_days': d})
+        elif d <= 14:
+            fresh_videos.append({**v, 'age_days': d})
+    for n in news:
+        d = age_days(n.get('date', ''))
+        if d > 90:
+            stale_news.append({**n, 'age_days': d})
+    return render_template('admin/freshness.html', stale_videos=stale_videos, stale_news=stale_news, fresh_videos=fresh_videos, today=today.strftime('%Y-%m-%d'))
+
+
+# --- Competitor Comparison ---
+@app.route('/admin/competitors')
+@admin_required
+def admin_competitors():
+    checks = [
+        {'feature': '首頁英雄區搜尋', 'us': True, 'fiverr': True, 'toby': True},
+        {'feature': '雙軌分流 (Fun/Learning)', 'us': True, 'fiverr': False, 'toby': False},
+        {'feature': '3 層 CMS (類別→子類→影片)', 'us': True, 'fiverr': True, 'toby': True},
+        {'feature': '影片策展 + YouTube 嵌入', 'us': True, 'fiverr': False, 'toby': False},
+        {'feature': '管理後台 (CRUD)', 'us': True, 'fiverr': True, 'toby': True},
+        {'feature': '訪客提交 + 審核流程', 'us': True, 'fiverr': False, 'toby': False},
+        {'feature': '新聞 CMS + 自動獲取', 'us': True, 'fiverr': False, 'toby': False},
+        {'feature': '會員系統', 'us': False, 'fiverr': True, 'toby': True},
+        {'feature': '評分/評論系統 (1-5星)', 'us': False, 'fiverr': True, 'toby': True},
+        {'feature': '支付系統', 'us': False, 'fiverr': True, 'toby': True},
+        {'feature': 'AI / CS Bot', 'us': '預留', 'fiverr': True, 'toby': 'AI Beta'},
+        {'feature': '手機 App', 'us': '預留', 'fiverr': True, 'toby': True},
+        {'feature': '多語言', 'us': False, 'fiverr': True, 'toby': '繁中為主'},
+        {'feature': 'SEO 頁尾', 'us': True, 'fiverr': True, 'toby': True},
+        {'feature': '搜尋功能', 'us': True, 'fiverr': True, 'toby': True},
+        {'feature': '社交分享', 'us': True, 'fiverr': False, 'toby': False},
+        {'feature': '聯絡表單', 'us': True, 'fiverr': True, 'toby': True},
+    ]
+    return render_template('admin/competitors.html', checks=checks)
+
+
+@app.route('/admin/health')
+@admin_required
+def admin_health():
+    now = datetime.now()
+    vids = read_csv('videos.csv')
+    news = read_csv('news.csv')
+    comments = read_csv('comments.csv')
+    subs = read_csv('submissions.csv')
+
+    stale_videos = []
+    for v in vids:
+        try:
+            d = datetime.strptime(v.get('submitted_date', '2000-01-01'), '%Y-%m-%d')
+            days = (now - d).days
+            if days > 60:
+                stale_videos.append({'title': v['title_zh'], 'days': days, 'id': v['id']})
+        except:
+            pass
+    stale_videos.sort(key=lambda x: x['days'], reverse=True)
+
+    total_views = sum(int(v.get('count', 0)) for v in read_csv('view_counts.csv'))
+    approved_vids = len([v for v in vids if v.get('status') == 'approved'])
+    pending_subs = len([s for s in subs if s.get('status') == 'pending'])
+    total_comments = len([c for c in comments if c.get('status') == 'approved'])
+
+    insights = {
+        'total_videos': len(vids),
+        'approved_videos': approved_vids,
+        'stale_videos': stale_videos[:10],
+        'stale_count': len(stale_videos),
+        'total_news': len([n for n in news if n.get('status') == 'published']),
+        'total_views': total_views,
+        'pending_submissions': pending_subs,
+        'total_comments': total_comments,
+        'competitor_notes': [
+            {'platform': 'Fiverr', 'strength': '全球最大自由工作者平台，AI matching 成熟', 'weakness': '缺乏本地香港內容，廣東話支援不足', 'to_watch': 'AI 提案匹配、賣家評級系統'},
+            {'platform': 'HelloToby', 'strength': '全港最大生活服務配對，80K+ 專家，Alipay 整合', 'weakness': '以服務為主，非影音內容策展', 'to_watch': 'AI 模式 Beta、透明報價、合作夥伴生態'},
+        ],
+        'self_improve': [
+            '定期檢查影片連結是否仍有效（YouTube 影片可能被刪除）',
+            '每週從 Google News 獲取最新本地新聞',
+            '留意 Toby/Fiverr 新功能（AI matching、評分系統）',
+            '收集用戶提交的影片類型偏好，調整分類',
+        ]
+    }
+    return render_template('admin/health.html', insights=insights, now=now)
+
+
 @app.route('/admin/news/fetch', methods=['POST'])
 @admin_required
 def admin_news_fetch():
@@ -888,7 +1147,9 @@ def inject_globals():
 
 @app.after_request
 def add_utf8_header(response):
-    response.headers['Content-Type'] = 'text/html; charset=utf-8'
+    ct = response.headers.get('Content-Type', '')
+    if ct and 'text/html' in ct:
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
     return response
 
 

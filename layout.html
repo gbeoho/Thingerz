@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>管理後台 - Thingerz</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:#06060d;color:#e4e4ed;line-height:1.6}
+.admin-layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:#0a0a14;border-right:1px solid rgba(255,255,255,.04);padding:24px 0;flex-shrink:0}
+.sidebar h2{font-size:1.1rem;font-weight:800;padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px}
+.sidebar a{display:block;padding:10px 20px;font-size:.88rem;color:#9898b0;transition:all .2s}
+.sidebar a:hover,.sidebar a.active{color:#fff;background:rgba(99,102,241,.1);border-left:3px solid #6366f1}
+.main{flex:1;padding:32px;overflow-x:auto}
+.main h1{font-size:1.6rem;font-weight:800;margin-bottom:24px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:#11111d;border-radius:14px;padding:24px;border:1px solid rgba(255,255,255,.04)}
+.stat-card h3{font-size:.78rem;color:#9898b0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.stat-card .num{font-size:2rem;font-weight:800}
+table{width:100%;border-collapse:collapse;background:#11111d;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.04)}
+th{text-align:left;padding:12px 16px;font-size:.78rem;color:#9898b0;text-transform:uppercase;letter-spacing:.05em;background:#0a0a14;border-bottom:1px solid rgba(255,255,255,.04)}
+td{padding:12px 16px;font-size:.88rem;border-bottom:1px solid rgba(255,255,255,.02)}
+tr:hover td{background:rgba(99,102,241,.04)}
+.input{width:100%;padding:10px 14px;background:#0e0e1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#e4e4ed;font-size:.85rem;outline:none;margin:4px 0}
+.input:focus{border-color:#6366f1}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%239898b0' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
+textarea.input{min-height:60px;resize:vertical}
+.btn{padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:#6366f1;color:#fff}.btn-primary:hover{background:#818cf8}
+.btn-danger{background:rgba(239,68,68,.15);color:#f87171}.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-success{background:rgba(16,185,129,.15);color:#34d399}.btn-success:hover{background:rgba(16,185,129,.25)}
+.btn-sm{padding:5px 14px;font-size:.75rem}
+.form-inline{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:24px}
+.form-inline .form-group{display:flex;flex-direction:column;gap:4px}
+.form-inline label{font-size:.75rem;color:#9898b0}
+.badge{padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge-pending{background:rgba(245,158,11,.15);color:#fbbf24}
+.badge-approved{background:rgba(16,185,129,.15);color:#34d399}
+.badge-rejected{background:rgba(239,68,68,.15);color:#f87171}
+.badge-published{background:rgba(99,102,241,.15);color:#a5b4fc}
+.mb{margin-bottom:16px}
+.text-muted{color:#6a6a80;font-size:.82rem}
+a{color:#818cf8}
+</style></head>
+<body><div class="admin-layout">
+<div class="sidebar">
+    <h2>Thingerz CMS</h2>
+    <a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">儀表板</a>
+    <a href="{{ url_for('admin_categories') }}" class="{% if 'admin_categories' in request.endpoint or 'admin_category' in request.endpoint %}active{% endif %}">類別管理</a>
+    <a href="{{ url_for('admin_subcategories') }}" class="{% if 'admin_subcategories' in request.endpoint or 'admin_subcategory' in request.endpoint %}active{% endif %}">子類別管理</a>
+    <a href="{{ url_for('admin_videos') }}" class="{% if request.endpoint == 'admin_videos' %}active{% endif %}">影片管理</a>
+    <a href="{{ url_for('admin_submissions') }}" class="{% if request.endpoint == 'admin_submissions' %}active{% endif %}">提交審核</a>
+    <a href="{{ url_for('admin_news') }}" class="{% if 'admin_news' in request.endpoint %}active{% endif %}">新聞管理</a>
+    <a href="{{ url_for('admin_comments') }}" class="{% if request.endpoint == 'admin_comments' %}active{% endif %}">評論管理</a>
+    <a href="{{ url_for('admin_contacts') }}" class="{% if request.endpoint == 'admin_contacts' %}active{% endif %}">聯絡查詢</a>
+    <a href="{{ url_for('admin_freshness') }}" class="{% if request.endpoint == 'admin_freshness' %}active{% endif %}">內容新鮮度</a>
+    <a href="{{ url_for('admin_competitors') }}" class="{% if request.endpoint == 'admin_competitors' %}active{% endif %}">競爭對手</a>
+    <a href="{{ url_for('admin_health') }}" class="{% if request.endpoint == 'admin_health' %}active{% endif %}" style="color:#fbbf24">網站健康</a>
+    <a href="{{ url_for('admin_backup') }}" style="color:#34d399">下載備份</a>
+    <a href="{{ url_for('admin_logout') }}" style="margin-top:24px;color:#f87171">登出</a>
+    <a href="{{ url_for('index') }}" target="_blank">查看網站 →</a>
+</div>
+<div class="main">
+{% block admin_content %}{% endblock %}
+</div>
+</div></body></html>

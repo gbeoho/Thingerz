@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{{ category['name_zh'] }} - Thingerz{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <span>/</span>
+            <a href="{{ url_for('track_page', track=category['track']) }}">{{ 'Fun' if category['track'] == 'fun' else 'Learning' }}</a>
+            <span>/</span>
+            <span class="current">{{ category['name_zh'] }}</span>
+        </div>
+        <h1>{{ category['name_zh'] }}</h1>
+        <p class="page-subtitle">{{ category['name_en'] }}</p>
+        <p class="page-desc">{{ category['description_zh'] }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="sticky-categories">
+            <a href="{{ url_for('category_page', slug=category['name_slug']) }}" class="sticky-cat-chip active">全部</a>
+            {% for s in subcategories %}
+            <a href="{{ url_for('subcategory_page', subcategory_id=s['id']) }}" class="sticky-cat-chip">{{ s['name_zh'] }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="title-accent {{ 'fun-accent' if category['track'] == 'fun' else 'learning-accent' }}"></span>
+                所有影片
+            </h2>
+            {% include "_district_filter.html" %}
+            <div class="view-controls">
+                <span class="result-count">{{ videos|length }} 個影片</span>
+            </div>
+        </div>
+        <div class="masonry-grid">
+            {% for video in videos %}
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}">
+                <div class="card-media">
+                    <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
+                    <div class="card-overlay">
+                        <div class="play-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    {% include "_platform_badge.html" %}
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    <div class="card-tags">
+                        {% for tag in video['tags'].split('|')[:2] %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% if not videos %}
+        <div class="empty-state">
+            <p>此分類暫無影片內容</p>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交第一個影片</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
