@@ -1,12 +1,11 @@
 {% extends "admin/layout.html" %}
 {% block admin_content %}
-<h1>新聞管理</h1>
+<h1>好去處管理</h1>
 <div class="mb" style="display:flex;gap:12px;flex-wrap:wrap">
-    <a href="#" onclick="document.getElementById('addForm').style.display='block';return false" class="btn btn-primary">+ 新增新聞</a>
-    <form method="POST" action="{{ url_for('admin_news_fetch') }}" onsubmit="return confirm('從 Google News 香港獲取最新新聞？')"><button class="btn btn-success">從 Google News 獲取</button></form>
+    <a href="#" onclick="document.getElementById('addForm').style.display='block';return false" class="btn btn-primary">+ 新增推介</a>
 </div>
 <div id="addForm" style="display:none;background:#11111d;padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,.06);margin-bottom:24px">
-    <h3 style="margin-bottom:14px">新增新聞</h3>
+    <h3 style="margin-bottom:14px">新增推介</h3>
     <form method="POST">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
             <div class="form-group"><label>中文標題</label><input name="title_zh" class="input" required></div>
