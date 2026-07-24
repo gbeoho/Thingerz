@@ -24,6 +24,15 @@
         });
     }
 
+    var langSelect = document.getElementById('langSelect');
+    if (langSelect) {
+        document.addEventListener('click', function(e) {
+            if (!langSelect.contains(e.target)) {
+                langSelect.classList.remove('open');
+            }
+        });
+    }
+
     var stickyCats = document.querySelector('.sticky-categories');
     if (stickyCats) {
         var chips = stickyCats.querySelectorAll('.sticky-cat-chip');
