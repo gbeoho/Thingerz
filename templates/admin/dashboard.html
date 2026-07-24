@@ -15,4 +15,14 @@
     <a href="{{ url_for('admin_news') }}" class="btn btn-primary">管理新聞</a>
     <a href="{{ url_for('admin_submissions') }}" class="btn btn-primary">審核提交 ({{ pending_count }})</a>
 </div>
+
+<h2 style="font-size:1.1rem;margin:28px 0 12px">資料備份</h2>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+    <a href="{{ url_for('admin_backup') }}" class="btn" style="background:#34d399;color:#000">下載全部資料備份</a>
+    <form method="POST" action="{{ url_for('admin_restore') }}" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center">
+        <input type="file" name="backup_file" accept=".json" class="input" style="width:auto;padding:8px 12px" required>
+        <button class="btn btn-primary btn-sm">還原備份</button>
+    </form>
+</div>
+<p class="text-muted" style="margin-top:8px">每次更新 GitHub 前，先「下載備份」。更新完後「還原備份」恢復資料。</p>
 {% endblock %}

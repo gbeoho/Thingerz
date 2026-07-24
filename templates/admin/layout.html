@@ -51,6 +51,10 @@ a{color:#818cf8}
     <a href="{{ url_for('admin_news') }}" class="{% if 'admin_news' in request.endpoint %}active{% endif %}">新聞管理</a>
     <a href="{{ url_for('admin_comments') }}" class="{% if request.endpoint == 'admin_comments' %}active{% endif %}">評論管理</a>
     <a href="{{ url_for('admin_contacts') }}" class="{% if request.endpoint == 'admin_contacts' %}active{% endif %}">聯絡查詢</a>
+    <a href="{{ url_for('admin_freshness') }}" class="{% if request.endpoint == 'admin_freshness' %}active{% endif %}">內容新鮮度</a>
+    <a href="{{ url_for('admin_competitors') }}" class="{% if request.endpoint == 'admin_competitors' %}active{% endif %}">競爭對手</a>
+    <a href="{{ url_for('admin_health') }}" class="{% if request.endpoint == 'admin_health' %}active{% endif %}" style="color:#fbbf24">網站健康</a>
+    <a href="{{ url_for('admin_backup') }}" style="color:#34d399">下載備份</a>
     <a href="{{ url_for('admin_logout') }}" style="margin-top:24px;color:#f87171">登出</a>
     <a href="{{ url_for('index') }}" target="_blank">查看網站 →</a>
 </div>
