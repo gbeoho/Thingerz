@@ -365,6 +365,11 @@ def extract_tiktok_id(url):
     return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
 
 
+def get_instagram_thumb(shortcode):
+    """Generate Instagram thumbnail URL from shortcode."""
+    return f'https://www.instagram.com/p/{shortcode}/media/?size=m'
+
+
 def generate_id(prefix):
     return f"{prefix}{uuid.uuid4().hex[:8]}"
 
@@ -814,7 +819,7 @@ def admin_video_add():
         thumb = request.form.get('thumbnail_url', '') or f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
     elif platform == 'instagram':
         platform_id = extract_instagram_id(platform_id_raw) or platform_id_raw
-        thumb = request.form.get('thumbnail_url', '') or f"https://picsum.photos/seed/{platform_id}/400/711"
+        thumb = request.form.get('thumbnail_url', '') or get_instagram_thumb(platform_id)
     elif platform == 'tiktok':
         platform_id = extract_tiktok_id(platform_id_raw) or platform_id_raw
         thumb = request.form.get('thumbnail_url', '') or f"https://picsum.photos/seed/{platform_id}/400/711"
@@ -912,9 +917,10 @@ def admin_approve_submission(submission_id):
 
         if platform == 'youtube':
             thumb = f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
+        elif platform == 'instagram':
+            thumb = get_instagram_thumb(platform_id)
         else:
             thumb = f"https://picsum.photos/seed/{platform_id}/400/711"
-
         vids = read_csv('videos.csv')
         max_num = max(int(v['id'].replace('v', '')) for v in vids) if vids else 0
         vids.append({
