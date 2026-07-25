@@ -353,7 +353,7 @@
             .lang-btn{width:100%;justify-content:space-between}
             .lang-dropdown{position:relative;margin-top:4px;width:100%}
             .nav-links .btn{margin:12px 24px;display:flex;justify-content:center;width:auto}
-            .nav-toggle{display:flex;z-index:101}
+            .nav-toggle{display:flex;z-index:101;position:relative}
             .nav-toggle{display:flex}
             .masonry-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
             .news-grid,.news-grid-full{grid-template-columns:1fr}
@@ -539,7 +539,7 @@
         document.getElementById('currentLang').textContent = label;
         document.getElementById('langSelect').classList.remove('open');
         var cookie = 'googtrans=/zh-HK/' + code;
-        document.cookie = cookie + ';path=/;domain=' + location.hostname;
+        document.cookie = cookie + ';path=/';
         location.reload();
     }
     </script>
