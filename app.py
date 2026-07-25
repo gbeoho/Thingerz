@@ -224,10 +224,24 @@ def read_csv(filename):
 
 def write_csv(filename, rows, fieldnames):
     write_table(filename.replace('.csv', ''), rows, fieldnames)
+    # Also sync to CSV for backup/deploy persistence
+    filepath = os.path.join(DATA_DIR, filename)
+    with open(filepath, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def append_csv(filename, row, fieldnames):
     append_table(filename.replace('.csv', ''), row, fieldnames)
+    # Also sync to CSV
+    rows = read_csv(filename)
+    rows.append(row)
+    filepath = os.path.join(DATA_DIR, filename)
+    with open(filepath, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def get_categories(track=None, direction=None):
@@ -475,23 +489,67 @@ def submit_video():
         desc_zh = request.form.get('description_zh', '')
         if contains_blocked(title_zh) or contains_blocked(desc_zh):
             return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=False, blocked=True)
+        # Auto-approve clean submissions
         submission = {
             'id': generate_id('sub_'),
             'platform': request.form.get('platform', 'youtube'),
             'platform_url': request.form.get('platform_url', ''),
-            'title_zh': request.form.get('title_zh', ''),
+            'title_zh': title_zh,
             'title_en': request.form.get('title_en', ''),
             'category_id': category_id,
             'subcategory_id': subcategory_id,
             'submitter_name': request.form.get('submitter_name', ''),
             'submitter_email': request.form.get('submitter_email', ''),
-            'description_zh': request.form.get('description_zh', ''),
+            'description_zh': desc_zh,
             'direction': request.form.get('direction', ''),
-            'status': 'pending',
+            'status': 'approved',
             'submitted_date': datetime.now().strftime('%Y-%m-%d')
         }
         fieldnames = ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date']
         append_csv('submissions.csv', submission, fieldnames)
+        # Auto-add to videos
+        platform = submission['platform']
+        url = submission.get('platform_url', '')
+        if platform == 'youtube':
+            platform_id = extract_youtube_id(url)
+        elif platform == 'instagram':
+            platform_id = extract_instagram_id(url)
+        elif platform == 'tiktok':
+            platform_id = extract_tiktok_id(url)
+        else:
+            platform_id = url.split('/')[-1].split('?')[0]
+        if platform == 'youtube':
+            thumb = f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
+        elif platform == 'instagram':
+            thumb = get_instagram_thumb(platform_id)
+        else:
+            thumb = f"https://picsum.photos/seed/{platform_id}/400/711"
+        vids = read_csv('videos.csv')
+        max_num = max(int(v['id'].replace('v', '')) for v in vids) if vids else 0
+        track_val = 'fun'
+        cat = get_category(category_id)
+        if cat:
+            track_val = cat.get('track', 'fun')
+        vids.append({
+            'id': f"v{max_num + 1:03d}",
+            'subcategory_id': subcategory_id,
+            'category_id': category_id,
+            'platform': platform,
+            'platform_id': platform_id,
+            'title_zh': title_zh,
+            'title_en': request.form.get('title_en', ''),
+            'description_zh': desc_zh,
+            'description_en': '',
+            'thumbnail_url': thumb,
+            'aspect_ratio': PLATFORM_CONFIG.get(platform, {}).get('aspect_ratio', '16:9'),
+            'tags': '',
+            'status': 'approved',
+            'track': track_val,
+            'direction': request.form.get('direction', track_val),
+            'submitted_date': datetime.now().strftime('%Y-%m-%d')
+        })
+        vfieldnames = ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']
+        write_csv('videos.csv', vids, vfieldnames)
         return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=True)
     return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=False, blocked=False)
 
