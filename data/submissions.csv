@@ -1,2 +1,9 @@
-﻿id,platform,platform_url,title_zh,title_en,category_id,subcategory_id,submitter_name,submitter_email,description_zh,direction,status,submitted_date
+id,platform,platform_url,title_zh,title_en,category_id,subcategory_id,submitter_name,submitter_email,description_zh,direction,status,submitted_date
 sub_44909473,tiktok,https://tiktok.com/@user/video/123,Test,,cat001,s001,Test,,,business,pending,2026-07-22
+sub_3757c7f1,youtube,https://www.youtube.com/watch?v=pPCnARwyCrM,【四分鐘學識搵工方法】│香港社區組織協會SoCO,null,cat001,s004,Dee,gbeoho@gmail.com,"
+香港社區組織協會 SoCO",learning,approved,2026-07-23
+sub_80fa2602,youtube,https://www.youtube.com/watch?v=pPCnARwyCrM,【四分鐘學識搵工方法】│香港社區組織協會SoCO,null,cat001,s004,Dee,gbeoho@gmail.com,香港社區組織協會 SoCO,learning,approved,2026-07-23
+sub_a916efc3,youtube,https://www.youtube.com/watch?v=dQw4w9WgXcQ,測試影片,,cat001,s001,Test,,,,pending,2026-07-23
+sub_686be57e,youtube,https://youtube.com/watch?v=kJQP7kiw5Fk,HK Test,,cat001,s001,T,,,,approved,2026-07-23
+sub_295383cd,youtube,https://youtube.com/watch?v=228SQpmwqsM,測試自動審核,,cat005,s029,Test,,,,approved,2026-07-25
+sub_295383cd,youtube,https://youtube.com/watch?v=228SQpmwqsM,測試自動審核,,cat005,s029,Test,,,,approved,2026-07-25
