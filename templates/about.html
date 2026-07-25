@@ -9,12 +9,19 @@
 </section>
 <section class="section">
     <div class="container" style="max-width:800px;margin:0 auto">
+        {% if about_content %}
+        <div style="background:#11111d;border-radius:18px;padding:40px;border:1px solid rgba(255,255,255,.04);line-height:2;font-size:1rem;white-space:pre-wrap">
+            {{ about_content }}
+        </div>
+        {% else %}
         <div style="background:#11111d;border-radius:18px;padding:40px;border:1px solid rgba(255,255,255,.04);line-height:2;font-size:1rem">
-            <p style="margin-bottom:20px"><strong>Thingerz</strong>，又名「<strong>點搵你</strong>」，旨在為用家及有志發揮一己所長的朋友提供一個雙向及多元化之服務平台。</p>
-            <p style="margin-bottom:20px">Thingerz 為 <strong>"Think"</strong> 與 <strong>"fingers"</strong> 之合體字，喻意您想到的（Think），只要您彈指（fingers）輕按滑鼠，答案或機會便會呈現您眼前。另 <strong>z</strong> 為 26 個英文字母之最後，代表網站照顧周全，包括所有。</p>
-            <p style="margin-bottom:20px">公司成立理念源於身邊有不少有才華的朋友往往未能找到合適的發揮機會，而創立者亦曾為尋找不同聯絡而四出奔波。當然社會上存在不少中介人公司，但它們往往收費昂貴，或服務未夠稱心。因此，Thingerz — 一個多元化及容易使用的網上平台 — 便應運而生。</p>
+            <p style="margin-bottom:20px"><strong>平台理念 — 新一代學習，消閒平台</strong></p>
+            <p style="margin-bottom:20px"><strong>Thingerz</strong>，又名「<strong>點搵你</strong>」，旨在為用家及有志發揮一己所長之朋友提供一個雙向及多元化之服務平台。</p>
+            <p style="margin-bottom:20px">Thingerz 為 <strong>"Think"</strong> 與 <strong>"fingers"</strong> 之合體字，喻意您想（Think）到的，只要您彈指（fingers）輕按滑鼠，答案或機會便會呈現您眼前。另外 <strong>'z'</strong> 為 26 個英文字母之最後，代表網站照顧周全，包括所有。</p>
+            <p style="margin-bottom:20px">平台成立理念源於身邊有不少有才華的朋友往往未能找到合適的發揮機會，而創立者亦曾為尋找不同聯絡而四出奔波。當然社會上有不少中介人公司／平台，但它們往往收費昂貴，或服務未夠稱心。因此，Thingerz — 一個多元化及容易使用之網上平台 — 便應運而生。</p>
             <p style="margin-bottom:20px">不論您正在尋找另類或新穎的聯絡，或是希望為各式各樣的技藝發掘宣傳渠道，Thingerz 同樣為您提供一個好幫手。請把握時機幫助有需要的朋友，同時讓自己的才華發揮出來！</p>
         </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}
