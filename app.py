@@ -320,7 +320,9 @@ def get_news(news_id=None):
             if n['id'] == news_id:
                 return n
         return None
-    return [n for n in news_list if n['status'] == 'published']
+    result = [n for n in news_list if n['status'] == 'published']
+    result.sort(key=lambda n: n.get('date', ''), reverse=True)
+    return result
 
 
 def get_related_videos(video, limit=4):
