@@ -514,7 +514,18 @@
     function switchLang(code, label){
         document.getElementById('currentLang').textContent = label;
         document.getElementById('langSelect').classList.remove('open');
-        var url = 'https://translate.google.com/translate?hl=' + code + '&sl=auto&tl=' + code + '&u=' + encodeURIComponent(window.location.href.split('#')[0]);
+        var originalUrl = window.location.href;
+        if (originalUrl.indexOf('translate.google.com') !== -1) {
+            var m = originalUrl.match(/[?&]u=([^&]+)/);
+            if (m) {
+                originalUrl = decodeURIComponent(m[1]);
+            } else {
+                originalUrl = window.location.origin;
+            }
+        } else {
+            originalUrl = originalUrl.split('#')[0];
+        }
+        var url = 'https://translate.google.com/translate?hl=' + code + '&sl=auto&tl=' + code + '&u=' + encodeURIComponent(originalUrl);
         window.location.href = url;
     }
     </script>
