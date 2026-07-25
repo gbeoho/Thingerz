@@ -314,6 +314,8 @@
         .footer-links a{display:block;font-size:.85rem;color:#9898b0;padding:5px 0;transition:color .2s}
         .footer-links a:hover{color:#818cf8}
         .footer-bottom{padding-top:24px;border-top:1px solid rgba(255,255,255,.03);text-align:center;font-size:.78rem;color:#6a6a80}
+        .disclaimer{margin-top:16px;padding:16px;background:rgba(255,255,255,.015);border-radius:12px;font-size:.7rem;line-height:1.7;max-width:800px;margin-left:auto;margin-right:auto}
+        .disclaimer p{margin-bottom:6px}
 
         /* ---- CENTERING OVERRIDES ---- */
         .page-hero,.track-hero{text-align:center}
@@ -439,6 +441,7 @@
             </a>
             <div class="nav-links">
                 <a href="{{ url_for('index') }}" class="nav-link">首頁</a>
+                <a href="{{ url_for('about') }}" class="nav-link">平台簡介</a>
                 <a href="{{ url_for('news_list') }}" class="nav-link">好去處</a>
                 <a href="{{ url_for('submit_video') }}" class="nav-link">提交影片</a>
                 <a href="{{ url_for('contact') }}" class="nav-link">聯絡我們</a>
@@ -499,7 +502,13 @@
                 <div class="footer-links"><h4>參與</h4><a href="{{ url_for('submit_video') }}">提交影片</a><a href="{{ url_for('contact') }}">聯絡我們</a><a href="{{ url_for('submit_video') }}">上載有趣內容</a></div>
                 <div class="footer-links"><h4>分類</h4>{% for cat in categories %}<a href="{{ url_for('category_page', slug=cat['name_slug']) }}">{{ cat['name_zh'] }}</a>{% endfor %}</div>
             </div>
-            <div class="footer-bottom"><p>&copy; {{ now.year }} Thingerz. All rights reserved.</p></div>
+            <div class="footer-bottom">
+                <p style="margin-bottom:12px">&copy; {{ now.year }} Thingerz. All rights reserved.</p>
+                <div class="disclaimer">
+                    <p><strong>免責聲明 Disclaimer</strong></p>
+                    <p>All contacts provided in "Thingerz" are referrals. Although every reasonable effort is made to monitor performance, Thingerz makes no guarantee of any kind. Information on Thingerz is subject to change without prior notice. Users are strictly prohibited from contacting the referrals on the website directly and those who violated this regulation shall be judged by the law.</p>
+                </div>
+            </div>
         </div>
     </footer>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
@@ -507,12 +516,10 @@
     function switchLang(code, label){
         document.getElementById('currentLang').textContent = label;
         document.getElementById('langSelect').classList.remove('open');
-        var cookieName = 'googtrans';
-        var cookieValue = '/zh-HK/' + code;
         var d = new Date();
         d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
-        document.cookie = cookieName + '=' + cookieValue + ';path=/;expires=' + d.toUTCString();
-        setTimeout(function(){ location.reload(); }, 100);
+        document.cookie = 'googtrans=/zh-HK/' + code + ';path=/;expires=' + d.toUTCString();
+        window.location.reload(true);
     }
     function googleTranslateInit(){
         new google.translate.TranslateElement({pageLanguage:'zh-HK',includedLanguages:'zh-HK,zh-CN,en,ja,ko,es,fr,hi,ar,bn,ru,pt,id,th,vi,ms,tl,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_hidden');
