@@ -411,7 +411,27 @@ def index():
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    content = ''
+    about_path = os.path.join(DATA_DIR, 'about.txt')
+    if os.path.exists(about_path):
+        with open(about_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    return render_template('about.html', about_content=content)
+
+
+@app.route('/admin/about', methods=['GET', 'POST'])
+@admin_required
+def admin_about():
+    about_path = os.path.join(DATA_DIR, 'about.txt')
+    if request.method == 'POST':
+        with open(about_path, 'w', encoding='utf-8') as f:
+            f.write(request.form.get('content', ''))
+        return redirect(url_for('admin_about'))
+    content = ''
+    if os.path.exists(about_path):
+        with open(about_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    return render_template('admin/about_edit.html', content=content)
 
 
 @app.route('/choose-logo')
