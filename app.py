@@ -409,6 +409,11 @@ def index():
     return render_template('index.html', fun_categories=fun_categories, learning_categories=learning_categories, featured_videos=featured_videos, latest_news=latest_news, platform_config=PLATFORM_CONFIG)
 
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
 @app.route('/choose-logo')
 def choose_logo():
     return render_template('choose_logo.html')
