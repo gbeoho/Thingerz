@@ -36,8 +36,6 @@
         .lang-select.open .lang-dropdown{display:block}
         .lang-dropdown a{display:block;padding:8px 14px;font-size:.8rem;color:#9898b0;border-radius:8px;transition:all .15s}
         .lang-dropdown a:hover{background:rgba(99,102,241,.1);color:#fff}
-        .skiptranslate iframe{display:none!important}
-        #google_translate_hidden{position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;opacity:0}
         body{top:0!important}
         .nav-link::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:0;height:2px;background:linear-gradient(90deg,#6366f1,#ec4899);border-radius:2px;transition:width .3s}
         .nav-link:hover{color:#fff}.nav-link:hover::after{width:100%}
@@ -516,18 +514,10 @@
     function switchLang(code, label){
         document.getElementById('currentLang').textContent = label;
         document.getElementById('langSelect').classList.remove('open');
-        document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 UTC';
-        var d = new Date();
-        d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
-        document.cookie = 'googtrans=/zh-HK/' + code + ';path=/;expires=' + d.toUTCString();
-        window.location.href = window.location.href.split('#')[0];
-    }
-    function googleTranslateInit(){
-        new google.translate.TranslateElement({pageLanguage:'zh-HK',includedLanguages:'zh-HK,zh-CN,en,ja,ko,es,fr,hi,ar,bn,ru,pt,id,th,vi,ms,tl,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_hidden');
+        var url = 'https://translate.google.com/translate?hl=' + code + '&sl=auto&tl=' + code + '&u=' + encodeURIComponent(window.location.href.split('#')[0]);
+        window.location.href = url;
     }
     </script>
-    <div id="google_translate_hidden" style="display:none"></div>
-    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateInit" async></script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
