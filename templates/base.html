@@ -525,6 +525,10 @@
         } else {
             originalUrl = originalUrl.split('#')[0];
         }
+        if (code === 'zh-HK') {
+            window.location.href = originalUrl;
+            return;
+        }
         var url = 'https://translate.google.com/translate?hl=' + code + '&sl=auto&tl=' + code + '&u=' + encodeURIComponent(originalUrl);
         window.location.href = url;
     }
