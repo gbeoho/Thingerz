@@ -503,44 +503,19 @@
         </div>
     </footer>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <div class="lang-select" id="langSelect">
-        <button class="lang-btn" onclick="document.getElementById('langSelect').classList.toggle('open')">
-            <span id="currentLang">中文(繁)</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5l3 3 3-3"/></svg>
-        </button>
-        <div class="lang-dropdown">
-            <a href="#" onclick="switchLang('zh-HK','中文(繁)')">中文(繁)</a>
-            <a href="#" onclick="switchLang('zh-CN','中文(简)')">中文(简)</a>
-            <a href="#" onclick="switchLang('en','English')">English</a>
-            <a href="#" onclick="switchLang('ja','日本語')">日本語</a>
-            <a href="#" onclick="switchLang('ko','한국어')">한국어</a>
-            <a href="#" onclick="switchLang('es','Español')">Español</a>
-            <a href="#" onclick="switchLang('fr','Français')">Français</a>
-            <a href="#" onclick="switchLang('hi','हिन्दी')">हिन्दी</a>
-            <a href="#" onclick="switchLang('ar','العربية')">العربية</a>
-            <a href="#" onclick="switchLang('bn','বাংলা')">বাংলা</a>
-            <a href="#" onclick="switchLang('ru','Русский')">Русский</a>
-            <a href="#" onclick="switchLang('pt','Português')">Português</a>
-            <a href="#" onclick="switchLang('id','Bahasa Indonesia')">Bahasa Indonesia</a>
-            <a href="#" onclick="switchLang('th','ไทย')">ไทย</a>
-            <a href="#" onclick="switchLang('vi','Tiếng Việt')">Tiếng Việt</a>
-            <a href="#" onclick="switchLang('ms','Bahasa Melayu')">Bahasa Melayu</a>
-            <a href="#" onclick="switchLang('tl','Tagalog')">Tagalog</a>
-            <a href="#" onclick="switchLang('de','Deutsch')">Deutsch</a>
-        </div>
-    </div>
     <script>
-    var langReady = false;
-    function googleTranslateInit(){
-        new google.translate.TranslateElement({pageLanguage:'zh-HK',includedLanguages:'zh-HK,zh-CN,en,ja,ko,es,fr,hi,ar,bn,ru,pt,id,th,vi,ms,tl,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_hidden');
-        setTimeout(function(){ langReady = true; }, 1500);
-    }
     function switchLang(code, label){
         document.getElementById('currentLang').textContent = label;
         document.getElementById('langSelect').classList.remove('open');
-        var cookie = 'googtrans=/zh-HK/' + code;
-        document.cookie = cookie + ';path=/';
-        location.reload();
+        var cookieName = 'googtrans';
+        var cookieValue = '/zh-HK/' + code;
+        var d = new Date();
+        d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+        document.cookie = cookieName + '=' + cookieValue + ';path=/;expires=' + d.toUTCString();
+        setTimeout(function(){ location.reload(); }, 100);
+    }
+    function googleTranslateInit(){
+        new google.translate.TranslateElement({pageLanguage:'zh-HK',includedLanguages:'zh-HK,zh-CN,en,ja,ko,es,fr,hi,ar,bn,ru,pt,id,th,vi,ms,tl,de',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_hidden');
     }
     </script>
     <div id="google_translate_hidden" style="display:none"></div>
