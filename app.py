@@ -421,6 +421,11 @@ def about():
     return render_template('about.html', about_content=content)
 
 
+@app.route('/downloads')
+def downloads():
+    return render_template('downloads.html')
+
+
 @app.route('/admin/about', methods=['GET', 'POST'])
 @admin_required
 def admin_about():
