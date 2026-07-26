@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}下載素材 - Thingerz 點搵你{% endblock %}
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>品牌素材下載</h1>
+        <p class="page-subtitle">LOGO · FB Cover · IG Profile</p>
+    </div>
+</section>
+<section class="section">
+    <div class="container" style="max-width:800px;margin:0 auto">
+        <div style="display:flex;flex-direction:column;gap:24px">
+            <div style="background:#11111d;border-radius:18px;padding:28px;border:1px solid rgba(255,255,255,.04)">
+                <h3 style="margin-bottom:12px">LOGO (400×400)</h3>
+                <img src="{{ url_for('static', filename='logo.svg') }}" width="160" style="border-radius:12px;margin-bottom:12px">
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <a href="{{ url_for('static', filename='logo.svg') }}" download class="btn btn-primary btn-sm">下載 SVG</a>
+                    <span class="text-muted" style="align-self:center">→ 拖入 Photoshop 另存 JPG</span>
+                </div>
+            </div>
+            <div style="background:#11111d;border-radius:18px;padding:28px;border:1px solid rgba(255,255,255,.04)">
+                <h3 style="margin-bottom:12px">Facebook 封面 (820×312)</h3>
+                <img src="{{ url_for('static', filename='fb_cover.svg') }}" width="300" style="border-radius:8px;margin-bottom:12px">
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <a href="{{ url_for('static', filename='fb_cover.svg') }}" download class="btn btn-primary btn-sm">下載 SVG</a>
+                    <span class="text-muted" style="align-self:center">→ 拖入 Photoshop 另存 JPG</span>
+                </div>
+            </div>
+            <div style="background:#11111d;border-radius:18px;padding:28px;border:1px solid rgba(255,255,255,.04)">
+                <h3 style="margin-bottom:12px">Instagram 大頭貼 (1080×1080)</h3>
+                <img src="{{ url_for('static', filename='ig_profile.svg') }}" width="160" style="border-radius:50%;margin-bottom:12px">
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <a href="{{ url_for('static', filename='ig_profile.svg') }}" download class="btn btn-primary btn-sm">下載 SVG</a>
+                    <span class="text-muted" style="align-self:center">→ 拖入 Photoshop 另存 JPG</span>
+                </div>
+            </div>
+        </div>
+        <div style="background:rgba(99,102,241,.05);border-radius:14px;padding:20px;margin-top:24px;text-align:center">
+            <p style="margin-bottom:8px"><strong>Photoshop 轉 JPG 步驟：</strong></p>
+            <p class="text-muted">File → Open → 選 .svg → Export → Export As → Format: JPG → Quality: 100% → Export</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
