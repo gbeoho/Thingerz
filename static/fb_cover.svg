@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="312" viewBox="0 0 820 312">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="820" y2="312">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1a1a3e"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0" y1="0" x2="820" y2="0">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="820" height="312" rx="16" fill="url(#bgGrad)"/>
+  <!-- Logo -->
+  <rect x="50" y="66" width="32" height="180" rx="16" fill="#1e3a5f"/>
+  <rect x="98" y="40" width="32" height="206" rx="16" fill="#1e40af"/>
+  <rect x="146" y="20" width="32" height="226" rx="16" fill="#2563eb"/>
+  <rect x="194" y="36" width="32" height="210" rx="16" fill="#3b82f6"/>
+  <rect x="242" y="60" width="32" height="186" rx="16" fill="#06b6d4"/>
+  <circle cx="210" cy="190" r="28" fill="none" stroke="#22d3ee" stroke-width="6" opacity="0.35"/>
+  <circle cx="210" cy="190" r="14" fill="none" stroke="#22d3ee" stroke-width="4"/>
+  <circle cx="210" cy="190" r="4" fill="#22d3ee"/>
+  <!-- Text -->
+  <text x="330" y="150" font-family="'Segoe UI','Microsoft JhengHei',sans-serif" font-size="52" font-weight="900" fill="url(#textGrad)" letter-spacing="-1">Thingerz 點搵你</text>
+  <text x="330" y="200" font-family="'Segoe UI','Microsoft JhengHei',sans-serif" font-size="22" fill="#64748b" letter-spacing="2">新 一 代 學 習 消 閒 平 台</text>
+</svg>
