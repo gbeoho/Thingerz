@@ -84,6 +84,18 @@ PLATFORM_CONFIG = {
         'watch_base': 'https://www.threads.net/@{user}/post/{id}',
         'thumb_base': None, 'aspect_ratio': '1:1', 'color': '#000000',
     },
+    'xiaohongshu': {
+        'name': '小紅書',
+        'embed_base': 'https://www.xiaohongshu.com/explore/{id}',
+        'watch_base': 'https://www.xiaohongshu.com/explore/{id}',
+        'thumb_base': None, 'aspect_ratio': '3:4', 'color': '#FF2442',
+    },
+    'bilibili': {
+        'name': 'Bilibili',
+        'embed_base': 'https://player.bilibili.com/player.html?bvid={id}',
+        'watch_base': 'https://www.bilibili.com/video/{id}',
+        'thumb_base': None, 'aspect_ratio': '16:9', 'color': '#FB7299',
+    },
 }
 
 DIRECTIONS = {
@@ -381,9 +393,44 @@ def extract_tiktok_id(url):
     return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
 
 
-def get_instagram_thumb(shortcode):
-    """Generate Instagram thumbnail URL from shortcode."""
-    return f'https://www.instagram.com/p/{shortcode}/media/?size=m'
+def extract_xiaohongshu_id(url):
+    """Extract Xiaohongshu note ID from URL."""
+    if not url:
+        return ''
+    match = re.search(r'xiaohongshu\.com/(?:explore|discovery/item)/([a-zA-Z0-9]+)', url)
+    if match:
+        return match.group(1)
+    match = re.search(r'xhslink\.com/([a-zA-Z0-9]+)', url)
+    if match:
+        return 'xh_' + match.group(1)
+    return url.strip().split('/')[-1].split('?')[0]
+
+
+def extract_bilibili_id(url):
+    """Extract Bilibili BV/AV ID from URL."""
+    if not url:
+        return ''
+    match = re.search(r'bilibili\.com/video/(BV[a-zA-Z0-9]+|av\d+)', url)
+    if match:
+        return match.group(1)
+    match_short = re.search(r'b23\.tv/([a-zA-Z0-9]+)', url)
+    if match_short:
+        return 'b23_' + match_short.group(1)
+    return url.strip().split('/')[-1].split('?')[0]
+
+
+def get_platform_thumb(platform, platform_id, api_url=''):
+    """Get thumbnail URL for any platform."""
+    if platform == 'youtube':
+        return f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
+    elif platform == 'instagram':
+        return f"https://www.instagram.com/p/{platform_id}/media/?size=m"
+    elif platform == 'bilibili':
+        return api_url or f"https://picsum.photos/seed/bili_{platform_id}/400/225"
+    elif platform == 'xiaohongshu':
+        return api_url or f"https://picsum.photos/seed/xhs_{platform_id}/300/400"
+    else:
+        return api_url or f"https://picsum.photos/seed/{platform_id}/400/711"
 
 
 def generate_id(prefix):
@@ -548,14 +595,13 @@ def submit_video():
             platform_id = extract_instagram_id(url)
         elif platform == 'tiktok':
             platform_id = extract_tiktok_id(url)
+        elif platform == 'xiaohongshu':
+            platform_id = extract_xiaohongshu_id(url)
+        elif platform == 'bilibili':
+            platform_id = extract_bilibili_id(url)
         else:
             platform_id = url.split('/')[-1].split('?')[0]
-        if platform == 'youtube':
-            thumb = f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
-        elif platform == 'instagram':
-            thumb = get_instagram_thumb(platform_id)
-        else:
-            thumb = f"https://picsum.photos/seed/{platform_id}/400/711"
+        thumb = get_platform_thumb(platform, platform_id)
         vids = read_csv('videos.csv')
         max_num = max(int(v['id'].replace('v', '')) for v in vids) if vids else 0
         track_val = 'fun'
@@ -906,16 +952,17 @@ def admin_video_add():
     platform_id_raw = request.form.get('platform_id', '').strip()
     if platform == 'youtube':
         platform_id = extract_youtube_id(platform_id_raw) or platform_id_raw
-        thumb = request.form.get('thumbnail_url', '') or f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
     elif platform == 'instagram':
         platform_id = extract_instagram_id(platform_id_raw) or platform_id_raw
-        thumb = request.form.get('thumbnail_url', '') or get_instagram_thumb(platform_id)
     elif platform == 'tiktok':
         platform_id = extract_tiktok_id(platform_id_raw) or platform_id_raw
-        thumb = request.form.get('thumbnail_url', '') or f"https://picsum.photos/seed/{platform_id}/400/711"
+    elif platform == 'xiaohongshu':
+        platform_id = extract_xiaohongshu_id(platform_id_raw) or platform_id_raw
+    elif platform == 'bilibili':
+        platform_id = extract_bilibili_id(platform_id_raw) or platform_id_raw
     else:
         platform_id = platform_id_raw
-        thumb = request.form.get('thumbnail_url', '')
+    thumb = request.form.get('thumbnail_url', '') or get_platform_thumb(platform, platform_id)
     vid = {
         'id': f"v{max_num + 1:03d}",
         'subcategory_id': request.form.get('subcategory_id', ''),
@@ -1008,7 +1055,7 @@ def admin_approve_submission(submission_id):
         if platform == 'youtube':
             thumb = f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
         elif platform == 'instagram':
-            thumb = get_instagram_thumb(platform_id)
+            thumb = get_platform_thumb(platform, platform_id)
         else:
             thumb = f"https://picsum.photos/seed/{platform_id}/400/711"
         vids = read_csv('videos.csv')
