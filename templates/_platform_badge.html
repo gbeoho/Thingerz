@@ -1,4 +1,4 @@
 {% set p = platform_config.get(video['platform'], {}) %}
-<div class="card-platform-badge platform-badge-{{ 'yt' if video['platform'] == 'youtube' else 'ig' if video['platform'] == 'instagram' else 'tt' if video['platform'] == 'tiktok' else 'th' }}">
+<div class="card-platform-badge platform-badge-{{ 'yt' if video['platform'] == 'youtube' else 'ig' if video['platform'] == 'instagram' else 'tt' if video['platform'] == 'tiktok' else 'th' if video['platform'] == 'threads' else 'xhs' if video['platform'] == 'xiaohongshu' else 'bili' if video['platform'] == 'bilibili' else 'yt' }}">
     {{ p.get('name', video['platform'] | capitalize) }}
 </div>

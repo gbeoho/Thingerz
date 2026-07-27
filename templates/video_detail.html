@@ -190,6 +190,10 @@
             iframe.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
         } else if (platform === 'tiktok') {
             iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
+        } else if (platform === 'bilibili') {
+            embedUrl = 'https://player.bilibili.com/player.html?bvid=' + platformId + '&autoplay=1';
+        } else if (platform === 'xiaohongshu') {
+            embedUrl = 'https://www.xiaohongshu.com/explore/' + platformId;
         }
         iframe.src = embedUrl;
         iframe.setAttribute('scrolling', 'no');
