@@ -3,6 +3,9 @@ import os
 import re
 import uuid
 import sqlite3
+import json
+import threading
+import time
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file
@@ -431,6 +434,46 @@ def get_platform_thumb(platform, platform_id, api_url=''):
         return api_url or f"https://picsum.photos/seed/xhs_{platform_id}/300/400"
     else:
         return api_url or f"https://picsum.photos/seed/{platform_id}/400/711"
+
+
+BACKUP_FILE = os.path.join(DATA_DIR, '_auto_backup.json')
+
+
+def auto_backup():
+    all_data = {}
+    for f in os.listdir(DATA_DIR):
+        if f.endswith('.csv') and not f.startswith('_'):
+            all_data[f] = read_csv(f)
+    backup = {'data': all_data, 'backup_time': datetime.now().isoformat(), 'video_count': len(all_data.get('videos.csv', [])), 'submission_count': len(all_data.get('submissions.csv', [])), 'comment_count': len(all_data.get('comments.csv', [])), 'contact_count': len(all_data.get('contacts.csv', []))}
+    with open(BACKUP_FILE, 'w', encoding='utf-8') as f:
+        json.dump(backup, f, ensure_ascii=False)
+
+
+def start_auto_backup():
+    def run():
+        while True:
+            time.sleep(7200)
+            try:
+                auto_backup()
+            except:
+                pass
+    t = threading.Thread(target=run, daemon=True)
+    t.start()
+
+
+def get_backup_status():
+    if os.path.exists(BACKUP_FILE):
+        try:
+            with open(BACKUP_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            back_time = data.get('backup_time', '')
+            if back_time:
+                dt = datetime.fromisoformat(back_time)
+                hours_ago = (datetime.now() - dt).total_seconds() / 3600
+                return {'last_backup': back_time, 'hours_ago': round(hours_ago, 1), 'video_count': data.get('video_count', 0), 'submission_count': data.get('submission_count', 0), 'comment_count': data.get('comment_count', 0), 'contact_count': data.get('contact_count', 0)}
+        except:
+            pass
+    return {'last_backup': None, 'hours_ago': None}
 
 
 def generate_id(prefix):
@@ -1382,7 +1425,8 @@ def inject_globals():
         'categories': get_categories(),
         'platform_config': PLATFORM_CONFIG,
         'directions': DIRECTIONS,
-        'now': datetime.now()
+        'now': datetime.now(),
+        'get_backup_status': get_backup_status,
     }
 
 
@@ -1402,6 +1446,17 @@ def internal_error(e):
 
 if __name__ == '__main__':
     import sys
+    start_auto_backup()
+    try:
+        auto_backup()
+    except:
+        pass
     port = int(os.environ.get('PORT', 5000))
     debug = '--debug' in sys.argv
     app.run(host='0.0.0.0', port=port, debug=debug)
+else:
+    start_auto_backup()
+    try:
+        auto_backup()
+    except:
+        pass
