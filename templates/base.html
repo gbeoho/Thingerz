@@ -475,6 +475,8 @@
                     </div>
                 </div>
                 <a href="{{ url_for('submit_video') }}" class="btn btn-primary" style="padding:8px 16px;font-size:.78rem;border-radius:20px">上載有趣內容</a>
+                <a href="https://www.facebook.com/thingerz/" target="_blank" class="nav-link" style="font-size:.75rem;color:#6a6a80" title="Facebook">FB</a>
+                <a href="https://www.instagram.com/_thingerz" target="_blank" class="nav-link" style="font-size:.75rem;color:#6a6a80" title="Instagram">IG</a>
             </div>
             <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
         </div>
@@ -495,7 +497,7 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-grid">
-                <div class="footer-brand"><h3>Thingerz 點搵你</h3><p>高效能社交媒體策展平台</p><p>探索興趣與行業的精彩影音內容</p><div class="app-badges" style="margin-top:14px"><span style="font-size:.7rem;color:#6a6a80;display:block;margin-bottom:6px">即將推出</span><div style="display:flex;gap:8px"><span style="background:#1a1a2e;padding:6px 12px;border-radius:8px;font-size:.68rem;color:#9898b0">App Store</span><span style="background:#1a1a2e;padding:6px 12px;border-radius:8px;font-size:.68rem;color:#9898b0">Google Play</span></div></div></div>
+                <div class="footer-brand"><h3>Thingerz 點搵你</h3><p>高效能社交媒體策展平台</p><p>探索興趣與行業的精彩影音內容</p><div class="app-badges" style="margin-top:14px"><span style="font-size:.7rem;color:#6a6a80;display:block;margin-bottom:6px">追蹤我們</span><div style="display:flex;gap:8px"><a href="https://www.facebook.com/thingerz/" target="_blank" style="background:#1a1a2e;padding:6px 14px;border-radius:8px;font-size:.68rem;color:#9898b0;transition:all .2s;text-decoration:none" onmouseover="this.style.background='#1877f2';this.style.color='#fff'" onmouseout="this.style.background='#1a1a2e';this.style.color='#9898b0'">Facebook</a><a href="https://www.instagram.com/_thingerz" target="_blank" style="background:#1a1a2e;padding:6px 14px;border-radius:8px;font-size:.68rem;color:#9898b0;transition:all .2s;text-decoration:none" onmouseover="this.style.background='#e4405f';this.style.color='#fff'" onmouseout="this.style.background='#1a1a2e';this.style.color='#9898b0'">Instagram</a></div></div></div>
                 <div class="footer-links"><h4>探索</h4><a href="{{ url_for('track_page', track='fun') }}">Fun 頻道</a><a href="{{ url_for('track_page', track='learning') }}">Learning 頻道</a><a href="{{ url_for('news_list') }}">好去處</a><a href="{{ url_for('search') }}">搜尋影片</a></div>
                 <div class="footer-links"><h4>參與</h4><a href="{{ url_for('submit_video') }}">提交影片</a><a href="{{ url_for('contact') }}">聯絡我們</a><a href="{{ url_for('submit_video') }}">上載有趣內容</a></div>
                 <div class="footer-links"><h4>分類</h4>{% for cat in categories %}<a href="{{ url_for('category_page', slug=cat['name_slug']) }}">{{ cat['name_zh'] }}</a>{% endfor %}</div>
