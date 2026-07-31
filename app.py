@@ -28,14 +28,22 @@ if DATA_DIR != SEED_DIR:
 DB_PATH = os.path.join(DATA_DIR, 'thingerz.db')
 
 ADMIN_PASSWORD = 'Gabriel00!'
+API_KEY = os.environ.get('API_KEY', 'thingerz_crawler_2026')
+# API key for crawler ingestion (override with THINGERZ_API_KEY env var on Render)
+API_KEY = os.environ.get('THINGERZ_API_KEY', 'thingerz_h7mPZwHywIaU1uHsQapK1kjD483mEY8N')
+CRAWLER_ALLOWED_PLATFORMS = {'youtube', 'bilibili', 'instagram', 'douyin', 'threads', 'xiaohongshu'}
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
 BLOCKED_WORDS = [
     'porn', 'xxx', 'sex', 'nude', 'naked', 'escort', 'onlyfans', 'camgirl', 'adult',
     '色情', '成人', '裸體', '裸露', '三級', '艷照', '援交', '一夜情', '約炮',
+    '自慰', '打飛機', '做愛', '性交', '口交', '肛交', '性愛', '嫖妓', '叫雞', '叫鸭',
+    'av', 'jav', 'hentai', 'a片', '黃片', '成人影片', '偷拍', '走光', '露點',
+    'sm', 'bdsm', '換妻', '群交', '亂倫', '強姦', '迷姦', '性騷擾',
     '共產黨', '國民黨', '民進黨', '習近平', '蔡英文', '賴清德', '特朗普', '拜登',
     '政治', '示威', '抗議', '遊行', '港獨', '台獨', '藏獨', '疆獨', '六四', '天安門',
     '反送中', '國安法', '光復', '革命', '罷工', '佔中', '雨傘', '暴徒', '黑警',
+    '暴亂', '香港暴亂', '暴動', '獨立', '分裂', '顛覆', '恐怖', '聖戰',
     'isis', 'terrorist', 'jihad', 'nazi', 'hitler',
 ]
 
@@ -99,6 +107,12 @@ PLATFORM_CONFIG = {
         'watch_base': 'https://www.bilibili.com/video/{id}',
         'thumb_base': None, 'aspect_ratio': '16:9', 'color': '#FB7299',
     },
+    'douyin': {
+        'name': '抖音',
+        'embed_base': 'https://www.douyin.com/embed/{id}',
+        'watch_base': 'https://www.douyin.com/video/{id}',
+        'thumb_base': None, 'aspect_ratio': '9:16', 'color': '#000000',
+    },
 }
 
 DIRECTIONS = {
@@ -154,6 +168,16 @@ TABLE_SCHEMAS = {
         id TEXT UNIQUE, name TEXT, email TEXT, subject TEXT, message TEXT, date TEXT, status TEXT)''',
     'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (
         video_id TEXT UNIQUE, count INTEGER DEFAULT 0, clicks INTEGER DEFAULT 0)''',
+    'crawled_videos': '''CREATE TABLE IF NOT EXISTS crawled_videos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        platform TEXT NOT NULL, platform_id TEXT NOT NULL,
+        sub_category TEXT, district TEXT, title TEXT, url TEXT,
+        thumbnail_url TEXT, author_name TEXT, author_url TEXT,
+        description TEXT, view_count INTEGER DEFAULT 0,
+        like_count INTEGER DEFAULT 0, comment_count INTEGER DEFAULT 0,
+        duration_sec INTEGER DEFAULT 0, published_at TEXT,
+        score REAL DEFAULT 0, updated_at TEXT,
+        UNIQUE(platform, platform_id))''',
 }
 
 
@@ -1428,6 +1452,90 @@ def inject_globals():
         'now': datetime.now(),
         'get_backup_status': get_backup_status,
     }
+
+
+@app.route('/api/content', methods=['POST', 'OPTIONS'])
+def api_content():
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    provided = (request.headers.get('X-API-Key') or '').strip()
+    if not provided:
+        body = request.get_json(silent=True) or {}
+        provided = str(body.get('key', '')).strip()
+    if not provided or provided != API_KEY:
+        return jsonify({'status': 'error', 'message': 'Invalid API key'}), 401
+
+    body = request.get_json(silent=True) or {}
+    content = body.get('content')
+    if not isinstance(content, list):
+        return jsonify({'status': 'error', 'message': 'content must be a list'}), 400
+
+    updated_at = str(body.get('updated_at', '')) or datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    db = get_db()
+    received = len(content)
+    duplicates = 0
+    errors = 0
+    inserted = 0
+
+    for item in content:
+        if not isinstance(item, dict):
+            errors += 1
+            continue
+        try:
+            platform = str(item.get('platform', '')).strip().lower()
+            platform_id = str(item.get('platform_id', '')).strip()
+            sub_category = str(item.get('sub_category', '')).strip()
+            if platform not in CRAWLER_ALLOWED_PLATFORMS or not platform_id:
+                errors += 1
+                continue
+            if sub_category and not re.fullmatch(r's\d{3}', sub_category):
+                errors += 1
+                continue
+
+            exists = db.execute(
+                "SELECT 1 FROM crawled_videos WHERE platform=? AND platform_id=?",
+                (platform, platform_id)).fetchone()
+            if exists:
+                duplicates += 1
+                continue
+
+            description = str(item.get('description', '')).strip()[:500]
+            cur = db.execute(
+                """INSERT OR IGNORE INTO crawled_videos
+                (platform, platform_id, sub_category, district, title, url,
+                 thumbnail_url, author_name, author_url, description,
+                 view_count, like_count, comment_count, duration_sec,
+                 published_at, score, updated_at)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (platform, platform_id,
+                 sub_category,
+                 str(item.get('district', '')).strip(),
+                 str(item.get('title', '')).strip(),
+                 str(item.get('url', '')).strip(),
+                 str(item.get('thumbnail_url', '')).strip(),
+                 str(item.get('author_name', '')).strip(),
+                 str(item.get('author_url', '')).strip(),
+                 description,
+                 int(item.get('view_count') or 0),
+                 int(item.get('like_count') or 0),
+                 int(item.get('comment_count') or 0),
+                 int(item.get('duration_sec') or 0),
+                 str(item.get('published_at', '')).strip(),
+                 float(item.get('score') or 0),
+                 updated_at))
+            if cur.rowcount > 0:
+                inserted += 1
+            else:
+                duplicates += 1
+        except (ValueError, TypeError):
+            errors += 1
+    db.commit()
+    db.close()
+
+    return jsonify({'status': 'ok', 'received': received,
+                    'duplicates_skipped': duplicates, 'errors': errors})
 
 
 @app.after_request
