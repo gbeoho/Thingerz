@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: thingerz-dashboard
-    runtime: python
-    plan: free
-    buildCommand: pip install -r api/requirements.txt
-    startCommand: python api/server.py
-    healthCheckPath: /api/stats
