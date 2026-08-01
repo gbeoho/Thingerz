@@ -183,6 +183,7 @@
     facade.addEventListener('click', function() {
         var embedUrl = this.dataset.embedUrl;
         var platform = this.dataset.platform;
+        var platformId = this.dataset.platformId;
         var wrapper = this.parentElement;
         var iframe = document.createElement('iframe');
         if (platform === 'youtube') {
