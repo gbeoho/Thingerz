@@ -29,8 +29,6 @@ DB_PATH = os.path.join(DATA_DIR, 'thingerz.db')
 
 ADMIN_PASSWORD = 'Gabriel00!'
 API_KEY = os.environ.get('API_KEY', 'thingerz_crawler_2026')
-# API key for crawler ingestion (override with THINGERZ_API_KEY env var on Render)
-API_KEY = os.environ.get('THINGERZ_API_KEY', 'thingerz_h7mPZwHywIaU1uHsQapK1kjD483mEY8N')
 CRAWLER_ALLOWED_PLATFORMS = {'youtube', 'bilibili', 'instagram', 'douyin', 'threads', 'xiaohongshu'}
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
