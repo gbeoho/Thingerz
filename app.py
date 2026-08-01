@@ -323,6 +323,37 @@ def get_subcategory(subcategory_id):
 def get_videos(subcategory_id=None, category_id=None, track=None, direction=None, status='approved', district=None, limit=None):
     videos = read_csv('videos.csv')
     result = [v for v in videos if v.get('status', '') == status]
+
+    # Merge crawled_videos (limited to avoid slow loads)
+    try:
+        db = get_db()
+        crawl_rows = db.execute('SELECT * FROM crawled_videos ORDER BY view_count DESC LIMIT 300').fetchall()
+        db.close()
+        for cr in crawl_rows:
+            sc = cr['sub_category'] or ''
+            cat_id = ('cat00' + sc[1:]) if sc.startswith('s0') else ('cat0' + sc[1:])
+            trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
+            result.append({
+                'id': 'cv_' + str(cr['id']),
+                'subcategory_id': sc,
+                'category_id': cat_id,
+                'platform': cr['platform'],
+                'platform_id': cr['platform_id'],
+                'title_zh': cr['title'] or '',
+                'title_en': '',
+                'description_zh': cr['description'] or '',
+                'description_en': '',
+                'thumbnail_url': cr['thumbnail_url'] or '',
+                'aspect_ratio': '16:9',
+                'tags': cr['district'] or '',
+                'status': 'approved',
+                'track': trk,
+                'direction': trk,
+                'submitted_date': cr['published_at'] or '',
+            })
+    except:
+        pass
+
     if subcategory_id:
         result = [v for v in result if v['subcategory_id'] == subcategory_id]
     if category_id:
@@ -340,6 +371,28 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
 
 
 def get_video(video_id):
+    if video_id.startswith('cv_'):
+        try:
+            db = get_db()
+            r = db.execute('SELECT * FROM crawled_videos WHERE id=?', (int(video_id[3:]),)).fetchone()
+            db.close()
+            if r:
+                sc = r['sub_category'] or ''
+                cat_id = ('cat00' + sc[1:]) if sc.startswith('s0') else ('cat0' + sc[1:])
+                trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
+                return {
+                    'id': video_id, 'subcategory_id': sc, 'category_id': cat_id,
+                    'platform': r['platform'], 'platform_id': r['platform_id'],
+                    'title_zh': r['title'] or '', 'title_en': '',
+                    'description_zh': r['description'] or '', 'description_en': '',
+                    'thumbnail_url': r['thumbnail_url'] or '',
+                    'aspect_ratio': '16:9', 'tags': r['district'] or '',
+                    'status': 'approved', 'track': trk, 'direction': trk,
+                    'submitted_date': r['published_at'] or '',
+                }
+        except:
+            pass
+        return None
     for v in read_csv('videos.csv'):
         if v['id'] == video_id:
             return v
