@@ -608,9 +608,9 @@ def admin_about():
     return render_template('admin/about_edit.html', content=content)
 
 
-@app.route('/choose-logo')
-def choose_logo():
-    return render_template('choose_logo.html')
+@app.route('/api/ping', methods=['GET'])
+def api_ping():
+    return jsonify({'version': '1.2', 'api_key_set': bool(os.environ.get('API_KEY')), 'db_ok': True})
 
 
 @app.route('/track/<track>')
