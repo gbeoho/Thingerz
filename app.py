@@ -336,7 +336,13 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                 if cr['platform'] == 'youtube':
                     thumb = f"https://img.youtube.com/vi/{cr['platform_id']}/hqdefault.jpg"
                 elif cr['platform'] == 'bilibili':
-                    thumb = f"https://picsum.photos/seed/bili_{cr['platform_id']}/400/225"
+                    fetched = get_bilibili_cover(cr['platform_id'])
+                    if fetched:
+                        thumb = fetched
+                        db.execute('UPDATE crawled_videos SET thumbnail_url=? WHERE id=?', (fetched, cr['id']))
+                        db.commit()
+                    else:
+                        thumb = f"https://picsum.photos/seed/bili_{cr['platform_id']}/400/225"
                 elif cr['platform'] == 'xiaohongshu':
                     thumb = f"https://picsum.photos/seed/xhs_{cr['platform_id']}/300/400"
                 else:
@@ -563,6 +569,21 @@ def get_backup_status():
 
 def generate_id(prefix):
     return f"{prefix}{uuid.uuid4().hex[:8]}"
+
+
+def get_bilibili_cover(bvid):
+    """Fetch Bilibili cover image URL via API. Returns '' on failure."""
+    try:
+        import urllib.request
+        u = f'https://api.bilibili.com/x/web-interface/view?bvid={bvid}'
+        r = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.bilibili.com'})
+        with urllib.request.urlopen(r, timeout=5) as resp:
+            d = json.loads(resp.read())
+            if d.get('code') == 0 and d.get('data'):
+                return d['data'].get('pic', '') or ''
+    except:
+        pass
+    return ''
 
 
 def admin_required(f):
