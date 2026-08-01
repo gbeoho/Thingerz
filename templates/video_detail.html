@@ -5,15 +5,17 @@
 {% set plat_cfg = platform_config.get(video['platform'], platform_config['youtube']) %}
 <article class="video-detail-page">
     <div class="container">
+        {% if category and sub %}
         <div class="breadcrumb">
             <a href="{{ url_for('index') }}">首頁</a>
             <span>/</span>
             <a href="{{ url_for('track_page', track=category.get('track', 'fun')) }}">{{ 'Fun' if category.get('track', '') == 'fun' else 'Learning' }}</a>
             <span>/</span>
-            <a href="{{ url_for('category_page', slug=category['name_slug']) }}">{{ category['name_zh'] }}</a>
+            <a href="{{ url_for('category_page', slug=category.get('name_slug', '')) }}">{{ category.get('name_zh', '') }}</a>
             <span>/</span>
-            <a href="{{ url_for('subcategory_page', subcategory_id=sub['id']) }}">{{ sub['name_zh'] }}</a>
+            <a href="{{ url_for('subcategory_page', subcategory_id=sub.get('id', '')) }}">{{ sub.get('name_zh', '') }}</a>
         </div>
+        {% endif %}
     </div>
 
     <div class="video-detail-layout">
