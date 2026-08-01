@@ -6,6 +6,7 @@ import sqlite3
 import json
 import threading
 import time
+import urllib.request
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file
@@ -574,7 +575,6 @@ def generate_id(prefix):
 def get_bilibili_cover(bvid):
     """Fetch Bilibili cover image URL via API. Returns '' on failure."""
     try:
-        import urllib.request
         u = f'https://api.bilibili.com/x/web-interface/view?bvid={bvid}'
         r = urllib.request.Request(u, headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.bilibili.com'})
         with urllib.request.urlopen(r, timeout=5) as resp:
