@@ -331,6 +331,16 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             sc = cr['sub_category'] or ''
             cat_id = ('cat00' + sc[1:]) if sc.startswith('s0') else ('cat0' + sc[1:])
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
+            thumb = cr['thumbnail_url'] or ''
+            if not thumb:
+                if cr['platform'] == 'youtube':
+                    thumb = f"https://img.youtube.com/vi/{cr['platform_id']}/hqdefault.jpg"
+                elif cr['platform'] == 'bilibili':
+                    thumb = f"https://picsum.photos/seed/bili_{cr['platform_id']}/400/225"
+                elif cr['platform'] == 'xiaohongshu':
+                    thumb = f"https://picsum.photos/seed/xhs_{cr['platform_id']}/300/400"
+                else:
+                    thumb = f"https://picsum.photos/seed/{cr['platform_id']}/400/225"
             result.append({
                 'id': 'cv_' + str(cr['id']),
                 'subcategory_id': sc,
@@ -341,7 +351,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                 'title_en': '',
                 'description_zh': cr['description'] or '',
                 'description_en': '',
-                'thumbnail_url': cr['thumbnail_url'] or '',
+                'thumbnail_url': thumb,
                 'aspect_ratio': '16:9',
                 'tags': cr['district'] or '',
                 'status': 'approved',
