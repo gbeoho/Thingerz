@@ -375,7 +375,15 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
     # Merge crawled_videos (limited to avoid slow loads)
     try:
         db = get_db()
-        crawl_rows = db.execute('SELECT * FROM crawled_videos ORDER BY view_count DESC LIMIT 3000').fetchall()
+        crawl_rows = []
+        # Fetch top videos per sub-category for balanced coverage
+        subs = [r[0] for r in db.execute("SELECT DISTINCT sub_category FROM crawled_videos WHERE sub_category != ''").fetchall()]
+        for sc in subs:
+            crawl_rows.extend(db.execute(
+                "SELECT * FROM crawled_videos WHERE sub_category=? ORDER BY view_count DESC LIMIT 10",
+                (sc,)).fetchall())
+        # Sort combined result by view_count
+        crawl_rows.sort(key=lambda r: r['view_count'] or 0, reverse=True)
         db.close()
         for cr in crawl_rows:
             sc = cr['sub_category'] or ''
