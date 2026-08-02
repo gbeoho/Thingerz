@@ -218,6 +218,55 @@ def init_db():
                 columns = ', '.join(fields)
                 db.execute(f"INSERT OR IGNORE INTO {table_name} ({columns}) VALUES ({placeholders})",
                            [values[k] for k in fields])
+    # Seed crawled_videos from JSONL if empty (survives Render ephemeral storage)
+    seed_path = os.path.join(DATA_DIR, 'seed_crawled_videos.jsonl')
+    if os.path.exists(seed_path):
+        crawl_count = db.execute("SELECT COUNT(*) FROM crawled_videos").fetchone()[0]
+        if crawl_count == 0:
+            imported = 0
+            with open(seed_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        item = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    platform = str(item.get('platform', '')).strip().lower()
+                    platform_id = str(item.get('platform_id', '')).strip()
+                    if not platform or not platform_id:
+                        continue
+                    try:
+                        db.execute(
+                            """INSERT OR IGNORE INTO crawled_videos
+                            (platform, platform_id, sub_category, district, title, url,
+                             thumbnail_url, author_name, author_url, description,
+                             view_count, like_count, comment_count, duration_sec,
+                             published_at, score, updated_at)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                            (platform, platform_id,
+                             str(item.get('sub_category', '')).strip(),
+                             str(item.get('district', '')).strip(),
+                             str(item.get('title', '')).strip(),
+                             str(item.get('url', '')).strip(),
+                             str(item.get('thumbnail_url', '')).strip(),
+                             str(item.get('author_name', '')).strip(),
+                             str(item.get('author_url', '')).strip(),
+                             str(item.get('description', '')).strip()[:500],
+                             int(item.get('view_count', 0) or 0),
+                             int(item.get('like_count', 0) or 0),
+                             int(item.get('comment_count', 0) or 0),
+                             int(item.get('duration_sec', 0) or 0),
+                             str(item.get('published_at', '')).strip(),
+                             float(item.get('score', 0) or 0),
+                             datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
+                        imported += 1
+                    except Exception:
+                        pass
+            if imported > 0:
+                db.commit()
+
     db.commit()
     db.close()
 
