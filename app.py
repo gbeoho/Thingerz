@@ -1536,7 +1536,7 @@ def inject_globals():
     }
 
 
-@app.route('/api/content', methods=['POST', 'OPTIONS'])
+@app.route('/api/content', methods=['POST', 'DELETE', 'OPTIONS'])
 def api_content():
     if request.method == 'OPTIONS':
         return '', 204
@@ -1547,6 +1547,24 @@ def api_content():
         provided = str(body.get('key', '')).strip()
     if not provided or provided != API_KEY:
         return jsonify({'status': 'error', 'message': 'Invalid API key'}), 401
+
+    # DELETE endpoint - remove bad crawled content
+    if request.method == 'DELETE':
+        body = request.get_json(silent=True) or {}
+        platform = str(body.get('platform', '')).strip()
+        ids = body.get('ids', [])
+        db = get_db()
+        deleted = 0
+        if ids:
+            placeholders = ','.join(['?' for _ in ids])
+            cur = db.execute(f"DELETE FROM crawled_videos WHERE platform=? AND id IN ({placeholders})", [platform] + ids)
+            deleted = cur.rowcount
+        elif platform:
+            cur = db.execute("DELETE FROM crawled_videos WHERE platform=?", (platform,))
+            deleted = cur.rowcount
+        db.commit()
+        db.close()
+        return jsonify({'status': 'ok', 'deleted': deleted})
 
     body = request.get_json(silent=True) or {}
     content = body.get('content')
