@@ -30,7 +30,7 @@ DB_PATH = os.path.join(DATA_DIR, 'thingerz.db')
 
 ADMIN_PASSWORD = 'Gabriel00!'
 API_KEY = os.environ.get('API_KEY', 'thingerz_crawler_2026')
-CRAWLER_ALLOWED_PLATFORMS = {'youtube', 'bilibili', 'instagram', 'douyin', 'threads', 'xiaohongshu'}
+CRAWLER_ALLOWED_PLATFORMS = {'youtube', 'bilibili', 'instagram', 'douyin', 'threads', 'xiaohongshu', 'facebook'}
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
 BLOCKED_WORDS = [
@@ -111,6 +111,12 @@ PLATFORM_CONFIG = {
         'embed_base': 'https://www.douyin.com/embed/{id}',
         'watch_base': 'https://www.douyin.com/video/{id}',
         'thumb_base': None, 'aspect_ratio': '9:16', 'color': '#000000',
+    },
+    'facebook': {
+        'name': 'Facebook',
+        'embed_base': 'https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/watch/?v={id}',
+        'watch_base': 'https://www.facebook.com/watch/?v={id}',
+        'thumb_base': None, 'aspect_ratio': '16:9', 'color': '#1877F2',
     },
 }
 
