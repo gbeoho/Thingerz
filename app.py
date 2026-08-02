@@ -403,6 +403,12 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif 36 <= sub_num <= 42: cat_id = 'cat006'
             elif 43 <= sub_num <= 48: cat_id = 'cat007'
             elif 49 <= sub_num <= 54: cat_id = 'cat008'
+            elif sub_num == 55: cat_id = 'cat002'  # AI學習
+            elif sub_num == 56: cat_id = 'cat003'  # COSPLAY教學
+            elif sub_num == 57: cat_id = 'cat001'  # 風水命理
+            elif sub_num == 58 or sub_num == 59: cat_id = 'cat004'  # 極限運動, 小丑
+            elif sub_num == 60: cat_id = 'cat003'  # 珠寶設計教學
+            elif sub_num == 61: cat_id = 'cat008'  # 寵物/動物溝通
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
@@ -475,6 +481,12 @@ def get_video(video_id):
                 elif 36 <= sub_num <= 42: cat_id = 'cat006'
                 elif 43 <= sub_num <= 48: cat_id = 'cat007'
                 elif 49 <= sub_num <= 54: cat_id = 'cat008'
+                elif sub_num == 55: cat_id = 'cat002'
+                elif sub_num == 56: cat_id = 'cat003'
+                elif sub_num == 57: cat_id = 'cat001'
+                elif sub_num == 58 or sub_num == 59: cat_id = 'cat004'
+                elif sub_num == 60: cat_id = 'cat003'
+                elif sub_num == 61: cat_id = 'cat008'
                 else: cat_id = 'cat001'
                 trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
                 return {
