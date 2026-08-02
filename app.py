@@ -330,7 +330,17 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
         db.close()
         for cr in crawl_rows:
             sc = cr['sub_category'] or ''
-            cat_id = ('cat00' + sc[1:]) if sc.startswith('s0') else ('cat0' + sc[1:])
+            # Map sub_category to category_id (s001-s008→cat001, s009-s014→cat002, etc.)
+            sub_num = int(sc[1:]) if sc.startswith('s') and len(sc) == 4 and sc[1:].isdigit() else 0
+            if 1 <= sub_num <= 8: cat_id = 'cat001'
+            elif 9 <= sub_num <= 14: cat_id = 'cat002'
+            elif 15 <= sub_num <= 22: cat_id = 'cat003'
+            elif 23 <= sub_num <= 28: cat_id = 'cat004'
+            elif 29 <= sub_num <= 35: cat_id = 'cat005'
+            elif 36 <= sub_num <= 42: cat_id = 'cat006'
+            elif 43 <= sub_num <= 48: cat_id = 'cat007'
+            elif 49 <= sub_num <= 54: cat_id = 'cat008'
+            else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
             if not thumb:
