@@ -406,7 +406,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 55: cat_id = 'cat002'  # AI學習
             elif sub_num == 56: cat_id = 'cat003'  # COSPLAY教學
             elif sub_num == 57: cat_id = 'cat001'  # 風水命理
-            elif sub_num == 58 or sub_num == 59: cat_id = 'cat004'  # 極限運動, 小丑
+            elif sub_num == 58 or sub_num == 59: cat_id = 'cat004'  # 重氧運動, 小丑
             elif sub_num == 60: cat_id = 'cat003'  # 珠寶設計教學
             elif sub_num == 61: cat_id = 'cat008'  # 寵物/動物溝通
             else: cat_id = 'cat001'
