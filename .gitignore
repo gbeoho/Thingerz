@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.db
+*.bak
 data/_auto_backup.json
 data/thingerz.db
 data/news_fetch_tracker.txt

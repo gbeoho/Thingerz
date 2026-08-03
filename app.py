@@ -173,16 +173,7 @@ TABLE_SCHEMAS = {
         id TEXT UNIQUE, name TEXT, email TEXT, subject TEXT, message TEXT, date TEXT, status TEXT)''',
     'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (
         video_id TEXT UNIQUE, count INTEGER DEFAULT 0, clicks INTEGER DEFAULT 0)''',
-    'crawled_videos': '''CREATE TABLE IF NOT EXISTS crawled_videos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        platform TEXT NOT NULL, platform_id TEXT NOT NULL,
-        sub_category TEXT, district TEXT, title TEXT, url TEXT,
-        thumbnail_url TEXT, author_name TEXT, author_url TEXT,
-        description TEXT, view_count INTEGER DEFAULT 0,
-        like_count INTEGER DEFAULT 0, comment_count INTEGER DEFAULT 0,
-        duration_sec INTEGER DEFAULT 0, published_at TEXT,
-        score REAL DEFAULT 0, updated_at TEXT,
-        UNIQUE(platform, platform_id))''',
+    'crawled_videos': '''CREATE TABLE IF NOT EXISTS crawled_videos (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        platform TEXT NOT NULL, platform_id TEXT NOT NULL,\n        sub_category TEXT, district TEXT, title TEXT, url TEXT,\n        thumbnail_url TEXT, author_name TEXT, author_url TEXT,\n        description TEXT, view_count INTEGER DEFAULT 0,\n        like_count INTEGER DEFAULT 0, comment_count INTEGER DEFAULT 0,\n        duration_sec INTEGER DEFAULT 0, published_at TEXT,\n        score REAL DEFAULT 0, updated_at TEXT,\n        district_confirmed INTEGER DEFAULT 0,\n        UNIQUE(platform, platform_id))''',
 }
 
 
@@ -197,6 +188,13 @@ def init_db():
     db = get_db()
     for table, schema in TABLE_SCHEMAS.items():
         db.execute(schema)
+    # Migration: ensure crawled_videos has district_confirmed column (existing DBs)
+    try:
+        cols = [r[1] for r in db.execute("PRAGMA table_info(crawled_videos)").fetchall()]
+        if 'district_confirmed' not in cols:
+            db.execute("ALTER TABLE crawled_videos ADD COLUMN district_confirmed INTEGER DEFAULT 0")
+    except Exception:
+        pass
     db.commit()
 
     csv_to_table = {
@@ -249,8 +247,8 @@ def init_db():
                             (platform, platform_id, sub_category, district, title, url,
                              thumbnail_url, author_name, author_url, description,
                              view_count, like_count, comment_count, duration_sec,
-                             published_at, score, updated_at)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                             published_at, score, updated_at, district_confirmed)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                             (platform, platform_id,
                              str(item.get('sub_category', '')).strip(),
                              str(item.get('district', '')).strip(),
@@ -266,7 +264,8 @@ def init_db():
                              int(item.get('duration_sec', 0) or 0),
                              str(item.get('published_at', '')).strip(),
                              float(item.get('score', 0) or 0),
-                             datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
+                             datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                             1 if item.get('district_confirmed') else 0))
                         imported += 1
                     except Exception:
                         pass
@@ -440,6 +439,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                 'thumbnail_url': thumb,
                 'aspect_ratio': '16:9',
                 'tags': cr['district'] or '',
+                'district_confirmed': bool(cr['district_confirmed']),
                 'status': 'approved',
                 'track': trk,
                 'direction': trk,
@@ -457,7 +457,14 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
     if direction:
         result = [v for v in result if v.get('direction', '') == direction]
     if district:
-        result = [v for v in result if district in v.get('tags', '')]
+        # District search: only show videos CONFIRMED to belong to that district.
+        # (Videos from videos.csv without a flag default to confirmed = user-picked.)
+        # Non-confirmed videos stay on the main page but never in district search.
+        result = [v for v in result
+                  if v.get('district_confirmed', True)
+                  and (district in v.get('tags', '')
+                       or district in v.get('title_zh', '')
+                       or district in v.get('description_zh', ''))]
     result.sort(key=lambda v: v.get('submitted_date', ''), reverse=True)
     if limit:
         result = result[:limit]
@@ -496,6 +503,7 @@ def get_video(video_id):
                     'description_zh': r['description'] or '', 'description_en': '',
                     'thumbnail_url': r['thumbnail_url'] or '',
                     'aspect_ratio': '16:9', 'tags': r['district'] or '',
+                    'district_confirmed': bool(r['district_confirmed']),
                     'status': 'approved', 'track': trk, 'direction': trk,
                     'submitted_date': r['published_at'] or '',
                 }
@@ -754,7 +762,7 @@ def category_page(slug):
     videos = get_videos(category_id=category['category_id'])
     district = request.args.get('district', '').strip()
     if district:
-        videos = [v for v in videos if district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', '')]
+        videos = [v for v in videos if v.get('district_confirmed', True) and (district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', ''))]
     return render_template('category.html', category=category, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
@@ -768,7 +776,7 @@ def subcategory_page(subcategory_id):
     videos = get_videos(subcategory_id=subcategory_id)
     district = request.args.get('district', '').strip()
     if district:
-        videos = [v for v in videos if district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', '')]
+        videos = [v for v in videos if v.get('district_confirmed', True) and (district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', ''))]
     return render_template('subcategory.html', category=category, sub=sub, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
