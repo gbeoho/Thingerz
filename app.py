@@ -1647,9 +1647,14 @@ def api_content():
         body = request.get_json(silent=True) or {}
         platform = str(body.get('platform', '')).strip()
         ids = body.get('ids', [])
+        platform_ids = body.get('platform_ids', [])
         db = get_db()
         deleted = 0
-        if ids:
+        if platform_ids:
+            placeholders = ','.join(['?' for _ in platform_ids])
+            cur = db.execute(f"DELETE FROM crawled_videos WHERE platform=? AND platform_id IN ({placeholders})", [platform] + platform_ids)
+            deleted = cur.rowcount
+        elif ids:
             placeholders = ','.join(['?' for _ in ids])
             cur = db.execute(f"DELETE FROM crawled_videos WHERE platform=? AND id IN ({placeholders})", [platform] + ids)
             deleted = cur.rowcount
