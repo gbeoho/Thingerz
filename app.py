@@ -522,8 +522,37 @@ def get_comments(video_id):
     return comments
 
 
+def _strip_tags(text):
+    """Remove HTML tags entirely -> plain text (safe to auto-escape)."""
+    if not text:
+        return ''
+    text = re.sub(r'<[^>]+>', '', str(text))
+    return text
+
+
+def _sanitize_news_item(n):
+    """Remove raw HTML / Google-News RSS artifacts from a news (好去處) row."""
+    if not isinstance(n, dict):
+        return n
+    # Unescape any HTML entities so code is not shown as text
+    import html as _html
+    for k in ('title_zh', 'title_en', 'summary_zh', 'summary_en'):
+        if n.get(k):
+            n[k] = _html.unescape(_strip_tags(n[k])).strip()
+    for k in ('content_zh', 'content_en'):
+        if n.get(k):
+            c = str(n[k])
+            # Drop any <a> pointing at Google News / any raw RSS url junk
+            c = re.sub(r'<a[^>]*href=["\']?https?://news\.google\.com[^"\'>]*["\']?[^>]*>.*?</a>', '', c, flags=re.S | re.I)
+            c = re.sub(r'https?://news\.google\.com/rss/articles/\S+', '', c)
+            # Drop stray Google News list markup
+            c = re.sub(r'</?ol[^>]*>|</?li[^>]*>', '', c, flags=re.I)
+            n[k] = c
+    return n
+
+
 def get_news(news_id=None):
-    news_list = read_csv('news.csv')
+    news_list = [_sanitize_news_item(n) for n in read_csv('news.csv')]
     if news_id:
         for n in news_list:
             if n['id'] == news_id:
