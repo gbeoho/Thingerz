@@ -448,6 +448,64 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
     except:
         pass
 
+    if subcategory_id and subcategory_id.startswith('s') and subcategory_id[1:].isdigit():
+        # Show ALL crawled videos for this specific sub-category (not just the
+        # top-10 fetched globally), so non-district-confirmed and lower-view
+        # fresh videos also appear on the sub-category page.
+        try:
+            db = get_db()
+            rows = db.execute(
+                "SELECT * FROM crawled_videos WHERE sub_category=? ORDER BY view_count DESC",
+                (subcategory_id,)).fetchall()
+            db.close()
+            sub_num = int(subcategory_id[1:])
+            if 1 <= sub_num <= 8: cat_id = 'cat001'
+            elif 9 <= sub_num <= 14: cat_id = 'cat002'
+            elif 15 <= sub_num <= 22: cat_id = 'cat003'
+            elif 23 <= sub_num <= 28: cat_id = 'cat004'
+            elif 29 <= sub_num <= 35: cat_id = 'cat005'
+            elif 36 <= sub_num <= 42: cat_id = 'cat006'
+            elif 43 <= sub_num <= 48: cat_id = 'cat007'
+            elif 49 <= sub_num <= 54: cat_id = 'cat008'
+            elif sub_num == 55: cat_id = 'cat002'  # AI學習
+            elif sub_num == 56: cat_id = 'cat003'  # COSPLAY教學
+            elif sub_num == 57: cat_id = 'cat001'  # 風水命理
+            elif sub_num in (58, 59): cat_id = 'cat004'  # 極限運動, 小丑
+            elif sub_num == 60: cat_id = 'cat003'  # 珠寶設計教學
+            elif sub_num == 61: cat_id = 'cat008'  # 寵物/動物溝通
+            else: cat_id = 'cat001'
+            trk = 'fun' if cat_id in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
+            seen = {v['id'] for v in result}
+            for cr in rows:
+                vid = 'cv_' + str(cr['id'])
+                if vid in seen:
+                    continue
+                seen.add(vid)
+                thumb = cr['thumbnail_url'] or ''
+                if not thumb:
+                    thumb = f"https://img.youtube.com/vi/{cr['platform_id']}/hqdefault.jpg"
+                result.append({
+                    'id': vid,
+                    'subcategory_id': subcategory_id,
+                    'category_id': cat_id,
+                    'platform': cr['platform'],
+                    'platform_id': cr['platform_id'],
+                    'title_zh': cr['title'] or '',
+                    'title_en': '',
+                    'description_zh': cr['description'] or '',
+                    'description_en': '',
+                    'thumbnail_url': thumb,
+                    'aspect_ratio': '16:9',
+                    'tags': cr['district'] or '',
+                    'district_confirmed': bool(cr['district_confirmed']),
+                    'status': 'approved',
+                    'track': trk,
+                    'direction': trk,
+                    'submitted_date': cr['published_at'] or '',
+                })
+        except Exception:
+            pass
+
     if subcategory_id:
         result = [v for v in result if v['subcategory_id'] == subcategory_id]
     if category_id:
