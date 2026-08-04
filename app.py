@@ -885,61 +885,7 @@ def submit_video():
 
 @app.route('/news')
 def news_list():
-    auto_fetch_if_stale()
     return render_template('news_list.html', news_items=get_news())
-
-
-def auto_fetch_if_stale():
-    import urllib.request
-    import xml.etree.ElementTree as ET
-    tracker_path = os.path.join(DATA_DIR, 'news_fetch_tracker.txt')
-    now = datetime.now()
-    try:
-        if os.path.exists(tracker_path):
-            with open(tracker_path, 'r') as f:
-                last_fetch = datetime.fromisoformat(f.read().strip())
-            if (now - last_fetch).total_seconds() < 86400:
-                return
-    except:
-        pass
-    try:
-        url = 'https://news.google.com/rss?hl=zh-HK&gl=HK&ceid=HK:zh-Hant'
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            tree = ET.parse(resp)
-        existing = read_csv('news.csv')
-        existing_titles = {n['title_zh'] for n in existing}
-        max_num = max(int(n['id'].replace('n', '')) for n in existing) if existing else 0
-        added = 0
-        for item in tree.findall('.//item')[:5]:
-            title = (item.find('title').text or '').strip()
-            if not title or title in existing_titles:
-                continue
-            link = item.find('link').text or ''
-            pub_date = item.find('pubDate')
-            date_str = datetime.strptime(pub_date.text, '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d') if pub_date is not None else now.strftime('%Y-%m-%d')
-            description = item.find('description')
-            desc_text = (description.text or '')[:200] if description is not None else ''
-            source = item.find('source')
-            source_name = source.text if source is not None else 'Google News'
-            max_num += 1
-            existing.append({
-                'id': f'n{max_num:03d}',
-                'title_zh': title, 'title_en': '',
-                'content_zh': f'<p>{desc_text}</p><p>來源：{source_name} | <a href="{link}" target="_blank">閱讀原文</a></p>',
-                'content_en': '', 'summary_zh': desc_text, 'summary_en': '',
-                'date': date_str,
-                'image_url': f'https://picsum.photos/seed/n{max_num}/800/400',
-                'status': 'published',
-            })
-            existing_titles.add(title)
-            added += 1
-        if added > 0:
-            write_csv('news.csv', existing, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status'])
-        with open(tracker_path, 'w') as f:
-            f.write(now.isoformat())
-    except:
-        pass
 
 
 @app.route('/news/<news_id>')
