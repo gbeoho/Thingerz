@@ -169,7 +169,7 @@ TABLE_SCHEMAS = {
     'submissions': '''CREATE TABLE IF NOT EXISTS submissions (
         id TEXT UNIQUE, platform TEXT, platform_url TEXT, title_zh TEXT, title_en TEXT,
         category_id TEXT, subcategory_id TEXT, submitter_name TEXT, submitter_email TEXT,
-        description_zh TEXT, direction TEXT, status TEXT, submitted_date TEXT)''',
+        description_zh TEXT, direction TEXT, status TEXT, submitted_date TEXT, district TEXT)''',
     'contacts': '''CREATE TABLE IF NOT EXISTS contacts (
         id TEXT UNIQUE, name TEXT, email TEXT, subject TEXT, message TEXT, date TEXT, status TEXT)''',
     'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (
@@ -957,8 +957,9 @@ def submit_video():
                 category_id = sub['category_id']
         title_zh = request.form.get('title_zh', '')
         desc_zh = request.form.get('description_zh', '')
+        district = (request.form.get('district', '') or '').strip()  # 選填 18區
         if contains_blocked(title_zh) or contains_blocked(desc_zh):
-            return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=False, blocked=True)
+            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=False, blocked=True)
         # Auto-approve clean submissions
         submission = {
             'id': generate_id('sub_'),
@@ -973,9 +974,10 @@ def submit_video():
             'description_zh': desc_zh,
             'direction': request.form.get('direction', ''),
             'status': 'approved',
-            'submitted_date': datetime.now().strftime('%Y-%m-%d')
+            'submitted_date': datetime.now().strftime('%Y-%m-%d'),
+            'district': district
         }
-        fieldnames = ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date']
+        fieldnames = ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date', 'district']
         append_csv('submissions.csv', submission, fieldnames)
         # Auto-add to videos
         platform = submission['platform']
@@ -1011,7 +1013,7 @@ def submit_video():
             'description_en': '',
             'thumbnail_url': thumb,
             'aspect_ratio': PLATFORM_CONFIG.get(platform, {}).get('aspect_ratio', '16:9'),
-            'tags': '',
+            'tags': district,
             'status': 'approved',
             'track': track_val,
             'direction': request.form.get('direction', track_val),
@@ -1019,8 +1021,8 @@ def submit_video():
         })
         vfieldnames = ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']
         write_csv('videos.csv', vids, vfieldnames)
-        return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=True)
-    return render_template('submit.html', categories=categories, platform_config=PLATFORM_CONFIG, success=False, blocked=False)
+        return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=True)
+    return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=False, blocked=False)
 
 
 @app.route('/news')
@@ -1376,7 +1378,7 @@ def admin_approve_submission(submission_id):
             submission = s
             s['status'] = 'approved'
             break
-    write_csv('submissions.csv', subs, ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date'])
+    write_csv('submissions.csv', subs, ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date', 'district'])
     if submission:
         platform = submission.get('platform', 'youtube')
         url = submission.get('platform_url', '')
@@ -1409,7 +1411,7 @@ def admin_approve_submission(submission_id):
             'description_en': '',
             'thumbnail_url': thumb,
             'aspect_ratio': PLATFORM_CONFIG.get(platform, {}).get('aspect_ratio', '16:9'),
-            'tags': '',
+            'tags': submission.get('district', ''),
             'status': 'approved',
             'track': 'fun',
             'direction': submission.get('direction', 'fun'),
@@ -1428,7 +1430,7 @@ def admin_reject_submission(submission_id):
         if s['id'] == submission_id:
             s['status'] = 'rejected'
             break
-    write_csv('submissions.csv', subs, ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date'])
+    write_csv('submissions.csv', subs, ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date', 'district'])
     return redirect(url_for('admin_submissions'))
 
 
