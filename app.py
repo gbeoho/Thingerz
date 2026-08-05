@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import random
 import uuid
 import sqlite3
 import json
@@ -786,12 +787,64 @@ def admin_required(f):
 
 # ==================== PUBLIC ROUTES ====================
 
+def _map_subcat(sub_num):
+    """Map a sub_category numeric id to category_id (cat001..cat008)."""
+    if 1 <= sub_num <= 8: return 'cat001'
+    elif 9 <= sub_num <= 14: return 'cat002'
+    elif 15 <= sub_num <= 22: return 'cat003'
+    elif 23 <= sub_num <= 28: return 'cat004'
+    elif 29 <= sub_num <= 35: return 'cat005'
+    elif 36 <= sub_num <= 42: return 'cat006'
+    elif 43 <= sub_num <= 48: return 'cat007'
+    elif 49 <= sub_num <= 54: return 'cat008'
+    elif sub_num == 55: return 'cat002'   # AI學習
+    elif sub_num == 56: return 'cat003'   # COSPLAY教學
+    elif sub_num == 57: return 'cat001'   # 風水命理
+    elif sub_num in (58, 59): return 'cat004'  # 重氧運動 / 小丑
+    elif sub_num == 60: return 'cat003'   # 珠寶設計教學
+    elif sub_num == 61: return 'cat008'   # 寵物/動物溝通
+    return 'cat001'
+
+
+def get_top_viewed(limit=100):
+    """Homepage 精選影片 pool: top N videos by view count across crawled_videos."""
+    result = []
+    try:
+        db = get_db()
+        rows = db.execute(
+            "SELECT * FROM crawled_videos ORDER BY view_count DESC LIMIT ?",
+            (limit,)).fetchall()
+        db.close()
+    except Exception:
+        return result
+    for cr in rows:
+        sc = cr['sub_category'] or ''
+        sub_num = int(sc[1:]) if (sc.startswith('s') and len(sc) == 4 and sc[1:].isdigit()) else 0
+        cat = _map_subcat(sub_num)
+        trk = 'fun' if cat in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
+        thumb = cr['thumbnail_url'] or f"https://img.youtube.com/vi/{cr['platform_id']}/hqdefault.jpg"
+        result.append({
+            'id': 'cv_' + str(cr['id']),
+            'subcategory_id': sc, 'category_id': cat,
+            'platform': cr['platform'], 'platform_id': cr['platform_id'],
+            'title_zh': cr['title'] or '', 'title_en': '',
+            'description_zh': cr['description'] or '', 'description_en': '',
+            'thumbnail_url': thumb, 'aspect_ratio': '16:9',
+            'tags': cr['district'] or '', 'district_confirmed': bool(cr['district_confirmed']),
+            'status': 'approved', 'track': trk, 'direction': trk,
+            'submitted_date': cr['published_at'] or '',
+        })
+    return result
+
+
 @app.route('/')
 def index():
     categories = get_categories()
     fun_categories = [c for c in categories if c.get('track', '') == 'fun']
     learning_categories = [c for c in categories if c.get('track', '') == 'learning']
-    featured_videos = get_videos(limit=6)
+    # 精選影片: top 100 by view count, randomly show a selection each load
+    pool = get_top_viewed(100)
+    featured_videos = random.sample(pool, min(6, len(pool))) if pool else get_videos(limit=6)
     latest_news = get_news()[:3]
     return render_template('index.html', fun_categories=fun_categories, learning_categories=learning_categories, featured_videos=featured_videos, latest_news=latest_news, platform_config=PLATFORM_CONFIG)
 
