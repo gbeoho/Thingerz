@@ -842,9 +842,9 @@ def index():
     categories = get_categories()
     fun_categories = [c for c in categories if c.get('track', '') == 'fun']
     learning_categories = [c for c in categories if c.get('track', '') == 'learning']
-    # 精選影片: top 100 by view count, randomly show a selection each load
+    # 精選影片: top 100 by view count, randomly show up to 8 each load
     pool = get_top_viewed(100)
-    featured_videos = random.sample(pool, min(6, len(pool))) if pool else get_videos(limit=6)
+    featured_videos = random.sample(pool, min(8, len(pool))) if pool else get_videos(limit=8)
     latest_news = get_news()[:3]
     return render_template('index.html', fun_categories=fun_categories, learning_categories=learning_categories, featured_videos=featured_videos, latest_news=latest_news, platform_config=PLATFORM_CONFIG)
 
