@@ -7,6 +7,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Thingerz">
     <meta name="theme-color" content="#06060d">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43W9QEV4H9"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-43W9QEV4H9');
+    </script>
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.svg') }}">
     <title>{% block title %}Thingerz 點搵你{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">

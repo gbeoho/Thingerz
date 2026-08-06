@@ -172,8 +172,8 @@ TABLE_SCHEMAS = {
         description_zh TEXT, direction TEXT, status TEXT, submitted_date TEXT, district TEXT)''',
     'contacts': '''CREATE TABLE IF NOT EXISTS contacts (
         id TEXT UNIQUE, name TEXT, email TEXT, subject TEXT, message TEXT, date TEXT, status TEXT)''',
-    'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (
-        video_id TEXT UNIQUE, count INTEGER DEFAULT 0, clicks INTEGER DEFAULT 0)''',
+    'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (\n        video_id TEXT UNIQUE, count INTEGER DEFAULT 0, clicks INTEGER DEFAULT 0)''',
+    'page_views': '''CREATE TABLE IF NOT EXISTS page_views (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        page TEXT, ip_hash TEXT, viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''',
     'crawled_videos': '''CREATE TABLE IF NOT EXISTS crawled_videos (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        platform TEXT NOT NULL, platform_id TEXT NOT NULL,\n        sub_category TEXT, district TEXT, title TEXT, url TEXT,\n        thumbnail_url TEXT, author_name TEXT, author_url TEXT,\n        description TEXT, view_count INTEGER DEFAULT 0,\n        like_count INTEGER DEFAULT 0, comment_count INTEGER DEFAULT 0,\n        duration_sec INTEGER DEFAULT 0, published_at TEXT,\n        score REAL DEFAULT 0, updated_at TEXT,\n        district_confirmed INTEGER DEFAULT 0,\n        UNIQUE(platform, platform_id))''',
 }
 
@@ -655,6 +655,42 @@ def increment_view(video_id):
     db.close()
 
 
+def record_page_view(page=''):
+    """Record a page view with a hashed IP for unique-visitor estimation."""
+    try:
+        ip = request.headers.get('X-Forwarded-For', '') or request.remote_addr or ''
+        import hashlib
+        ip_hash = hashlib.sha256(ip.encode('utf-8')).hexdigest()[:16] if ip else 'unknown'
+        db = get_db()
+        db.execute("INSERT INTO page_views (page, ip_hash) VALUES (?, ?)", (str(page)[:200], ip_hash))
+        db.commit()
+        db.close()
+    except Exception:
+        pass
+
+
+def get_page_stats():
+    """Return aggregated visitor/view stats for /api/stats."""
+    db = get_db()
+    total_views = db.execute("SELECT COUNT(*) as c FROM page_views").fetchone()['c']
+    unique_visitors = db.execute("SELECT COUNT(DISTINCT ip_hash) as c FROM page_views WHERE ip_hash != 'unknown'").fetchone()['c']
+    today_views = db.execute("SELECT COUNT(*) as c FROM page_views WHERE date(viewed_at) = date('now')").fetchone()['c']
+    month_views = db.execute("SELECT COUNT(*) as c FROM page_views WHERE strftime('%Y-%m', viewed_at) = strftime('%Y-%m', 'now')").fetchone()['c']
+    db.close()
+    return {
+        "available": True,
+        "total_views": total_views,
+        "today_views": today_views,
+        "month_views": month_views,
+        "unique_visitors": unique_visitors,
+    }
+
+
+@app.route('/api/stats', methods=['GET'])
+def api_stats():
+    return jsonify(get_page_stats())
+
+
 def extract_youtube_id(url):
     """Extract YouTube video ID from various URL formats."""
     if not url:
@@ -846,6 +882,7 @@ def get_top_viewed(limit=100):
 
 @app.route('/')
 def index():
+    record_page_view('/')
     categories = get_categories()
     fun_categories = [c for c in categories if c.get('track', '') == 'fun']
     learning_categories = [c for c in categories if c.get('track', '') == 'learning']
