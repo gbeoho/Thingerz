@@ -352,17 +352,16 @@
             .hero-track-label{font-size:3.2rem}
             .hero-cta-circle{width:64px;height:64px}
             .nav-container{padding:0 16px}
-            .nav-links{display:none;position:fixed;top:64px;left:0;right:0;bottom:0;background:rgba(6,6,13,.98);border-top:1px solid rgba(255,255,255,.06);padding:20px 0 40px 0;flex-direction:column;gap:0;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:99}
-            .nav-links.active{display:flex}
-            .nav-link{font-size:1.1rem;padding:14px 24px;border-bottom:1px solid rgba(255,255,255,.04);width:100%}
-            .nav-search{margin:8px 24px;width:auto}
-            .nav-search input{width:100%;padding:12px 16px;font-size:.95rem}
-            .lang-select{margin:8px 24px}
-            .lang-btn{width:100%;justify-content:space-between}
-            .lang-dropdown{position:relative;margin-top:4px;width:100%}
-            .nav-links .btn{margin:12px 24px;display:flex;justify-content:center;width:auto}
-            .nav-toggle{display:flex;z-index:101;position:relative}
-            .nav-toggle{display:flex}
+            .nav-links{display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;align-items:center;gap:4px 16px;padding:8px 16px;border-top:1px solid rgba(255,255,255,.06);background:none}
+            .nav-links::-webkit-scrollbar{display:none}
+            .nav-links .nav-link{font-size:.92rem;padding:8px 10px;flex-shrink:0;white-space:nowrap;border-bottom:none;width:auto}
+            .nav-search{flex-shrink:0;margin:0 6px}
+            .nav-search input{width:110px;padding:8px 12px;font-size:.85rem}
+            .lang-select{flex-shrink:0;margin:0 6px}
+            .lang-btn{width:auto;justify-content:center}
+            .lang-dropdown{position:relative;margin-top:4px;width:auto}
+            .nav-links .btn{flex-shrink:0;margin:0 6px}
+            .nav-toggle{display:none}
             .masonry-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
             .news-grid,.news-grid-full{grid-template-columns:1fr}
             .news-card-full{grid-template-columns:1fr}
