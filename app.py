@@ -10,7 +10,7 @@ import time
 import urllib.request
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -689,6 +689,86 @@ def get_page_stats():
 @app.route('/api/stats', methods=['GET'])
 def api_stats():
     return jsonify(get_page_stats())
+
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """Generate an SEO sitemap covering all static, category, subcategory,
+    news and video pages for Google Search Console."""
+    base = 'https://thingerz.com'
+    from xml.etree.ElementTree import Element, SubElement, tostring
+    from xml.dom import minidom
+
+    urls = []
+
+    def add(path, priority=0.5, changefreq='weekly'):
+        urls.append((base + path, priority, changefreq))
+
+    # Static pages
+    add('/', priority=1.0, changefreq='daily')
+    add('/about', priority=0.4)
+    add('/news', priority=0.8, changefreq='daily')
+    add('/track/fun', priority=0.6)
+    add('/track/learning', priority=0.6)
+
+    # Categories (slides)
+    for c in get_categories():
+        slug = c.get('name_slug', '')
+        if slug:
+            add(f'/category/{slug}', priority=0.7)
+
+    # Subcategories
+    for s in get_subcategories():
+        sid = s.get('id', '')
+        if sid:
+            add(f'/subcategory/{sid}', priority=0.6)
+
+    # Crawled videos (district searchable)
+    video_ids = set()
+    try:
+        db = get_db()
+        rows = db.execute("SELECT id FROM crawled_videos WHERE district_confirmed=1 LIMIT 2000").fetchall()
+        for r in rows:
+            video_ids.add('cv_' + str(r['id']))
+        db.close()
+    except Exception:
+        pass
+
+    # Manually approved videos
+    video_ids.update(v['id'] for v in get_videos(limit=10000)
+                     if v.get('id') and v.get('status') == 'approved')
+
+    for vid in list(video_ids)[:3000]:
+        add(f'/video/{vid}', priority=0.4)
+
+    # News articles
+    news_list = get_news() or []
+    for n in news_list:
+        if n.get('id') and n.get('status') == 'published':
+            add(f'/news/{n["id"]}', priority=0.7, changefreq='monthly')
+
+    # Build XML
+    urlset = Element('urlset')
+    urlset.set('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9')
+    for loc, priority, changefreq in urls:
+        u = SubElement(urlset, 'url')
+        SubElement(u, 'loc').text = loc
+        SubElement(u, 'changefreq').text = changefreq
+        SubElement(u, 'priority').text = str(priority)
+    xml_str = minidom.parseString(tostring(urlset)).toprettyxml(indent='  ')
+    return Response(xml_str, mimetype='application/xml')
+
+
+@app.route('/robots.txt')
+def robots():
+    content = (
+        'User-agent: *\n'
+        'Disallow: /admin\n'
+        'Disallow: /api/\n'
+        'Allow: /\n\n'
+        'Sitemap: https://thingerz.com/sitemap.xml\n'
+    )
+    return Response(content, mimetype='text/plain')
 
 
 def extract_youtube_id(url):

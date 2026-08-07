@@ -1,5 +1,25 @@
 {% extends "base.html" %}
 {% block title %}{{ video['title_zh'] }} - Thingerz{% endblock %}
+{% block meta_description %}{{ (video['description_zh'] or video['title_zh'] or video['title_zh'] or 'Thingerz 影片')[:150] }}{% endblock %}
+{% block og_title %}{{ video['title_zh'] }} - Thingerz{% endblock %}
+{% block og_description %}{{ (video['description_zh'] or video['title_zh'] or 'Thingerz 影片')[:150] }}{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": {{ video['title_zh']|tojson }},
+  "description": {{ (video['description_zh'] or '')|tojson }},
+  "thumbnailUrl": {{ video['thumbnail_url']|tojson }},
+  "uploadDate": {{ (video['submitted_date'] or '2026-01-01')|tojson }},
+  "url": "https://thingerz.com/video/{{ video['id'] }}"
+  {% if video['platform'] and video['url'] %},
+  "embedUrl": {{ video['url']|tojson }}
+  {% endif %}
+}
+</script>
+{% endblock %}
 
 {% block content %}
 {% set plat_cfg = platform_config.get(video['platform'], platform_config['youtube']) %}

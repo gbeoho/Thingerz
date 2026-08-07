@@ -18,6 +18,24 @@
     </script>
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.svg') }}">
     <title>{% block title %}Thingerz 點搵你{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Thingerz — 探索香港 18 區嘅興趣與行業精彩影音。YouTube、Bilibili、Instagram 等平台嘅教學、作品、好去處內容一網打盡。{% endblock %}">
+    <link rel="canonical" href="{{ request.url.split('?')[0] if request else 'https://thingerz.com/' }}">
+    <meta property="og:title" content="{% block og_title %}Thingerz 點搵你{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Thingerz — 探索香港 18 區嘅興趣與行業精彩影音。{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url.split('?')[0] if request else 'https://thingerz.com/' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Thingerz",
+      "alternateName": "Thingerz 點搵你",
+      "url": "https://thingerz.com",
+      "inLanguage": "zh-HK",
+      "description": "探索香港18區嘅興趣與行業精彩影音"
+    }
+    </script>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
