@@ -27,6 +27,26 @@
             <div class="article-body">
                 {{ news_item['content_zh'] | safe }}
             </div>
+
+            <!-- Share bar: amplify 好去處 across socials -->
+            {% set share_url = request.url.split('?')[0] if request else 'https://thingerz.com' %}
+            {% set share_text = (news_item['title_zh'] + ' - 好去處') | urlencode %}
+            <div style="margin:32px 0;padding:20px;background:#11111d;border-radius:16px;border:1px solid rgba(255,255,255,.05);text-align:center">
+                <p style="font-size:.9rem;font-weight:600;margin-bottom:14px;color:#e4e4ed">分享俾朋友，一齊發掘香港好去處 📍</p>
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                    <a href="https://wa.me/?text={{ share_text }} {{ share_url }}" target="_blank" rel="noopener"
+                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#25D366;color:#fff;text-decoration:none">WhatsApp</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}" target="_blank" rel="noopener"
+                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#1877f2;color:#fff;text-decoration:none">Facebook</a>
+                    <a href="https://t.me/share/url?url={{ share_url }}&text={{ share_text }}" target="_blank" rel="noopener"
+                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#2AABEE;color:#fff;text-decoration:none">Telegram</a>
+                    <a href="https://twitter.com/intent/tweet?url={{ share_url }}&text={{ share_text }}" target="_blank" rel="noopener"
+                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);text-decoration:none">X</a>
+                    <button onclick="navigator.clipboard.writeText('{{ share_url }}');this.textContent='✓ 已複製'"
+                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer">複製</button>
+                </div>
+                <p style="font-size:.72rem;color:#6a6a80;margin-top:12px">更多好去處：<a href="https://thingerz.com" style="color:#818cf8">thingerz.com</a></p>
+            </div>
         </div>
 
         <div class="article-footer">
