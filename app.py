@@ -619,6 +619,12 @@ def _sanitize_news_item(n):
 
 def get_news(news_id=None):
     news_list = [_sanitize_news_item(n) for n in read_csv('news.csv')]
+    for n in news_list:
+        # Extract YouTube ID so 好去處 detail can embed the video player inline
+        vid = extract_youtube_id(str(n.get('content_zh', '') or '')
+                                 + str(n.get('image_url', '') or ''))
+        n['video_id'] = vid if vid else ''
+        n['video_url'] = f"https://www.youtube.com/watch?v={vid}" if vid else ''
     if news_id:
         for n in news_list:
             if n['id'] == news_id:

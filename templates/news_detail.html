@@ -24,6 +24,20 @@
                 <h1>{{ news_item['title_zh'] }}</h1>
                 <p class="article-subtitle">{{ news_item['title_en'] }}</p>
             </header>
+
+            {% if news_item.get('video_id') %}
+            <div class="video-player-wrapper" style="margin-bottom:28px">
+                <iframe style="width:100%;aspect-ratio:16/9;border-radius:18px;border:none;background:#000"
+                        src="https://www.youtube-nocookie.com/embed/{{ news_item['video_id'] }}"
+                        title="{{ news_item['title_zh'] }}"
+                        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen loading="lazy"></iframe>
+            </div>
+            <p style="font-size:.78rem;color:#6a6a80;margin-bottom:20px">
+                📺 直接收看影片：<a href="{{ news_item['video_url'] }}" target="_blank" rel="noopener" style="color:#818cf8">在 YouTube 開啟</a>
+            </p>
+            {% endif %}
+
             <div class="article-body">
                 {{ news_item['content_zh'] | safe }}
             </div>
