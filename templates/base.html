@@ -24,6 +24,8 @@
     <meta property="og:description" content="{% block og_description %}Thingerz — 探索香港 18 區嘅興趣與行業精彩影音。{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.url.split('?')[0] if request else 'https://thingerz.com/' }}">
+    <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='favicon.svg', _external=True) }}{% endblock %}">
+    {% block extra_og %}{% endblock %}
     <meta name="twitter:card" content="summary_large_image">
     <script type="application/ld+json">
     {
