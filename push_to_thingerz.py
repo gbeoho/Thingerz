@@ -4,7 +4,19 @@ Usage: python push_to_thingerz.py full_export.json
 import requests, json, sys, time, os
 
 API_URL = "https://thingerz.onrender.com/api/content"
-API_KEY = "thingerz_crawler_2026"
+import os as _os
+
+def _load_api_key():
+    try:
+        with open("/opt/data/Thingerz/.env", encoding="utf-8") as _f:
+            for _l in _f:
+                if _l.strip().startswith("API_KEY="):
+                    return _l.strip().split("=", 1)[1].strip()
+    except FileNotFoundError:
+        pass
+    return _os.environ.get("API_KEY", "")
+
+API_KEY = _load_api_key()
 BATCH_SIZE = 500
 
 def main():

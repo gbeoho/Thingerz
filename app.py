@@ -29,8 +29,8 @@ if DATA_DIR != SEED_DIR:
             shutil.copy2(src, dst)
 DB_PATH = os.path.join(DATA_DIR, 'thingerz.db')
 
-ADMIN_PASSWORD = 'Gabriel00!'
-API_KEY = os.environ.get('API_KEY', 'thingerz_crawler_2026')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
+API_KEY = os.environ.get('API_KEY', '')
 CRAWLER_ALLOWED_PLATFORMS = {'youtube', 'bilibili', 'instagram', 'douyin', 'threads', 'xiaohongshu', 'facebook'}
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
@@ -1209,13 +1209,45 @@ def api_subcategories(category_id):
 
 # ==================== ADMIN ROUTES ====================
 
+# Brute-force protection: per-IP failed-login tracking with temporary lockout.
+import hmac as _hmac
+_LOGIN_ATTEMPTS = {}   # ip -> [fail_count, lockout_until_epoch]
+LOGIN_MAX_FAILS = 5
+LOGIN_LOCKOUT_SEC = 900  # 15 min after 5 failed attempts
+
+
+def _login_allowed(ip):
+    now = time.time()
+    rec = _LOGIN_ATTEMPTS.get(ip)
+    if not rec:
+        return True, None
+    cnt, until = rec
+    if until and now < until:
+        return False, int(until - now)
+    return True, None
+
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        if request.form.get('password') == ADMIN_PASSWORD:
+        ip = request.remote_addr or '?'
+        ok, wait = _login_allowed(ip)
+        if not ok:
+            return render_template('admin/login.html',
+                                   error=f'嘗試太多，請 {(wait or 0)//60} 分鐘後再試'), 429
+        submitted = request.form.get('password', '')
+        if ADMIN_PASSWORD and _hmac.compare_digest(submitted.encode(), ADMIN_PASSWORD.encode()):
+            _LOGIN_ATTEMPTS.pop(ip, None)
             session['admin_logged_in'] = True
             return redirect(url_for('admin_dashboard'))
-        return render_template('admin/login.html', error='密碼錯誤')
+        cnt, until = _LOGIN_ATTEMPTS.get(ip, (0, 0))
+        cnt += 1
+        if cnt >= LOGIN_MAX_FAILS:
+            _LOGIN_ATTEMPTS[ip] = [0, time.time() + LOGIN_LOCKOUT_SEC]
+            return render_template('admin/login.html',
+                                   error='失敗次數過多，已鎖定 15 分鐘'), 429
+        _LOGIN_ATTEMPTS[ip] = [cnt, 0]
+        return render_template('admin/login.html', error='密碼錯誤'), 401
     return render_template('admin/login.html', error=None)
 
 
