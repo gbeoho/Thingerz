@@ -39,7 +39,9 @@ textarea.input{min-height:60px;resize:vertical}
 .mb{margin-bottom:16px}
 .text-muted{color:#6a6a80;font-size:.82rem}
 a{color:#818cf8}
-</style></head>
+</style>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
 <body><div class="admin-layout">
 <div class="sidebar">
     <h2>Thingerz CMS</h2>
@@ -63,4 +65,21 @@ a{color:#818cf8}
 <div class="main">
 {% block admin_content %}{% endblock %}
 </div>
-</div></body></html>
+<script>
+    // CSRF: inject the session token into every admin form
+    (function(){
+        var t = document.querySelector('meta[name="csrf-token"]');
+        if (!t) return;
+        function inject(){
+            document.querySelectorAll('form').forEach(function(f){
+                if (f.querySelector('input[name="csrf_token"]')) return;
+                var i = document.createElement('input');
+                i.type = 'hidden'; i.name = 'csrf_token'; i.value = t.getAttribute('content');
+                f.appendChild(i);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
+        else inject();
+    })();
+    </script>
+</body></html>

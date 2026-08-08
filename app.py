@@ -3,6 +3,7 @@ import os
 import re
 import random
 import uuid
+import secrets
 import sqlite3
 import json
 import threading
@@ -15,7 +16,12 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['SECRET_KEY'] = os.urandom(24).hex()
+# Persistent secret from env when set, else random — sessions survive restarts
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_urlsafe(32)
+# DDoS guard: cap request body size (16MB) — blocks oversized POST floods
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 DATA_DIR = os.environ.get('DATA_DIR', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data'))
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -1885,6 +1891,74 @@ def admin_news_fetch():
     return redirect(url_for('admin_news'))
 
 
+# ==================== SECURITY HARDENING (CSRF / rate-limit) ====================
+
+_RL_BUCKETS = {}  # rate-limit buckets: key -> [timestamps]
+
+
+def _rate_ok(key, limit, window_sec):
+    now = time.time()
+    dq = _RL_BUCKETS.setdefault(key, [])
+    while dq and dq[0] < now - window_sec:
+        dq.pop(0)
+    dq.append(now)
+    return len(dq) <= limit
+
+
+def _client_ip():
+    # Respect proxy chain (Render/Cloudflare) — first untrusted hop is the client
+    xff = request.headers.get('X-Forwarded-For', '')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.remote_addr or '?'
+
+
+def _get_csrf():
+    tok = session.get('_csrf')
+    if not tok:
+        tok = secrets.token_urlsafe(32)
+        session['_csrf'] = tok
+    return tok
+
+
+def _csrf_ok(token):
+    return bool(token) and secrets.compare_digest(token, str(session.get('_csrf') or ''))
+
+
+def _rl_label():
+    p = request.path
+    if p.rstrip('/') == '/submit':
+        return 'submit'
+    if p.rstrip('/') == '/contact':
+        return 'contact'
+    if '/comment' in p:
+        return 'comment'
+    if p == '/api/content':
+        return 'api_content'
+    return None
+
+
+@app.before_request
+def _security_checks():
+    # --- Rate limiting (per-IP, per-endpoint) — DDoS / spam guard ---
+    if request.method == 'POST':
+        lab = _rl_label()
+        ip = _client_ip()
+        if lab == 'api_content':
+            if not _rate_ok(f'rl:{ip}:api', 120, 60):
+                return jsonify({'status': 'error', 'message': 'Too many requests'}), 429
+        elif lab in ('submit', 'contact', 'comment'):
+            if not _rate_ok(f'rl:{ip}:{lab}', 10, 60):
+                return jsonify({'status': 'error', 'message': 'Too many requests, please slow down'}), 429
+
+    # --- CSRF on all unsafe methods; skip key-authenticated API + login ---
+    if request.method in ('POST', 'PUT', 'PATCH', 'DELETE') \
+            and request.path not in ('/api/content', '/admin'):
+        token = request.form.get('csrf_token') or request.headers.get('X-CSRF-Token', '')
+        if not _csrf_ok(token):
+            return jsonify({'status': 'error', 'message': 'CSRF validation failed'}), 403
+
+
 @app.context_processor
 def inject_globals():
     return {
@@ -1893,6 +1967,7 @@ def inject_globals():
         'directions': DIRECTIONS,
         'now': datetime.now(),
         'get_backup_status': get_backup_status,
+        'csrf_token': _get_csrf,
     }
 
 
@@ -2004,7 +2079,22 @@ def api_content():
 
 
 @app.after_request
-def add_utf8_header(response):
+def add_security_headers(response):
+    # Security headers — XSS/clickjacking/sniffing/mixed-content hardening
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    response.headers.setdefault('X-Frame-Options', 'DENY')
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.setdefault('Permissions-Policy',
+                                'camera=(), microphone=(), geolocation=()')
+    response.headers.setdefault(
+        'Content-Security-Policy',
+        "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; "
+        "style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src *; font-src *; "
+        "frame-src * blob: data:; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com; "
+        "frame-ancestors 'none';")
+    if request.is_secure:
+        response.headers.setdefault('Strict-Transport-Security',
+                                    'max-age=31536000; includeSubDomains')
     ct = response.headers.get('Content-Type', '')
     if ct and 'text/html' in ct:
         response.headers['Content-Type'] = 'text/html; charset=utf-8'
@@ -2013,8 +2103,21 @@ def add_utf8_header(response):
 
 @app.errorhandler(500)
 def internal_error(e):
-    import traceback
-    return f"<pre>500 Internal Server Error\n\n{traceback.format_exc()}</pre>", 500
+    # Generic message — do NOT leak stack traces to clients
+    return ('<h1>500 Internal Server Error</h1>'
+            '<p>Something went wrong. Please try again later.</p>'), 500
+
+
+@app.errorhandler(413)
+def too_large(e):
+    return ('<h1>413 Payload Too Large</h1>'
+            '<p>The request is too large.</p>'), 413
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return ('<h1>403 Forbidden</h1>'
+            '<p>Request rejected by security checks.</p>'), 403
 
 
 if __name__ == '__main__':

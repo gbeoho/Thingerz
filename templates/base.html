@@ -20,6 +20,7 @@
     <title>{% block title %}Thingerz 點搵你{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Thingerz — 探索香港 18 區嘅興趣與行業精彩影音。YouTube、Bilibili、Instagram 等平台嘅教學、作品、好去處內容一網打盡。{% endblock %}">
     <link rel="canonical" href="{{ request.url.split('?')[0] if request else 'https://thingerz.com/' }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta property="og:title" content="{% block og_title %}Thingerz 點搵你{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Thingerz — 探索香港 18 區嘅興趣與行業精彩影音。{% endblock %}">
     <meta property="og:type" content="website">
@@ -547,6 +548,23 @@
             </div>
         </div>
     </footer>
+    <script>
+    // CSRF: inject the session token into every form so all POSTs carry it
+    (function(){
+        var t = document.querySelector('meta[name="csrf-token"]');
+        if (!t) return;
+        function inject(){
+            document.querySelectorAll('form').forEach(function(f){
+                if (f.querySelector('input[name="csrf_token"]')) return;
+                var i = document.createElement('input');
+                i.type = 'hidden'; i.name = 'csrf_token'; i.value = t.getAttribute('content');
+                f.appendChild(i);
+            });
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inject);
+        else inject();
+    })();
+    </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
     function switchLang(code, label){
