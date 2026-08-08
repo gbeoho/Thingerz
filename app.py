@@ -531,7 +531,12 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                   and (district in v.get('tags', '')
                        or district in v.get('title_zh', '')
                        or district in v.get('description_zh', ''))]
-    result.sort(key=lambda v: v.get('submitted_date', ''), reverse=True)
+    # Ordering: curated/uploaded videos (videos.csv) always on top, newest upload first;
+    # crawled videos after, keeping their existing (view-count) order.
+    curated = [v for v in result if not str(v.get('id', '')).startswith('cv_')]
+    crawled = [v for v in result if str(v.get('id', '')).startswith('cv_')]
+    curated.sort(key=lambda v: str(v.get('submitted_date', '')), reverse=True)
+    result = curated + crawled
     if limit:
         result = result[:limit]
     return result
