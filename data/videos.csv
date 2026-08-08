@@ -1,4 +1,4 @@
-﻿id,subcategory_id,category_id,platform,platform_id,title_zh,title_en,description_zh,description_en,thumbnail_url,aspect_ratio,tags,status,track,direction,submitted_date
+id,subcategory_id,category_id,platform,platform_id,title_zh,title_en,description_zh,description_en,thumbnail_url,aspect_ratio,tags,status,track,direction,submitted_date
 v001,s001,cat001,youtube,Vgxk1C0_xpg,香港生活實錄：浮華背後的真實故事,香港生活實錄：浮華背後的真實故事,香港生活實錄：浮華背後的真實故事,,https://img.youtube.com/vi/Vgxk1C0_xpg/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-24
 v002,s001,cat001,youtube,lZTKWHiICjE,探索香港獨特城市文化,探索香港獨特城市文化,探索香港獨特城市文化,,https://img.youtube.com/vi/lZTKWHiICjE/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-23
 v003,s002,cat001,youtube,hTUfndy2TvM,香港品牌推廣策略與市場定位,香港品牌推廣策略與市場定位,香港品牌推廣策略與市場定位,,https://img.youtube.com/vi/hTUfndy2TvM/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-22
@@ -61,3 +61,27 @@ v059,s051,cat008,youtube,em3_XODgxmc,香港交友配對活動為何如此受歡�
 v060,s052,cat008,youtube,n4ENTD1g8Fk,Art Basel 香港2025吸引九萬訪客,Art Basel 香港2025吸引九萬訪客,Art Basel 香港2025吸引九萬訪客,,https://img.youtube.com/vi/n4ENTD1g8Fk/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-25
 v061,s053,cat008,youtube,euDI7fDJlIk,香港Speed Dating速配活動,香港Speed Dating速配活動,香港Speed Dating速配活動,,https://img.youtube.com/vi/euDI7fDJlIk/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-24
 v062,s054,cat008,youtube,70bP6YtkEvg,香港收藏家天堂：藝術市場新勢力,香港收藏家天堂：藝術市場新勢力,香港收藏家天堂：藝術市場新勢力,,https://img.youtube.com/vi/70bP6YtkEvg/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-23
+v063,s014,cat002,youtube,xnbUpV591XE,靜觀音樂 - 烤雞音樂台,Mindfulness Music by Roastchickenmusic,靜觀呼吸時可以聽聽,,https://img.youtube.com/vi/xnbUpV591XE/hqdefault.jpg,16:9,,approved,learning,learning,2026-08-08
+v064,s009,cat002,youtube,_V2h91ClkM0,烤雞投資法 期權小知識,Roastchicken invest about option fundamental knowledge,簡單學期權,,https://img.youtube.com/vi/_V2h91ClkM0/hqdefault.jpg,16:9,,approved,learning,learning,2026-08-08
+v065,s004,cat001,youtube,TeL46pYlqfU,車仔麵三代2024年竟能走進資本市場 + 亂開店?  元朗小子，殺出中港,Mastermind Strategy Advisors,"•	一般理解2024年是中港企業極困難的年份，為甚麼車仔麵三代仍然可以走入資本市場 ?
+•	香港準備開很多間 ? 中原地產的「亂開」戰略，豈可亂抄 !
+•	一般飲食業老闆被謔稱「廚房佬」，資本圈中人認為朽木不可雕
+•	飲食企業集資後，增長到一個地步就停止，甚至走下坡
+•	他們一般缺少甚麼特質，而車仔麵3代為甚麼又可以倖免 ?
+•	「麥當勞化比率」是有意義的飲食企業管理水平量度指標嗎 ?
+•	怎樣栽培家族成員，讓其有效地加入?
+•	旺鋪不是我杯茶 ?
+•	有可能培養到即日可以上前線的員工嗎 ?
+
+總結 : 當代的小喜宴",,https://img.youtube.com/vi/TeL46pYlqfU/hqdefault.jpg,16:9,,approved,learning,learning,2026-08-08
+v066,s004,cat001,youtube,TeL46pYlqfU,車仔麵三代2024年竟能走進資本市場 + 亂開店?  元朗小子，殺出中港,Mastermind Strategy Advisors,"•	一般理解2024年是中港企業極困難的年份，為甚麼車仔麵三代仍然可以走入資本市場 ?
+•	香港準備開很多間 ? 中原地產的「亂開」戰略，豈可亂抄 !
+•	一般飲食業老闆被謔稱「廚房佬」，資本圈中人認為朽木不可雕
+•	飲食企業集資後，增長到一個地步就停止，甚至走下坡
+•	他們一般缺少甚麼特質，而車仔麵3代為甚麼又可以倖免 ?
+•	「麥當勞化比率」是有意義的飲食企業管理水平量度指標嗎 ?
+•	怎樣栽培家族成員，讓其有效地加入?
+•	旺鋪不是我杯茶 ?
+•	有可能培養到即日可以上前線的員工嗎 ?
+
+總結 : 當代的小喜宴",,https://img.youtube.com/vi/TeL46pYlqfU/hqdefault.jpg,16:9,,approved,learning,learning,2026-08-08

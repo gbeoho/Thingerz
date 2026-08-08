@@ -1,9 +1,32 @@
-id,platform,platform_url,title_zh,title_en,category_id,subcategory_id,submitter_name,submitter_email,description_zh,direction,status,submitted_date
-sub_44909473,tiktok,https://tiktok.com/@user/video/123,Test,,cat001,s001,Test,,,business,pending,2026-07-22
+id,platform,platform_url,title_zh,title_en,category_id,subcategory_id,submitter_name,submitter_email,description_zh,direction,status,submitted_date,district
+sub_44909473,tiktok,https://tiktok.com/@user/video/123,Test,,cat001,s001,Test,,,business,pending,2026-07-22,
 sub_3757c7f1,youtube,https://www.youtube.com/watch?v=pPCnARwyCrM,【四分鐘學識搵工方法】│香港社區組織協會SoCO,null,cat001,s004,Dee,gbeoho@gmail.com,"
-香港社區組織協會 SoCO",learning,approved,2026-07-23
-sub_80fa2602,youtube,https://www.youtube.com/watch?v=pPCnARwyCrM,【四分鐘學識搵工方法】│香港社區組織協會SoCO,null,cat001,s004,Dee,gbeoho@gmail.com,香港社區組織協會 SoCO,learning,approved,2026-07-23
-sub_a916efc3,youtube,https://www.youtube.com/watch?v=dQw4w9WgXcQ,測試影片,,cat001,s001,Test,,,,pending,2026-07-23
-sub_686be57e,youtube,https://youtube.com/watch?v=kJQP7kiw5Fk,HK Test,,cat001,s001,T,,,,approved,2026-07-23
-sub_295383cd,youtube,https://youtube.com/watch?v=228SQpmwqsM,測試自動審核,,cat005,s029,Test,,,,approved,2026-07-25
-sub_295383cd,youtube,https://youtube.com/watch?v=228SQpmwqsM,測試自動審核,,cat005,s029,Test,,,,approved,2026-07-25
+香港社區組織協會 SoCO",learning,approved,2026-07-23,
+sub_80fa2602,youtube,https://www.youtube.com/watch?v=pPCnARwyCrM,【四分鐘學識搵工方法】│香港社區組織協會SoCO,null,cat001,s004,Dee,gbeoho@gmail.com,香港社區組織協會 SoCO,learning,approved,2026-07-23,
+sub_a916efc3,youtube,https://www.youtube.com/watch?v=dQw4w9WgXcQ,測試影片,,cat001,s001,Test,,,,pending,2026-07-23,
+sub_686be57e,youtube,https://youtube.com/watch?v=kJQP7kiw5Fk,HK Test,,cat001,s001,T,,,,approved,2026-07-23,
+sub_295383cd,youtube,https://youtube.com/watch?v=228SQpmwqsM,測試自動審核,,cat005,s029,Test,,,,approved,2026-07-25,
+sub_2e637e52,youtube,https://youtu.be/xnbUpV591XE?si=JrAAxyL301Bpvgbh,靜觀音樂 - 烤雞音樂台,Mindfulness Music by Roastchickenmusic,cat002,s014,G,,靜觀呼吸時可以聽聽,learning,approved,2026-08-08,
+sub_cae6d84c,youtube,https://youtu.be/_V2h91ClkM0?si=sxFToIYe-R8D8-OV,烤雞投資法 期權小知識,Roastchicken invest about option fundamental knowledge,cat002,s009,烤,,簡單學期權,learning,approved,2026-08-08,
+sub_4e453d61,youtube,https://youtu.be/TeL46pYlqfU?si=TbUIV9jnBL_A06Xu,車仔麵三代2024年竟能走進資本市場 + 亂開店?  元朗小子，殺出中港,Mastermind Strategy Advisors,cat001,s004,Mastermind,,"•	一般理解2024年是中港企業極困難的年份，為甚麼車仔麵三代仍然可以走入資本市場 ?
+•	香港準備開很多間 ? 中原地產的「亂開」戰略，豈可亂抄 !
+•	一般飲食業老闆被謔稱「廚房佬」，資本圈中人認為朽木不可雕
+•	飲食企業集資後，增長到一個地步就停止，甚至走下坡
+•	他們一般缺少甚麼特質，而車仔麵3代為甚麼又可以倖免 ?
+•	「麥當勞化比率」是有意義的飲食企業管理水平量度指標嗎 ?
+•	怎樣栽培家族成員，讓其有效地加入?
+•	旺鋪不是我杯茶 ?
+•	有可能培養到即日可以上前線的員工嗎 ?
+
+總結 : 當代的小喜宴",learning,approved,2026-08-08,
+sub_baef23b5,youtube,https://youtu.be/TeL46pYlqfU?si=TbUIV9jnBL_A06Xu,車仔麵三代2024年竟能走進資本市場 + 亂開店?  元朗小子，殺出中港,Mastermind Strategy Advisors,cat001,s004,Mastermind,,"•	一般理解2024年是中港企業極困難的年份，為甚麼車仔麵三代仍然可以走入資本市場 ?
+•	香港準備開很多間 ? 中原地產的「亂開」戰略，豈可亂抄 !
+•	一般飲食業老闆被謔稱「廚房佬」，資本圈中人認為朽木不可雕
+•	飲食企業集資後，增長到一個地步就停止，甚至走下坡
+•	他們一般缺少甚麼特質，而車仔麵3代為甚麼又可以倖免 ?
+•	「麥當勞化比率」是有意義的飲食企業管理水平量度指標嗎 ?
+•	怎樣栽培家族成員，讓其有效地加入?
+•	旺鋪不是我杯茶 ?
+•	有可能培養到即日可以上前線的員工嗎 ?
+
+總結 : 當代的小喜宴",learning,approved,2026-08-08,
