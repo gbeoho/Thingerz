@@ -60,6 +60,10 @@
                        style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#2AABEE;color:#fff;text-decoration:none">Telegram</a>
                     <a href="https://twitter.com/intent/tweet?url={{ share_url_enc }}&text={{ share_text }}" target="_blank" rel="noopener"
                        style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);text-decoration:none">X</a>
+                    <a href="https://www.threads.net/intent/post?text={{ share_text }}%20{{ share_url_enc }}" target="_blank" rel="noopener"
+                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);text-decoration:none">Threads</a>
+                    <button onclick="navigator.clipboard.writeText('{{ share_url }}');window.open('https://www.instagram.com/','_blank');this.textContent='✓ 已複製'"
+                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;cursor:pointer">Instagram</button>
                     <button onclick="navigator.clipboard.writeText('{{ share_url }}');this.textContent='✓ 已複製'"
                        style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer">複製</button>
                 </div>
