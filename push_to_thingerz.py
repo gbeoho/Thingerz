@@ -3,7 +3,7 @@ Usage: python push_to_thingerz.py full_export.json
 """
 import requests, json, sys, time, os
 
-API_URL = "https://thingerz.onrender.com/api/content"
+API_URL = "https://thingerz.com/api/content"
 import os as _os
 
 def _load_api_key():

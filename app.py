@@ -1949,6 +1949,17 @@ def admin_news_fetch():
 
 # ==================== SECURITY HARDENING (CSRF / rate-limit) ====================
 
+CANONICAL_HOST = os.environ.get('CANONICAL_HOST', 'thingerz.com')
+
+
+@app.before_request
+def canonical_host():
+    """301 any non-canonical host (e.g. thingerz.onrender.com) to thingerz.com
+    so Google/Bing consolidate all signals on one domain."""
+    h = (request.host or '').lower()
+    if h and h != CANONICAL_HOST and not (h.startswith('localhost') or h.startswith('127.')):
+        return redirect('https://' + CANONICAL_HOST + request.full_path, code=301)
+
 _RL_BUCKETS = {}  # rate-limit buckets: key -> [timestamps]
 
 
