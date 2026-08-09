@@ -35,8 +35,26 @@ if DATA_DIR != SEED_DIR:
             shutil.copy2(src, dst)
 DB_PATH = os.path.join(DATA_DIR, 'thingerz.db')
 
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '')
-API_KEY = os.environ.get('API_KEY', '')
+def _secret(name):
+    """Resolve a secret: env var first, then Render 'Secret File' mounts
+    (e.g. /etc/secrets/NAME). Secret files are NOT env vars on Render, so
+    we read the mounted file explicitly. Whitespace/newline trimmed."""
+    v = os.environ.get(name, '').strip()
+    if v:
+        return v
+    for base in ('/etc/secrets', '/var/run/secrets', '/run/secrets'):
+        try:
+            with open(os.path.join(base, name), encoding='utf-8') as f:
+                v = f.read().strip()
+            if v:
+                return v
+        except (OSError, IOError):
+            continue
+    return ''
+
+
+ADMIN_PASSWORD = _secret('ADMIN_PASSWORD')
+API_KEY = _secret('API_KEY')
 CRAWLER_ALLOWED_PLATFORMS = {'youtube', 'bilibili', 'instagram', 'douyin', 'threads', 'xiaohongshu', 'facebook'}
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
@@ -1022,7 +1040,7 @@ def admin_about():
 
 @app.route('/api/ping', methods=['GET'])
 def api_ping():
-    return jsonify({'version': '1.2', 'api_key_set': bool(os.environ.get('API_KEY')), 'db_ok': True})
+    return jsonify({'version': '1.2', 'api_key_set': bool(API_KEY), 'db_ok': True})
 
 
 @app.route('/track/<track>')
