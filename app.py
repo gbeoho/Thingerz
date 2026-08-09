@@ -13,6 +13,8 @@ from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response
 
+import geo  # 18-district GEO landing pages
+
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -746,6 +748,10 @@ def sitemap():
     add('/track/fun', priority=0.6)
     add('/track/learning', priority=0.6)
 
+    # 18-district GEO landing pages
+    for dslug in geo.DISTRICT_SLUGS:
+        add(f'/location/{dslug}', priority=0.7, changefreq='weekly')
+
     # Categories (slides)
     for c in get_categories():
         slug = c.get('name_slug', '')
@@ -1195,6 +1201,28 @@ def news_detail(news_id):
     if not item:
         return redirect(url_for('news_list'))
     return render_template('news_detail.html', news_item=item, all_news=get_news())
+
+
+@app.route('/location/<slug>')
+def location_page(slug):
+    """GEO district landing pages (18 districts). Each page: H1/H2, 2-sentence
+    intro, conversational FAQ, district-confirmed videos and Service JSON-LD."""
+    d = geo.DISTRICTS_BY_SLUG.get(slug)
+    if not d:
+        return redirect(url_for('index'))
+    vids = get_videos(district=d['name_zh']) or []
+    # broaden: any curated video whose title/desc/tags mention the district name
+    district = d['name_zh']
+    extra = [v for v in get_videos(limit=300)
+             if v.get('district_confirmed', True)
+             and district in (v.get('tags', '') or '')
+             and v not in vids]
+    seen = {v['id'] for v in vids}
+    for v in extra:
+        if v['id'] not in seen:
+            vids.append(v)
+    return render_template('location.html', district=d, videos=vids,
+                           all_districts=[x for x in geo.DISTRICTS])
 
 
 @app.route('/contact', methods=['GET', 'POST'])
@@ -1986,6 +2014,7 @@ def inject_globals():
         'now': datetime.now(),
         'get_backup_status': get_backup_status,
         'csrf_token': _get_csrf,
+        'districts': geo.DISTRICTS,
     }
 
 

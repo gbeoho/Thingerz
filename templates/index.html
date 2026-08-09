@@ -142,6 +142,22 @@
 </section>
 {% endif %}
 
+<section class="section" style="padding:0 0 48px">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent"></span>
+            18區／By District
+            <a href="{{ url_for('search') }}" class="section-link">搜尋全港 &rarr;</a>
+        </h2>
+        <div class="sticky-categories">
+            {% for d in districts %}
+            <a href="{{ url_for('location_page', slug=d['slug']) }}" class="sticky-cat-chip" title="{{ d.name_en }}">{{ d['name_zh'] }}</a>
+            {% endfor %}
+        </div>
+        <p style="font-size:.76rem;color:#6a6a80;margin-top:10px">按地區搵本地服務、興趣班同創意人才 — GEO 18 區導覽</p>
+    </div>
+</section>
+
 <section class="section cta-section">
     <div class="container">
         <div class="cta-card">

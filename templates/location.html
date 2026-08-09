@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ district.short_en }} Services & Talent ({{ district.name_zh }}) | Thingerz{% endblock %}
+{% block meta_description %}{{ district.intro }}{% endblock %}
+{% block og_title %}{{ district.short_en }} Services & Talent ({{ district.name_zh }}) | Thingerz{% endblock %}
+{% block og_description %}{{ district.intro }}{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Freelance Talent Matching - {{ district.name_zh }}",
+  "alternateName": "Thingerz {{ district.name_en }}",
+  "provider": {
+    "@type": "Organization",
+    "name": "Thingerz",
+    "url": "https://thingerz.com"
+  },
+  "areaServed": [
+    { "@type": "AdministrativeArea", "name": "{{ district.name_en }}" }
+  ],
+  "url": "{{ request.url.split('?')[0] if request else 'https://thingerz.com' }}",
+  "description": "{{ district.intro }}"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <span>/</span>
+            <a href="{{ url_for('search') }}">搵服務</a>
+            <span>/</span>
+            <span class="current">{{ district.name_zh }}</span>
+        </div>
+        <h1>Services &amp; Talent in {{ district.short_en }} ({{ district.name_zh }}) | Thingerz</h1>
+        <p class="page-subtitle">Micro-services, Tutors &amp; Creative Freelancers in {{ district.short_en }} — 點搵你</p>
+        <p class="page-desc">{{ district.intro }}</p>
+    </div>
+</section>
+
+<section class="section" style="padding:24px 0 8px">
+    <div class="container">
+        <div class="sticky-categories">
+            {% for d in all_districts %}
+            <a href="{{ url_for('location_page', slug=d['slug']) }}" class="sticky-cat-chip {{ 'active' if d['slug'] == district['slug'] else '' }}">{{ d['name_zh'] }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">區內影片 / {{ district.short_en }} Videos</h2>
+            <span class="result-count">{{ videos|length }} 個影片</span>
+        </div>
+        {% if videos %}
+        <div class="masonry-grid">
+            {% for video in videos %}
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}">
+                <div class="card-media">
+                    <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
+                    <div class="card-overlay">
+                        <div class="play-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    {% include "_platform_badge.html" %}
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    <div class="card-tags">
+                        {% for tag in video['tags'].split('|')[:2] %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>此區暫時未有已確認嘅影片內容 — 你都可以提交第一個！</p>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交影片</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section" style="padding-top:0">
+    <div class="container" style="max-width:860px">
+        <h2 class="section-title">{{ district.name_zh }} 常見問題 / {{ district.short_en }} FAQ</h2>
+        {% for f in district['faqs'] %}
+        <div style="padding:18px 22px;background:#11111d;border:1px solid rgba(255,255,255,.05);border-radius:14px;margin-bottom:12px">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px">{{ f[0] }}</h3>
+            <p style="font-size:.9rem;color:#9898b0;line-height:1.6">{{ f[1] }} <a href="{{ url_for('search') }}" style="color:#818cf8">Thingerz 點搵你</a></p>
+        </div>
+        {% endfor %}
+        <p style="font-size:.78rem;color:#6a6a80;margin-top:18px;line-height:1.7">
+            想喺 {{ district.name_zh }} 搵服務或人才？喺 Thingerz 搜尋就得 — 全港 18 區嘅本地專業人士、微服務同創意人才一次過盤點。
+            Looking for services or talent in {{ district.name_en }}? Search on Thingerz 點搵你.
+        </p>
+    </div>
+</section>
+{% endblock %}
