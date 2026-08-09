@@ -23,6 +23,21 @@
   "description": "{{ district.intro }}"
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for f in district['faqs'] %}
+    {
+      "@type": "Question",
+      "name": {{ f[0] | tojson }},
+      "acceptedAnswer": { "@type": "Answer", "text": {{ f[1] | tojson }} }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
 {% endblock %}
 
 {% block content %}

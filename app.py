@@ -57,6 +57,10 @@ def _secret(name):
 
 ADMIN_PASSWORD = _secret('ADMIN_PASSWORD')
 API_KEY = _secret('API_KEY')
+
+# IndexNow key — served at /{key}.txt so Bing/Yandex/Naver/Seznam can verify
+# URL submissions (fast crawling of new /location pages for AI/LLM citations).
+INDEXNOW_KEY = 'e389115dc5f0ae53d885384d6bf1d12f'
 CRAWLER_ALLOWED_PLATFORMS = {'youtube', 'bilibili', 'instagram', 'douyin', 'threads', 'xiaohongshu', 'facebook'}
 FOUL_WORDS = ['fuck', 'shit', 'damn', 'ass', 'bitch', 'dick', 'piss', 'crap', 'bastard', 'slut', 'whore', '屌', '鳩', '柒', '撚', '閪', '屄', '𨳒', '仆街', '冚家鏟', '傻閪', 'on9', 'on99', 'diu', 'pkm', 'hihi', 'clsm', 'cls', 'mlg']
 
@@ -798,6 +802,12 @@ def sitemap():
         SubElement(u, 'priority').text = str(priority)
     xml_str = minidom.parseString(tostring(urlset)).toprettyxml(indent='  ')
     return Response(xml_str, mimetype='application/xml')
+
+
+@app.route('/' + INDEXNOW_KEY + '.txt')
+def indexnow_key():
+    """IndexNow host-verification key file (must live at /{key}.txt)."""
+    return Response(INDEXNOW_KEY + '\n', mimetype='text/plain')
 
 
 @app.route('/robots.txt')
