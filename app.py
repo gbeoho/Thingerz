@@ -1227,6 +1227,9 @@ def submit_video():
             platform_id = extract_bilibili_id(url)
         else:
             platform_id = url.split('/')[-1].split('?')[0]
+        if not platform_id:
+            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
+                                   platform_config=PLATFORM_CONFIG, invalid=True, platform=platform)
         thumb = get_platform_thumb(platform, platform_id)
         vids = read_csv('videos.csv')
         max_num = max(int(v['id'].replace('v', '')) for v in vids) if vids else 0

@@ -21,6 +21,15 @@
             <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交另一部影片</a>
             <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
         </div>
+        {% elif invalid %}
+        <div class="success-message" style="border-color:rgba(239,68,68,.3)">
+            <div class="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            </div>
+            <h2>連結無法識別</h2>
+            <p>暫時無法從你提供嘅連結讀取影片 ID。請確認你揀咗正確嘅平台（YouTube / Instagram / Bilibili…），並且貼上嘅係<strong>影片/帖子嘅完整連結</strong>，而唔係個人頁面或分享短鏈。</p>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">重新提交</a>
+        </div>
         {% elif blocked %}
         <div class="success-message" style="border-color:rgba(239,68,68,.3)">
             <div class="success-icon">
