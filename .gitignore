@@ -7,3 +7,4 @@ data/_auto_backup.json
 data/thingerz.db
 data/news_fetch_tracker.txt
 .env
+data/covers/

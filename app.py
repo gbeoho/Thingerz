@@ -883,13 +883,71 @@ def get_platform_thumb(platform, platform_id, api_url=''):
     if platform == 'youtube':
         return f"https://img.youtube.com/vi/{platform_id}/hqdefault.jpg"
     elif platform == 'instagram':
-        return f"https://www.instagram.com/p/{platform_id}/media/?size=m"
+        # Served through our own /cover proxy: Instagram's /media/ URLs are
+        # hotlink-blocked in browsers (login wall) and CDN signatures expire.
+        return f"https://thingerz.com/cover/instagram/{platform_id}"
     elif platform == 'bilibili':
         return api_url or f"https://picsum.photos/seed/bili_{platform_id}/400/225"
     elif platform == 'xiaohongshu':
         return api_url or f"https://picsum.photos/seed/xhs_{platform_id}/300/400"
     else:
         return api_url or f"https://picsum.photos/seed/{platform_id}/400/711"
+
+
+def _ig_cover_bytes(platform_id):
+    """Fetch an Instagram cover WITHOUT login, best-effort:
+    1. p/<id>/media/?size=m (post/reel poster = IG's first-frame thumb)
+    2. embed page display_url (full-res media)
+    3. embed page profile_pic_url (author avatar — last-resort cover)
+    Returns image bytes or None."""
+    ua = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                        '(KHTML, like Gecko) Chrome/124.0 Safari/537.36'}
+    try:
+        req = urllib.request.Request(f'https://www.instagram.com/p/{platform_id}/media/?size=m', headers=ua)
+        data = urllib.request.urlopen(req, timeout=15).read()
+        if data[:3] == b'\xff\xd8\xff':
+            return data
+    except Exception:
+        pass
+    try:
+        html = urllib.request.urlopen(
+            urllib.request.Request(f'https://www.instagram.com/p/{platform_id}/embed/captioned/', headers=ua),
+            timeout=15).read().decode('utf-8', 'ignore').replace('\\', '')
+        m = re.search(r'"display_url":"(https:[^"]+)"', html) or \
+            re.search(r'"profile_pic_url":"(https:[^"]+)"', html)
+        if m:
+            url = m.group(1)
+            data = urllib.request.urlopen(urllib.request.Request(url, headers=ua), timeout=15).read()
+            if data[:3] == b'\xff\xd8\xff':
+                return data
+    except Exception:
+        pass
+    return None
+
+
+@app.route('/cover/instagram/<platform_id>')
+def ig_cover_proxy(platform_id):
+    """Stable same-origin cover for IG posts/reels. Fetches once from Instagram
+    (no login), caches bytes locally, then serves forever — immune to
+    hotlink-blocking and CDN signature expiry. Re-caches lazily after a
+    redeploy wipes the ephemeral disk."""
+    safe = re.sub(r'[^a-zA-Z0-9_-]', '', platform_id) or 'x'
+    cache_dir = os.path.join(DATA_DIR, 'covers')
+    try:
+        os.makedirs(cache_dir, exist_ok=True)
+    except OSError:
+        pass
+    path = os.path.join(cache_dir, f'{safe}.jpg')
+    if not os.path.exists(path):
+        data = _ig_cover_bytes(safe)
+        if not data:
+            return Response('', 404)
+        try:
+            with open(path, 'wb') as f:
+                f.write(data)
+        except OSError:
+            return Response(data, mimetype='image/jpeg')
+    return send_file(path, mimetype='image/jpeg', max_age=86400)
 
 
 BACKUP_FILE = os.path.join(DATA_DIR, '_auto_backup.json')
