@@ -36,7 +36,7 @@
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
             </div>
             <h2>內容不符合規範</h2>
-            <p>你的提交包含不適當內容，已被拒絕。請修改後重新提交。</p>
+            <p>你的提交包含不適當內容，已被拒絕。{% if block_reason %}原因：<strong>{{ block_reason }}</strong>。{% endif %}請修改後重新提交。</p>
             <a href="{{ url_for('submit_video') }}" class="btn btn-primary">重新提交</a>
         </div>
         {% else %}

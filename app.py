@@ -15,6 +15,11 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 
 import geo  # 18-district GEO landing pages
 
+try:
+    import screening  # restricted-word upload screening (self-contained, works on Render)
+except Exception:
+    screening = None
+
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -1191,8 +1196,15 @@ def submit_video():
         title_zh = request.form.get('title_zh', '')
         desc_zh = request.form.get('description_zh', '')
         district = (request.form.get('district', '') or '').strip()  # 選填 18區
+        block_reason = None
         if contains_blocked(title_zh) or contains_blocked(desc_zh):
-            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=False, blocked=True)
+            block_reason = "含有不當用語"
+        elif screening:
+            block_reason = screening.screen_upload(title_zh, desc_zh)
+        if block_reason:
+            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
+                                   platform_config=PLATFORM_CONFIG, success=False, blocked=True,
+                                   block_reason=block_reason)
         # Auto-approve clean submissions
         submission = {
             'id': generate_id('sub_'),
