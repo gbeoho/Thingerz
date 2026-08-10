@@ -606,6 +606,9 @@ def get_video(video_id):
                 elif sub_num == 58 or sub_num == 59: cat_id = 'cat004'
                 elif sub_num == 60: cat_id = 'cat003'
                 elif sub_num == 61: cat_id = 'cat008'
+                elif sub_num == 62: cat_id = 'cat002'
+                elif sub_num == 63: cat_id = 'cat001'
+                elif sub_num == 64: cat_id = 'cat005'
                 else: cat_id = 'cat001'
                 trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
                 return {
@@ -1046,6 +1049,9 @@ def _map_subcat(sub_num):
     elif sub_num in (58, 59): return 'cat004'  # 重氧運動 / 小丑
     elif sub_num == 60: return 'cat003'   # 珠寶設計教學
     elif sub_num == 61: return 'cat008'   # 寵物/動物溝通
+    elif sub_num == 62: return 'cat002'   # 音響設備及教學
+    elif sub_num == 63: return 'cat001'   # 汽車維修及裝置
+    elif sub_num == 64: return 'cat005'   # 燒賣腸粉關注組
     return 'cat001'
 
 
