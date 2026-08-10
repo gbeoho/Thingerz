@@ -451,6 +451,9 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 58 or sub_num == 59: cat_id = 'cat004'  # 重氧運動, 小丑
             elif sub_num == 60: cat_id = 'cat003'  # 珠寶設計教學
             elif sub_num == 61: cat_id = 'cat008'  # 寵物/動物溝通
+            elif sub_num == 62: cat_id = 'cat002'  # 音響設備及教學
+            elif sub_num == 63: cat_id = 'cat001'  # 汽車維修及裝置
+            elif sub_num == 64: cat_id = 'cat005'  # 燒賣腸粉關注組
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
@@ -516,6 +519,9 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num in (58, 59): cat_id = 'cat004'  # 極限運動, 小丑
             elif sub_num == 60: cat_id = 'cat003'  # 珠寶設計教學
             elif sub_num == 61: cat_id = 'cat008'  # 寵物/動物溝通
+            elif sub_num == 62: cat_id = 'cat002'  # 音響設備及教學
+            elif sub_num == 63: cat_id = 'cat001'  # 汽車維修及裝置
+            elif sub_num == 64: cat_id = 'cat005'  # 燒賣腸粉關注組
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
             seen = {v['id'] for v in result}
