@@ -51,21 +51,14 @@
             {% set share_text = (news_item['title_zh'] + ' - 好去處') | urlencode %}
             <div style="margin:32px 0;padding:20px;background:#11111d;border-radius:16px;border:1px solid rgba(255,255,255,.05);text-align:center">
                 <p style="font-size:.9rem;font-weight:600;margin-bottom:14px;color:#e4e4ed">分享俾朋友，一齊發掘香港好去處 📍</p>
-                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-                    <a href="https://wa.me/?text={{ share_text }}%20{{ share_url_enc }}" target="_blank" rel="noopener"
-                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#25D366;color:#fff;text-decoration:none">WhatsApp</a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url_enc }}" target="_blank" rel="noopener"
-                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#1877f2;color:#fff;text-decoration:none">Facebook</a>
-                    <a href="https://t.me/share/url?url={{ share_url_enc }}&text={{ share_text }}" target="_blank" rel="noopener"
-                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#2AABEE;color:#fff;text-decoration:none">Telegram</a>
-                    <a href="https://twitter.com/intent/tweet?url={{ share_url_enc }}&text={{ share_text }}" target="_blank" rel="noopener"
-                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);text-decoration:none">X</a>
-                    <a href="https://www.threads.net/intent/post?text={{ share_text }}%20{{ share_url_enc }}" target="_blank" rel="noopener"
-                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);text-decoration:none">Threads</a>
-                    <button onclick="navigator.clipboard.writeText('{{ share_url }}');window.open('https://www.instagram.com/','_blank');this.textContent='✓ 已複製'"
-                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;cursor:pointer">Instagram</button>
-                    <button onclick="navigator.clipboard.writeText('{{ share_url }}');this.textContent='✓ 已複製'"
-                       style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer">複製</button>
+                    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                    <button onclick="tzhShare('https://wa.me/?text={{ share_text }}%20{{ share_url_enc }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#25D366;color:#fff;border:none;cursor:pointer">WhatsApp</button>
+                    <button onclick="tzhShare('https://www.facebook.com/sharer/sharer.php?u={{ share_url_enc }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#1877f2;color:#fff;border:none;cursor:pointer">Facebook</button>
+                    <button onclick="tzhShare('https://t.me/share/url?url={{ share_url_enc }}&text={{ share_text }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#2AABEE;color:#fff;border:none;cursor:pointer">Telegram</button>
+                    <button onclick="tzhShare('https://twitter.com/intent/tweet?url={{ share_url_enc }}&text={{ share_text }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);border:none;cursor:pointer">X</button>
+                    <button onclick="tzhShare('https://www.threads.net/intent/post?text={{ share_text }}%20{{ share_url_enc }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);border:none;cursor:pointer">Threads</button>
+                    <button onclick="tzhShareIG()" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;cursor:pointer">Instagram</button>
+                    <button onclick="navigator.clipboard.writeText('{{ share_url }}');this.textContent='✓ 已複製'" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer">複製</button>
                 </div>
                 <p style="font-size:.72rem;color:#6a6a80;margin-top:12px">更多好去處：<a href="https://thingerz.com" style="color:#818cf8">thingerz.com</a></p>
             </div>

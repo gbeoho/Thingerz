@@ -97,12 +97,12 @@
                         {% set sv_enc = sv | urlencode %}
                         {% set sv_text = (video['title_zh'] + ' - Thingerz') | urlencode %}
                         <div style="display:flex;gap:8px;flex-wrap:wrap">
-                            <a href="https://wa.me/?text={{ sv_text }}%20{{ sv_enc }}" target="_blank" rel="noopener" class="share-btn" style="background:#25D366;color:#fff">WhatsApp</a>
-                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ sv_enc }}" target="_blank" rel="noopener" class="share-btn share-fb">Facebook</a>
-                            <a href="https://t.me/share/url?url={{ sv_enc }}&text={{ sv_text }}" target="_blank" rel="noopener" class="share-btn" style="background:#2AABEE;color:#fff">Telegram</a>
-                            <a href="https://twitter.com/intent/tweet?url={{ sv_enc }}&text={{ sv_text }}" target="_blank" rel="noopener" class="share-btn share-th">X</a>
-                            <a href="https://www.threads.net/intent/post?text={{ sv_text }}%20{{ sv_enc }}" target="_blank" rel="noopener" class="share-btn share-th">Threads</a>
-                            <button onclick="navigator.clipboard.writeText('{{ sv }}');window.open('https://www.instagram.com/','_blank');this.textContent='✓ 已複製'" class="share-btn share-ig" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;cursor:pointer">Instagram</button>
+                            <button onclick="tzhShare('https://wa.me/?text={{ sv_text }}%20{{ sv_enc }}')" class="share-btn" style="background:#25D366;color:#fff;border:none;cursor:pointer">WhatsApp</button>
+                            <button onclick="tzhShare('https://www.facebook.com/sharer/sharer.php?u={{ sv_enc }}')" class="share-btn share-fb" style="border:none;cursor:pointer">Facebook</button>
+                            <button onclick="tzhShare('https://t.me/share/url?url={{ sv_enc }}&text={{ sv_text }}')" class="share-btn" style="background:#2AABEE;color:#fff;border:none;cursor:pointer">Telegram</button>
+                            <button onclick="tzhShare('https://twitter.com/intent/tweet?url={{ sv_enc }}&text={{ sv_text }}')" class="share-btn share-th" style="border:none;cursor:pointer">X</button>
+                            <button onclick="tzhShare('https://www.threads.net/intent/post?text={{ sv_text }}%20{{ sv_enc }}')" class="share-btn share-th" style="border:none;cursor:pointer">Threads</button>
+                            <button onclick="tzhShareIG()" class="share-btn share-ig" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;cursor:pointer">Instagram</button>
                             <button onclick="navigator.clipboard.writeText('{{ sv }}');this.textContent='✓ 已複製'" class="share-btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer">複製</button>
                         </div>
                     </div>

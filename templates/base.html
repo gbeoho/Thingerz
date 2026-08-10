@@ -567,6 +567,34 @@
     </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
+    // Share-on-social helpers. Use the native Web Share API when available so
+    // the OS share sheet (incl. Instagram Story/Post, WhatsApp, FB, Threads…)
+    // can be used on mobile; fall back to the platform's desktop intent URL.
+    function tzhOpen(u){ window.open(u, '_blank', 'noopener'); }
+    function tzhShare(intentUrl){
+        var url = location.href;
+        if (navigator.share) {
+            navigator.share({ title: document.title, text: url, url: url })
+              .catch(function(){ if (intentUrl) tzhOpen(intentUrl); });
+            return;
+        }
+        if (intentUrl) tzhOpen(intentUrl);
+    }
+    function tzhShareIG(){
+        var url = location.href;
+        if (navigator.share) {
+            navigator.share({ title: document.title, text: url, url: url }).catch(function(){});
+            return;
+        }
+        // Desktop fallback: Instagram has no web share-to-feed intent, so copy
+        // the link and open Instagram for the user to paste into a post/story.
+        var copied = false;
+        try { navigator.clipboard.writeText(url); copied = true; } catch(e){}
+        tzhOpen('https://www.instagram.com/');
+        if (copied) { try { this.textContent = '\u2713 \u5df2\u8907\u88fd'; } catch(e){} }
+    }
+    </script>
+    <script>
     function switchLang(code, label){
         document.getElementById('currentLang').textContent = label;
         document.getElementById('langSelect').classList.remove('open');
