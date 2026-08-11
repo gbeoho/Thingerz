@@ -250,9 +250,14 @@ def init_db():
         'contacts.csv': ('contacts', ['id','name','email','subject','message','date','status']),
     }
 
+    # Reference tables (categories / subcategories) are the static source of
+    # truth in CSV — always sync any missing rows from CSV so new sub-categories
+    # (e.g. s065-s069) appear on a persisted live DB after deploy, not just on a
+    # fresh one. Live-editable tables (news/videos/submissions/comments) keep the
+    # count==0 guard so a stale local CSV can't overwrite the live DB.
     for csv_file, (table_name, fields) in csv_to_table.items():
         count = db.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
-        if count > 0:
+        if count > 0 and table_name not in ('categories', 'subcategories'):
             continue
         csv_path = os.path.join(DATA_DIR, csv_file)
         if not os.path.exists(csv_path):
