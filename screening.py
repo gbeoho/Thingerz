@@ -62,7 +62,29 @@ CRIME_NEWS_TITLE = [
     "毒品", "刀襲", "走私", "網賭", "貴賓廳", "黑幕", "刑事恐嚇", "滋擾案",
     "現屆香港特別行政區政府", "上任四周年", "政綱主題巴士", "答問大會",
 ]
-ECON_DOOM_TITLE = ["大崩盤", "崩盤", "蒸發", "死寂"]
+ECON_DOOM_TITLE = ["大崩盤", "崩盤", "崩盘", "联系汇率", "聯繫匯率", "金管局"]
+
+# ─────────────────────────────────────────────────────────────────────────
+# Extra classes discovered during 2026-08 content sweeps: ghost/horror stories,
+# mobile-gaming livestreams, finance/property TV, HK online-gossip talk shows,
+# war news, mainland re-uploads (抖音/快手).
+# ─────────────────────────────────────────────────────────────────────────
+EXTRA_TITLE_BLOCK = [
+    # ghost / horror
+    "凶宅", "鬼故", "靈異", "鬼故事", "猛鬼", "撞鬼", "見鬼", "驅魔", "怪談", "冤魂", "亡魂",
+    "鬼上身", "靈異事件", "鬼單", "鬼樓", "撞邪", "邪靈", "百鬼", "陰魂",
+    # war / foreign-conflict news
+    "戰爭", "普京", "澤倫斯基", "烏俄", "俄烏", "頓涅茨克", "轟炸", "導彈", "导弹", "烏軍", "烏軍",
+    # gaming livestream / gacha
+    "手遊", "逆水寒", "原神", "絕區零", "崩壞", "王者榮耀", "英雄聯盟", "開局一座島", "禮包碼",
+    "兌換碼", "課金", "遊戲直播", "排位賽", "實況主",
+    # finance / property TV + gambling
+    "港股", "美股", "A股", "股市", "樓市", "樓盤", "按揭", "財經直播", "賽馬直播", "六合彩", "投注",
+    # HK online-gossip talk-show saga
+    "何伯", "咸圈", "廢門", "診西", "口水台", "直播訪問",
+    # mainland re-uploads / douyin-style
+    "抖音", "快手", "搬運",
+]
 
 # ─────────────────────────────────────────────────────────────────────────
 # Foreign content (no HK opt-out)
@@ -111,6 +133,9 @@ def screen_upload(title="", description="", author=""):
     for w in ECON_DOOM_TITLE:
         if w.lower() in t:
             return f"econ-doom title: {w}"
+    for w in EXTRA_TITLE_BLOCK:
+        if w.lower() in t:
+            return f"restricted title: {w}"
 
     # foreign property (no opt-out)
     ht = (title + " " + author).lower()
