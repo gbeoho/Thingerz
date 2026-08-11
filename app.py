@@ -454,6 +454,11 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 62: cat_id = 'cat002'  # 音響設備及教學
             elif sub_num == 63: cat_id = 'cat001'  # 汽車維修及裝置
             elif sub_num == 64: cat_id = 'cat005'  # 燒賣腸粉關注組
+            elif sub_num == 65: cat_id = 'cat002'  # 身心靈提升
+            elif sub_num == 66: cat_id = 'cat003'  # 手錶設計及維修
+            elif sub_num == 67: cat_id = 'cat003'  # 動漫及動畫
+            elif sub_num == 68: cat_id = 'cat008'  # 玩具(四驅車,陀螺)
+            elif sub_num == 69: cat_id = 'cat006'  # 生活小配件
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
@@ -522,6 +527,11 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 62: cat_id = 'cat002'  # 音響設備及教學
             elif sub_num == 63: cat_id = 'cat001'  # 汽車維修及裝置
             elif sub_num == 64: cat_id = 'cat005'  # 燒賣腸粉關注組
+            elif sub_num == 65: cat_id = 'cat002'  # 身心靈提升
+            elif sub_num == 66: cat_id = 'cat003'  # 手錶設計及維修
+            elif sub_num == 67: cat_id = 'cat003'  # 動漫及動畫
+            elif sub_num == 68: cat_id = 'cat008'  # 玩具(四驅車,陀螺)
+            elif sub_num == 69: cat_id = 'cat006'  # 生活小配件
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
             seen = {v['id'] for v in result}
@@ -609,6 +619,11 @@ def get_video(video_id):
                 elif sub_num == 62: cat_id = 'cat002'
                 elif sub_num == 63: cat_id = 'cat001'
                 elif sub_num == 64: cat_id = 'cat005'
+                elif sub_num == 65: cat_id = 'cat002'  # 身心靈提升
+                elif sub_num == 66: cat_id = 'cat003'  # 手錶設計及維修
+                elif sub_num == 67: cat_id = 'cat003'  # 動漫及動畫
+                elif sub_num == 68: cat_id = 'cat008'  # 玩具(四驅車,陀螺)
+                elif sub_num == 69: cat_id = 'cat006'  # 生活小配件
                 else: cat_id = 'cat001'
                 trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
                 return {
@@ -1052,6 +1067,11 @@ def _map_subcat(sub_num):
     elif sub_num == 62: return 'cat002'   # 音響設備及教學
     elif sub_num == 63: return 'cat001'   # 汽車維修及裝置
     elif sub_num == 64: return 'cat005'   # 燒賣腸粉關注組
+    elif sub_num == 65: return 'cat002'   # 身心靈提升
+    elif sub_num == 66: return 'cat003'   # 手錶設計及維修
+    elif sub_num == 67: return 'cat003'   # 動漫及動畫
+    elif sub_num == 68: return 'cat008'   # 玩具(四驅車,陀螺)
+    elif sub_num == 69: return 'cat006'   # 生活小配件
     return 'cat001'
 
 
