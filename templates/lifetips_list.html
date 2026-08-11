@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}生活小知識 - Thingerz{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>生活小知識</h1>
+        <p class="page-subtitle">香港人嘅實用生活貼士、慳錢慳位小技巧、淘寶/拼多多小物家居妙用</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="news-grid-full">
+            {% for tip in tip_items %}
+            <article class="news-card-full">
+                <div class="news-image">
+                    <img src="{{ tip['image_url'] }}" alt="{{ tip['title_zh'] }}" loading="lazy">
+                </div>
+                <div class="news-info">
+                    <time class="news-date">{{ tip['date'] }}</time>
+                    <h2><a href="{{ url_for('lifetips_detail', tip_id=tip['id']) }}">{{ tip['title_zh'] }}</a></h2>
+                    <p>{{ tip['summary_zh'] }}</p>
+                    <a href="{{ url_for('lifetips_detail', tip_id=tip['id']) }}" class="read-more">閱讀全文 &rarr;</a>
+                </div>
+            </article>
+            {% endfor %}
+            {% if not tip_items %}
+            <div class="empty-state">
+                <p>暫無生活小知識</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

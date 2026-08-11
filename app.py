@@ -199,6 +199,9 @@ TABLE_SCHEMAS = {
     'news': '''CREATE TABLE IF NOT EXISTS news (
         id TEXT UNIQUE, title_zh TEXT, title_en TEXT, content_zh TEXT, content_en TEXT,
         summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT, region TEXT)''',
+    'lifetips': '''CREATE TABLE IF NOT EXISTS lifetips (
+        id TEXT UNIQUE, title_zh TEXT, title_en TEXT, content_zh TEXT, content_en TEXT,
+        summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT, region TEXT)''',
     'comments': '''CREATE TABLE IF NOT EXISTS comments (
         id TEXT UNIQUE, video_id TEXT, author TEXT, content TEXT, date TEXT, status TEXT)''',
     'submissions': '''CREATE TABLE IF NOT EXISTS submissions (
@@ -245,6 +248,7 @@ def init_db():
         'subcategories.csv': ('subcategories', ['id','category_id','name_slug','name_zh','name_en']),
         'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']),
         'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
+        'lifetips.csv': ('lifetips', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
         'comments.csv': ('comments', ['id','video_id','author','content','date','status']),
         'submissions.csv': ('submissions', ['id','platform','platform_url','title_zh','title_en','category_id','subcategory_id','submitter_name','submitter_email','description_zh','direction','status','submitted_date']),
         'contacts.csv': ('contacts', ['id','name','email','subject','message','date','status']),
@@ -704,6 +708,23 @@ def get_news(news_id=None):
     return result
 
 
+def get_lifetips(tip_id=None):
+    rows = read_csv('lifetips.csv')
+    for r in rows:
+        vid = extract_youtube_id(str(r.get('content_zh', '') or '') + str(r.get('image_url', '') or ''))
+        r['video_id'] = vid if vid else ''
+        r['video_url'] = f"https://www.youtube.com/watch?v={vid}" if vid else ''
+    if tip_id:
+        for r in rows:
+            if r['id'] == tip_id:
+                return r
+        return None
+    result = [r for r in rows if r.get('status') == 'published' and r.get('region', 'hk') != 'foreign']
+    result.sort(key=lambda r: r.get('date', ''), reverse=True)
+    return result
+
+
+
 def get_related_videos(video, limit=4):
     all_videos = read_csv('videos.csv')
     same_sub = [v for v in all_videos if v['subcategory_id'] == video['subcategory_id'] and v['id'] != video['id'] and v['status'] == 'approved']
@@ -783,6 +804,7 @@ def sitemap():
     add('/', priority=1.0, changefreq='daily')
     add('/about', priority=0.4)
     add('/news', priority=0.8, changefreq='daily')
+    add('/life-tips', priority=0.8, changefreq='daily')
     add('/track/fun', priority=0.6)
     add('/track/learning', priority=0.6)
 
@@ -825,6 +847,12 @@ def sitemap():
     for n in news_list:
         if n.get('id') and n.get('status') == 'published':
             add(f'/news/{n["id"]}', priority=0.7, changefreq='monthly')
+
+    # Life-tips articles
+    tips = get_lifetips() or []
+    for t in tips:
+        if t.get('id') and t.get('status') == 'published':
+            add(f'/life-tips/{t["id"]}', priority=0.6, changefreq='monthly')
 
     # Build XML
     urlset = Element('urlset')
@@ -1121,7 +1149,8 @@ def index():
     pool = get_top_viewed(100)
     featured_videos = random.sample(pool, min(8, len(pool))) if pool else get_videos(limit=8)
     latest_news = get_news()[:3]
-    return render_template('index.html', fun_categories=fun_categories, learning_categories=learning_categories, featured_videos=featured_videos, latest_news=latest_news, platform_config=PLATFORM_CONFIG)
+    latest_lifetips = get_lifetips()[:3]
+    return render_template('index.html', fun_categories=fun_categories, learning_categories=learning_categories, featured_videos=featured_videos, latest_news=latest_news, latest_lifetips=latest_lifetips, platform_config=PLATFORM_CONFIG)
 
 
 @app.route('/about')
@@ -1321,6 +1350,19 @@ def news_detail(news_id):
     if not item:
         return redirect(url_for('news_list'))
     return render_template('news_detail.html', news_item=item, all_news=get_news())
+
+
+@app.route('/life-tips')
+def lifetips_list():
+    return render_template('lifetips_list.html', tip_items=get_lifetips())
+
+
+@app.route('/life-tips/<tip_id>')
+def lifetips_detail(tip_id):
+    it = get_lifetips(tip_id)
+    if not it:
+        return redirect(url_for('lifetips_list'))
+    return render_template('lifetips_detail.html', tip=it, all_tips=get_lifetips())
 
 
 @app.route('/location/<slug>')

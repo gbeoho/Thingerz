@@ -142,6 +142,32 @@
 </section>
 {% endif %}
 
+{% if latest_lifetips %}
+<section class="section news-section">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent"></span>
+            生活小知識
+            <a href="{{ url_for('lifetips_list') }}" class="section-link">查看全部 &rarr;</a>
+        </h2>
+        <div class="news-grid">
+            {% for tip in latest_lifetips %}
+            <article class="news-card">
+                <div class="news-image">
+                    <img src="{{ tip['image_url'] }}" alt="{{ tip['title_zh'] }}" loading="lazy">
+                </div>
+                <div class="news-info">
+                    <time class="news-date">{{ tip['date'] }}</time>
+                    <h3><a href="{{ url_for('lifetips_detail', tip_id=tip['id']) }}">{{ tip['title_zh'] }}</a></h3>
+                    <p>{{ tip['summary_zh'] }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <section class="section" style="padding:0 0 48px">
     <div class="container">
         <h2 class="section-title">

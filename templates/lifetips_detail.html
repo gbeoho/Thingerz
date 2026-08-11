@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ tip['title_zh'] }} - 生活小知識 - Thingerz{% endblock %}
+{% block og_title %}{{ tip['title_zh'] }} - 生活小知識 - Thingerz{% endblock %}
+{% block og_description %}{{ (tip['summary_zh'] or tip['title_zh'] or 'Thingerz 生活小知識')[:150] }}{% endblock %}
+{% block og_image %}{{ tip['image_url'] or url_for('static', filename='favicon.svg', _external=True) }}{% endblock %}
+
+{% block content %}
+<article class="news-article-page">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <span>/</span>
+            <a href="{{ url_for('lifetips_list') }}">生活小知識</a>
+            <span>/</span>
+            <span class="current">{{ tip['title_zh'] }}</span>
+        </div>
+    </div>
+    <div class="news-article-hero">
+        <div class="container">
+            <img src="{{ tip['image_url'] }}" alt="{{ tip['title_zh'] }}" class="news-hero-image">
+        </div>
+    </div>
+    <div class="container">
+        <div class="news-article-content">
+            <header class="article-header">
+                <time class="news-date">{{ tip['date'] }}</time>
+                <h1>{{ tip['title_zh'] }}</h1>
+                <p class="article-subtitle">{{ tip['title_en'] }}</p>
+            </header>
+
+            {% if tip.get('video_id') %}
+            <div class="video-player-wrapper" style="margin-bottom:28px">
+                <iframe style="width:100%;aspect-ratio:16/9;border-radius:18px;border:none;background:#000"
+                        src="https://www.youtube-nocookie.com/embed/{{ tip['video_id'] }}"
+                        title="{{ tip['title_zh'] }}"
+                        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen loading="lazy"></iframe>
+            </div>
+            <p style="font-size:.78rem;color:#6a6a80;margin-bottom:20px">
+                📺 直接收看影片：<a href="{{ tip['video_url'] }}" target="_blank" rel="noopener" style="color:#818cf8">在 YouTube 開啟</a>
+            </p>
+            {% endif %}
+
+            <div class="article-body">
+                {{ tip['content_zh'] | safe }}
+            </div>
+
+            {% set share_url = request.url.split('?')[0] if request else 'https://thingerz.com' %}
+            {% set share_url_enc = share_url | urlencode %}
+            {% set share_text = (tip['title_zh'] + ' - 生活小知識') | urlencode %}
+            <div style="margin:32px 0;padding:20px;background:#11111d;border-radius:16px;border:1px solid rgba(255,255,255,.05);text-align:center">
+                <p style="font-size:.9rem;font-weight:600;margin-bottom:14px;color:#e4e4ed">分享俾朋友，一齊學識生活小知識 💡</p>
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                    <button onclick="tzhShare('https://wa.me/?text={{ share_text }}%20{{ share_url_enc }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#25D366;color:#fff;border:none;cursor:pointer">WhatsApp</button>
+                    <button onclick="tzhShare('https://www.facebook.com/sharer/sharer.php?u={{ share_url_enc }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#1877f2;color:#fff;border:none;cursor:pointer">Facebook</button>
+                    <button onclick="tzhShare('https://t.me/share/url?url={{ share_url_enc }}&text={{ share_text }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#2AABEE;color:#fff;border:none;cursor:pointer">Telegram</button>
+                    <button onclick="tzhShare('https://twitter.com/intent/tweet?url={{ share_url_enc }}&text={{ share_text }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);border:none;cursor:pointer">X</button>
+                    <button onclick="tzhShare('https://www.threads.net/intent/post?text={{ share_text }}%20{{ share_url_enc }}')" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);border:none;cursor:pointer">Threads</button>
+                    <button onclick="tzhShareIG()" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;border:none;cursor:pointer">Instagram</button>
+                    <button onclick="navigator.clipboard.writeText('{{ share_url }}');this.textContent='✓ 已複製'" style="padding:9px 0;width:64px;border-radius:12px;font-size:.78rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer">複製</button>
+                </div>
+                <p style="font-size:.72rem;color:#6a6a80;margin-top:12px">更多生活小知識：<a href="{{ url_for('lifetips_list') }}" style="color:#818cf8">thingerz.com/life-tips</a></p>
+            </div>
+        </div>
+
+        <div class="article-footer">
+            <h3>更多生活小知識</h3>
+            <div class="news-grid">
+                {% for item in all_tips %}
+                {% if item['id'] != tip['id'] %}
+                <article class="news-card">
+                    <div class="news-image">
+                        <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                    </div>
+                    <div class="news-info">
+                        <time class="news-date">{{ item['date'] }}</time>
+                        <h3><a href="{{ url_for('lifetips_detail', tip_id=item['id']) }}">{{ item['title_zh'] }}</a></h3>
+                        <p>{{ item['summary_zh'] }}</p>
+                    </div>
+                </article>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</article>
+{% endblock %}
