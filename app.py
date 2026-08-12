@@ -425,6 +425,23 @@ def get_subcategory(subcategory_id):
     return None
 
 
+# Convert YouTube's relative upload-time strings ("8 日前", "5 個月前", "1 年前",
+# "13 小時前", "11 個月前曾經串流") into a sortable "days ago" float, so crawled
+# videos can be ordered newest-first. Empty/unknown -> very old (sorts last).
+_AGO_RE = re.compile(r'(\d+)\s*(分鐘|小時|日|星期|個月|年)前')
+_AGO_MULT = {'分鐘': 1 / 1440.0, '小時': 1 / 24.0, '日': 1.0,
+             '星期': 7.0, '個月': 30.0, '年': 365.0}
+
+
+def _published_ago_days(s):
+    if not s:
+        return float('inf')
+    m = _AGO_RE.search(str(s))
+    if not m:
+        return float('inf')
+    return int(m.group(1)) * _AGO_MULT[m.group(2)]
+
+
 def get_videos(subcategory_id=None, category_id=None, track=None, direction=None, status='approved', district=None, limit=None):
     videos = read_csv('videos.csv')
     result = [v for v in videos if v.get('status', '') == status]
@@ -593,12 +610,14 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                   and (district in v.get('tags', '')
                        or district in v.get('title_zh', '')
                        or district in v.get('description_zh', ''))]
-    # Ordering: curated/uploaded videos (videos.csv) always on top, newest upload first;
-    # crawled videos after, keeping their existing (view-count) order.
+    # Ordering (user directive): NEW uploaded (crawled) YouTube videos first, sorted
+    # by real upload recency (newest first via relative published_at); then our
+    # internal/curated videos.csv in descending uploaded date.
     curated = [v for v in result if not str(v.get('id', '')).startswith('cv_')]
     crawled = [v for v in result if str(v.get('id', '')).startswith('cv_')]
+    crawled.sort(key=lambda v: _published_ago_days(str(v.get('submitted_date', ''))))
     curated.sort(key=lambda v: str(v.get('submitted_date', '')), reverse=True)
-    result = curated + crawled
+    result = crawled + curated
     if limit:
         result = result[:limit]
     return result
