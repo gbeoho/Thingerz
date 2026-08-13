@@ -159,6 +159,108 @@ def screen_upload(title="", description="", author=""):
     return None
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# Sub-category content matching (for uploads): verify the submitter picked
+# the RIGHT category so uploaded links never auto-post in a wrong category.
+# ─────────────────────────────────────────────────────────────────────────
+SUB_CAT_KEYWORDS = {
+    's001': ['市場研究','市調','市場調查','market research','問卷','行業報告'],
+    's002': ['品牌','branding','brand','行銷','marketing','推廣'],
+    's003': ['網上生意','電商','網店','開網店','網購','代購','shopify','淘寶開店','直播帶貨'],
+    's004': ['顧問','consult','諮詢','專業顧問'],
+    's005': ['室內設計','interior design','裝修','空間設計','家居設計'],
+    's006': ['醫療','醫生','診所','醫療服務','hospital','看診'],
+    's007': ['餐飲','餐廳','飲食業','餐飲業','酒吧','food & beverage'],
+    's008': ['活動策劃','event','活動','配對','聯誼','networking'],
+    's009': ['技能教學','tutorial','skill','技能班'],
+    's010': ['表演教練','表演訓練','coaching'],
+    's011': ['學琴','練琴','鋼琴','結他','吉他','小提琴','音樂班','樂理','口琴','ukulele','音樂學習','學鼓'],
+    's012': ['視覺創作','藝術課程','視覺藝術','art course'],
+    's013': ['英文','日文','韓文','翻譯','語言班','學英文','translate','普通話','日語','英語'],
+    's014': ['心理','自我提升','self improvement','情緒','mindset','勵志','成長','壓力','抑鬱'],
+    's015': ['平面設計','graphic design','photoshop','illustrator','排版','logo設計'],
+    's016': ['服飾設計','時裝設計','fashion design','fashion'],
+    's017': ['手作','手工','diy','craft','編織','鉤織','串珠','皮革','毛冷'],
+    's018': ['配件設計','accessory','飾品設計','飾物'],
+    's019': ['攝影','拍攝','photography','相機','剪片','影像','vlog','video editing'],
+    's020': ['印刷','printmaking','版畫','絲網'],
+    's021': ['藝術裝置','installation','藝術展','展覽','公共藝術'],
+    's022': ['繪畫','素描','畫畫','水彩','油畫','drawing','painting','書法','水墨'],
+    's023': ['音樂演出','演奏','concert','band','歌手','唱歌','live music'],
+    's024': ['舞蹈','跳舞','dance','街舞','芭蕾','kpop'],
+    's025': ['戲劇','話劇','drama','舞台劇'],
+    's026': ['魔術','magic','魔術師','近景'],
+    's027': ['特技','雜耍','特技表演','acrobatic','體操'],
+    's028': ['互動娛樂','interactive','沉浸式','互動劇'],
+    's029': ['烘焙','麵包','蛋糕','baking','曲奇','cupcake','muffin','班戟','焗蛋糕','焗包'],
+    's030': ['烹飪','食譜','cooking','料理','下廚','家常菜','煮餸'],
+    's031': ['手沖咖啡','咖啡','品酒','調酒','茶藝','品茶','飲品','拉花'],
+    's032': ['食物創作','甜品創作','food art','分子料理','食品創作'],
+    's033': ['香氛','香薰','香水','精油','感官','香味'],
+    's034': ['園藝','種植','盆栽','植物','gardening','多肉'],
+    's035': ['飲食品牌','食品品牌','餐廳品牌','food brand'],
+    's036': ['婚禮策劃','婚禮統籌','wedding planner'],
+    's037': ['婚禮佈置','wedding design'],
+    's038': ['新娘化妝','wedding styling','婚紗','姊妹裙'],
+    's039': ['結婚蛋糕','wedding cake'],
+    's040': ['親子活動','parent-child','kids','親子好去處','親子館','小朋友'],
+    's041': ['生活美學','lifestyle','居家','家居佈置','生活品味','生活小智慧','收納','執屋'],
+    's042': ['節慶','禮品','gift','聖誕','農曆新年','中秋','禮物'],
+    's043': ['化妝','makeup','化妝教學','眼妝','唇妝'],
+    's044': ['護膚','skincare','保養','面膜','護膚品'],
+    's045': ['造型','styling','穿搭','形象','髮型'],
+    's046': ['美感內容','beauty content','美妝'],
+    's047': ['個人品牌','personal branding','個人形象'],
+    's048': ['美容服務','美容院','facial','美容療程'],
+    's049': ['親子教育','育兒','親子教養','parenting'],
+    's050': ['兒童活動','kids activity'],
+    's051': ['社區組織','community','義工'],
+    's052': ['公共參與','公共事務','公民','社區參與'],
+    's053': ['社交配對','社交','交友','dating','配對'],
+    's054': ['公眾講座','講座','seminar','演講','talk'],
+    's055': ['人工智能','機器學習','chatgpt','生成式','ai學習','ai繪圖','prompt'],
+    's056': ['cosplay','角色扮演'],
+    's057': ['風水','命理','占卜','八字','紫微','塔羅'],
+    's058': ['hyrox','重氧運動','hiit','crossfit','健身'],
+    's059': ['小丑','氣球','clown','扭氣球','氣球藝術'],
+    's060': ['珠寶設計','jewellery','首飾設計','金工','銀飾'],
+    's061': ['寵物','動物','pet','寵物溝通','動物溝通','貓','狗'],
+    's062': ['音響','耳機','喇叭','audio','音質','hifi'],
+    's063': ['汽車維修','車房','car repair','整車','改裝'],
+    's064': ['燒賣','腸粉','點心','dim sum','siu mai'],
+    's065': ['身心靈','靈性','冥想','mindfulness','禪修'],
+    's066': ['手錶','watch','鐘錶','修錶'],
+    's067': ['動漫','動畫','anime','漫畫','卡通'],
+    's068': ['四驅車','陀螺','beyblade','mini4wd','玩具'],
+    's069': ['生活小配件','生活用品'],
+    's070': ['運動教學','健身教學','足球教學','籃球教學','游泳','sports'],
+    's071': ['asmr','助眠','白噪音','放鬆音效'],
+}
+
+# length-1 / too-generic keys that must not trigger a category match alone
+WEAK_KEYS = {'煮', '活動', '課程', '教學', '表演', '配件', '小物', '公園', '貼士'}
+
+
+def match_subcategory(title="", description="", author=""):
+    """Return the subcategory_id the submitted content best matches, or None
+    when there is no confident match. Ignores WEAK_KEYS; a clear margin over
+    every other category is required (ties/ambiguity → None)."""
+    text = " ".join([title or "", description or "", author or ""]).lower()
+    scores = {}
+    for sid, kws in SUB_CAT_KEYWORDS.items():
+        s = sum(1 for k in kws if len(k) > 1 and k not in WEAK_KEYS and k.lower() in text)
+        if s:
+            scores[sid] = s
+    if not scores:
+        return None
+    best = max(scores, key=scores.get)
+    best_score = scores[best]
+    rest = [v for sid, v in scores.items() if sid != best]
+    if rest and max(rest) >= best_score:
+        return None  # ambiguous / no clear winner
+    return best
+
+
 if __name__ == "__main__":
     import sys
     t = sys.argv[1] if len(sys.argv) > 1 else ""

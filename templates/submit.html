@@ -39,6 +39,16 @@
                         <p>你提交的內容不適合上載到 Thingerz。請修改後再試。</p>
             <a href="{{ url_for('submit_video') }}" class="btn btn-primary">重新提交</a>
         </div>
+        {% elif pending_review %}
+        <div class="success-message" style="border-color:rgba(245,158,11,.4)">
+            <div class="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h2>已收到，需核對分類</h2>
+            <p>你提交的影片分類似乎唔啱，我哋會交由後台核對後先決定上架位置。唔使重複提交。</p>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交另一部影片</a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
+        </div>
         {% else %}
         <form method="POST" class="submit-form">
             <div class="form-section">

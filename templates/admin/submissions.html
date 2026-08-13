@@ -14,7 +14,15 @@
         <td><span class="badge badge-{{ s.get('status','pending') }}">{{ s.get('status','pending') }}</span></td>
         <td>
             {% if s.get('status') == 'pending' %}
-            <form method="POST" action="{{ url_for('admin_approve_submission', submission_id=s['id']) }}" style="display:inline"><button class="btn btn-success btn-sm">批准</button></form>
+            <form method="POST" action="{{ url_for('admin_approve_submission', submission_id=s['id']) }}" style="margin-bottom:6px">
+                <select name="subcategory_id" style="padding:4px 6px;font-size:12px">
+                    <option value="" disabled {% if not s.get('subcategory_id') %}selected{% endif %}>揀分類（可改）</option>
+                    {% for sc in subcategories %}
+                    <option value="{{ sc['id'] }}" {% if sc['id'] == s.get('subcategory_id') %}selected{% endif %}>{{ sc['id'] }} · {{ sc.get('name_zh','') }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-success btn-sm">批准</button>
+            </form>
             <form method="POST" action="{{ url_for('admin_reject_submission', submission_id=s['id']) }}" style="display:inline"><button class="btn btn-danger btn-sm">拒絕</button></form>
             {% else %}
             <span class="text-muted">已處理</span>

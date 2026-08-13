@@ -241,6 +241,14 @@ def init_db():
             db.execute("ALTER TABLE news ADD COLUMN region TEXT DEFAULT 'hk'")
     except Exception:
         pass
+    # Migration: ensure submissions has district column (pre-existing DBs created
+    # before the field was added — without this every /submit POST crashes)
+    try:
+        scols = [r[1] for r in db.execute("PRAGMA table_info(submissions)").fetchall()]
+        if 'district' not in scols:
+            db.execute("ALTER TABLE submissions ADD COLUMN district TEXT")
+    except Exception:
+        pass
     db.commit()
 
     csv_to_table = {
@@ -1298,6 +1306,37 @@ def submit_video():
             return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
                                    platform_config=PLATFORM_CONFIG, success=False, blocked=True,
                                    block_reason=block_reason)
+        # Category verification: if the submitter's chosen sub-category clearly
+        # does NOT match the content (confident match to a DIFFERENT category),
+        # don't auto-post it in a wrong category — route to the admin review
+        # queue so it can be moved to the right category.
+        needs_review = False
+        if screening and subcategory_id:
+            matched = screening.match_subcategory(title_zh, desc_zh,
+                                                  request.form.get('submitter_name', ''))
+            if matched and matched != subcategory_id:
+                needs_review = True
+        if needs_review:
+            pending_sub = {
+                'id': generate_id('sub_'),
+                'platform': request.form.get('platform', 'youtube'),
+                'platform_url': request.form.get('platform_url', ''),
+                'title_zh': title_zh,
+                'title_en': request.form.get('title_en', ''),
+                'category_id': category_id,
+                'subcategory_id': subcategory_id,
+                'submitter_name': request.form.get('submitter_name', ''),
+                'submitter_email': request.form.get('submitter_email', ''),
+                'description_zh': desc_zh,
+                'direction': request.form.get('direction', ''),
+                'status': 'pending',
+                'submitted_date': datetime.now().strftime('%Y-%m-%d'),
+                'district': district
+            }
+            pending_fieldnames = ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date', 'district']
+            append_csv('submissions.csv', pending_sub, pending_fieldnames)
+            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
+                                   platform_config=PLATFORM_CONFIG, success=False, pending_review=True)
         # Auto-approve clean submissions
         submission = {
             'id': generate_id('sub_'),
@@ -1785,6 +1824,12 @@ def admin_approve_submission(submission_id):
         if s['id'] == submission_id:
             submission = s
             s['status'] = 'approved'
+            # allow the reviewer to correct the category at approval time
+            new_sub = (request.form.get('subcategory_id') or '').strip()
+            if new_sub and new_sub != s.get('subcategory_id'):
+                s['subcategory_id'] = new_sub
+                sb = get_subcategory(new_sub)
+                s['category_id'] = sb['category_id'] if sb else s.get('category_id', '')
             break
     write_csv('submissions.csv', subs, ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date', 'district'])
     if submission:
