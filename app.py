@@ -620,14 +620,15 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                   and (district in v.get('tags', '')
                        or district in v.get('title_zh', '')
                        or district in v.get('description_zh', ''))]
-    # Ordering (user directive): NEW uploaded (crawled) YouTube videos first, sorted
-    # by real upload recency (newest first via relative published_at); then our
-    # internal/curated videos.csv in descending uploaded date.
+    # Ordering (user directive): USER-UPLOADED content first (videos.csv — includes IG
+    # submissions), newest first by submitted date; then crawled videos by publish
+    # recency (newest first via relative published_at). So a freshly uploaded IG reel
+    # shows at the very front of its sub-category, not buried after all crawled rows.
     curated = [v for v in result if not str(v.get('id', '')).startswith('cv_')]
     crawled = [v for v in result if str(v.get('id', '')).startswith('cv_')]
-    crawled.sort(key=lambda v: _published_ago_days(str(v.get('submitted_date', ''))))
     curated.sort(key=lambda v: str(v.get('submitted_date', '')), reverse=True)
-    result = crawled + curated
+    crawled.sort(key=lambda v: _published_ago_days(str(v.get('submitted_date', ''))))
+    result = curated + crawled
     if limit:
         result = result[:limit]
     return result
