@@ -486,7 +486,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 68: cat_id = 'cat008'  # 玩具(四驅車,陀螺)
             elif sub_num == 69: cat_id = 'cat006'  # 生活小配件
             elif sub_num == 70: cat_id = 'cat002'  # 體育運動教學
-            elif sub_num == 71: cat_id = 'cat004'  # ASMR放鬆
+            elif sub_num == 71: cat_id = 'cat004'  # ASMR音效
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
@@ -561,7 +561,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 68: cat_id = 'cat008'  # 玩具(四驅車,陀螺)
             elif sub_num == 69: cat_id = 'cat006'  # 生活小配件
             elif sub_num == 70: cat_id = 'cat002'  # 體育運動教學
-            elif sub_num == 71: cat_id = 'cat004'  # ASMR放鬆
+            elif sub_num == 71: cat_id = 'cat004'  # ASMR音效
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
             seen = {v['id'] for v in result}
@@ -657,7 +657,7 @@ def get_video(video_id):
                 elif sub_num == 68: cat_id = 'cat008'  # 玩具(四驅車,陀螺)
                 elif sub_num == 69: cat_id = 'cat006'  # 生活小配件
                 elif sub_num == 70: cat_id = 'cat002'  # 體育運動教學
-                elif sub_num == 71: cat_id = 'cat004'  # ASMR放鬆
+                elif sub_num == 71: cat_id = 'cat004'  # ASMR音效
                 else: cat_id = 'cat001'
                 trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
                 return {
@@ -1131,7 +1131,7 @@ def _map_subcat(sub_num):
     elif sub_num == 68: return 'cat008'   # 玩具(四驅車,陀螺)
     elif sub_num == 69: return 'cat006'   # 生活小配件
     elif sub_num == 70: return 'cat002'  # 體育運動教學
-    elif sub_num == 71: return 'cat004'  # ASMR放鬆
+    elif sub_num == 71: return 'cat004'  # ASMR音效
     return 'cat001'
 
 
