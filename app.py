@@ -126,8 +126,11 @@ PLATFORM_CONFIG = {
     },
     'threads': {
         'name': 'Threads',
-        'embed_base': 'https://www.threads.net/@{user}/post/{id}/embed',
-        'watch_base': 'https://www.threads.net/@{user}/post/{id}',
+        # Threads has NO username-less embed. We store the full path (@user/post/ID)
+        # in platform_id, so {id} carries it and the URL becomes
+        # https://www.threads.net/@user/post/ID[/embed]. ({user} is left unused.)
+        'embed_base': 'https://www.threads.net/{id}/embed',
+        'watch_base': 'https://www.threads.net/{id}',
         'thumb_base': None, 'aspect_ratio': '1:1', 'color': '#000000',
     },
     'xiaohongshu': {
@@ -974,6 +977,28 @@ def extract_bilibili_id(url):
     return url.strip().split('/')[-1].split('?')[0]
 
 
+def extract_threads_id(url):
+    """Extract the full @user/post/ID path from a Threads URL.
+
+    Threads embeds require the username folder (@user/post/ID), unlike IG/TikTok.
+    We return the path itself so it can be plugged straight into the {id} slot of
+    the embed/watch base (https://www.threads.net/{id}).
+    Examples:
+      https://www.threads.net/@foo/post/AbC123        -> @foo/post/AbC123
+      https://www.threads.net/@foo/post/AbC123/embed  -> @foo/post/AbC123
+      https://www.threads.net/t/AbC123                -> t/AbC123
+    """
+    if not url:
+        return ''
+    m = re.search(r'threads\.net/(@[\w.]+/post/[\w.-]+)', url)
+    if m:
+        return m.group(1)
+    m = re.search(r'threads\.net/(t/[\w.-]+)', url)
+    if m:
+        return m.group(1)
+    return url.strip().split('/')[-1].split('?')[0]
+
+
 def get_platform_thumb(platform, platform_id, api_url=''):
     """Get thumbnail URL for any platform."""
     if platform == 'youtube':
@@ -1364,6 +1389,8 @@ def submit_video():
             platform_id = extract_youtube_id(url)
         elif platform == 'instagram':
             platform_id = extract_instagram_id(url)
+        elif platform == 'threads':
+            platform_id = extract_threads_id(url)
         elif platform == 'tiktok':
             platform_id = extract_tiktok_id(url)
         elif platform == 'xiaohongshu':
@@ -1741,6 +1768,8 @@ def admin_video_add():
         platform_id = extract_youtube_id(platform_id_raw) or platform_id_raw
     elif platform == 'instagram':
         platform_id = extract_instagram_id(platform_id_raw) or platform_id_raw
+    elif platform == 'threads':
+        platform_id = extract_threads_id(platform_id_raw) or platform_id_raw
     elif platform == 'tiktok':
         platform_id = extract_tiktok_id(platform_id_raw) or platform_id_raw
     elif platform == 'xiaohongshu':
@@ -1840,6 +1869,8 @@ def admin_approve_submission(submission_id):
             platform_id = extract_youtube_id(url)
         elif platform == 'instagram':
             platform_id = extract_instagram_id(url)
+        elif platform == 'threads':
+            platform_id = extract_threads_id(url)
         elif platform == 'tiktok':
             platform_id = extract_tiktok_id(url)
         else:
