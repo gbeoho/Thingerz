@@ -1033,10 +1033,13 @@ def get_platform_thumb(platform, platform_id, api_url=''):
         return f"https://thingerz.com/cover/instagram/{platform_id}"
     elif platform == 'threads':
         # Threads has no server-side cover endpoint (embed is JS + signed URLs).
-        # Cover is captured to data/covers/threads_<key>.jpg by the local
+        # Cover is captured to data/covers/threads_<postid>.jpg by the local
         # Playwright script (thingerz-marketing/scripts/grab_threads_covers.py)
-        # and served same-origin here. Key derives from the @user/post/… id.
-        return f"https://thingerz.com/cover/threads/{re.sub(r'[^A-Za-z0-9_.-]', '_', platform_id)}"
+        # and served same-origin here. Key = the Threads post/short-code ID
+        # (last path segment), NOT the full @user/post/… path.
+        tid = platform_id.rstrip('/').split('/')[-1].split('?')[0]
+        tid = re.sub(r'[^A-Za-z0-9_.-]', '_', tid) or 'x'
+        return f"https://thingerz.com/cover/threads/{tid}"
     elif platform == 'bilibili':
         return api_url or f"https://picsum.photos/seed/bili_{platform_id}/400/225"
     elif platform == 'xiaohongshu':
