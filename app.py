@@ -1031,6 +1031,12 @@ def get_platform_thumb(platform, platform_id, api_url=''):
         # Served through our own /cover proxy: Instagram's /media/ URLs are
         # hotlink-blocked in browsers (login wall) and CDN signatures expire.
         return f"https://thingerz.com/cover/instagram/{platform_id}"
+    elif platform == 'threads':
+        # Threads has no server-side cover endpoint (embed is JS + signed URLs).
+        # Cover is captured to data/covers/threads_<key>.jpg by the local
+        # Playwright script (thingerz-marketing/scripts/grab_threads_covers.py)
+        # and served same-origin here. Key derives from the @user/post/… id.
+        return f"https://thingerz.com/cover/threads/{re.sub(r'[^A-Za-z0-9_.-]', '_', platform_id)}"
     elif platform == 'bilibili':
         return api_url or f"https://picsum.photos/seed/bili_{platform_id}/400/225"
     elif platform == 'xiaohongshu':
@@ -1093,6 +1099,18 @@ def ig_cover_proxy(platform_id):
         except OSError:
             return Response(data, mimetype='image/jpeg')
     return send_file(path, mimetype='image/jpeg', max_age=86400)
+
+
+@app.route('/cover/threads/<key>')
+def threads_cover_proxy(key):
+    """Serve a captured Threads cover (data/covers/threads_<key>.jpg), written by
+    the local Playwright capture script. Falls back to 404 (card then shows its
+    fallback) if the cover hasn't been generated yet."""
+    safe = re.sub(r'[^A-Za-z0-9_.-]', '', key) or 'x'
+    path = os.path.join(DATA_DIR, 'covers', f'threads_{safe}.jpg')
+    if os.path.exists(path):
+        return send_file(path, mimetype='image/jpeg', max_age=86400)
+    return Response('', 404)
 
 
 BACKUP_FILE = os.path.join(DATA_DIR, '_auto_backup.json')
