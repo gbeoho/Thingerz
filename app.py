@@ -990,10 +990,10 @@ def extract_threads_id(url):
     """
     if not url:
         return ''
-    m = re.search(r'threads\.net/(@[\w.]+/post/[\w.-]+)', url)
+    m = re.search(r'threads\.(?:net|com)/(@[\w.]+/post/[\w.-]+)', url)
     if m:
         return m.group(1)
-    m = re.search(r'threads\.net/(t/[\w.-]+)', url)
+    m = re.search(r'threads\.(?:net|com)/(t/[\w.-]+)', url)
     if m:
         return m.group(1)
     return url.strip().split('/')[-1].split('?')[0]
