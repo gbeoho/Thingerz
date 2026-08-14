@@ -399,6 +399,24 @@ def append_csv(filename, row, fieldnames):
         writer.writerows(rows)
 
 
+def log_upload(entry):
+    """Append-only, never-rewritten record of every user upload. Written at the
+    FIRST possible point in the submit/admin-add flows so the raw source (URL,
+    title, form fields, ip, timestamp) is preserved even if the main csv/db
+    later gets mangled or wiped by a Render deploy. This file is pulled by the
+    /admin/backup dump and merged into the local git repo by the frequent
+    thingerz-daily-backup cron, so an upload is never lost.
+    """
+    try:
+        path = os.path.join(DATA_DIR, 'uploads_log.jsonl')
+        entry.setdefault('logged_at', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        entry.setdefault('remote_addr', request.remote_addr or '')
+        with open(path, 'a', encoding='utf-8') as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+    except Exception:
+        pass  # logging must never break an upload
+
+
 def get_categories(track=None, direction=None):
     cats = read_csv('categories.csv')
     if track:
@@ -1361,6 +1379,14 @@ def submit_video():
             }
             pending_fieldnames = ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date', 'district']
             append_csv('submissions.csv', pending_sub, pending_fieldnames)
+            log_upload({'event': 'submit_pending', 'id': pending_sub['id'],
+                        'platform': pending_sub['platform'],
+                        'platform_url': pending_sub['platform_url'],
+                        'title_zh': title_zh, 'description_zh': desc_zh,
+                        'subcategory_id': subcategory_id,
+                        'district': district,
+                        'submitter_name': pending_sub['submitter_name'],
+                        'status': 'pending'})
             return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
                                    platform_config=PLATFORM_CONFIG, success=False, pending_review=True)
         # Auto-approve clean submissions
@@ -1429,6 +1455,14 @@ def submit_video():
         })
         vfieldnames = ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']
         write_csv('videos.csv', vids, vfieldnames)
+        log_upload({'event': 'submit_approved', 'id': vids[-1]['id'],
+                    'platform': platform, 'platform_url': url,
+                    'platform_id': platform_id,
+                    'title_zh': title_zh, 'description_zh': desc_zh,
+                    'subcategory_id': subcategory_id, 'category_id': category_id,
+                    'district': district,
+                    'submitter_name': submission['submitter_name'],
+                    'status': 'approved'})
         return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=True)
     return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=False, blocked=False)
 
@@ -1800,6 +1834,10 @@ def admin_video_add():
     vids.append(vid)
     fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date']
     write_csv('videos.csv', vids, fieldnames)
+    log_upload({'event': 'admin_add', 'id': vid['id'],
+                'platform': platform, 'platform_id': platform_id,
+                'title_zh': vid['title_zh'], 'subcategory_id': vid['subcategory_id'],
+                'category_id': vid['category_id'], 'status': vid['status']})
     return redirect(url_for('admin_videos'))
 
 
@@ -2086,6 +2124,15 @@ def admin_backup():
     for f in os.listdir(DATA_DIR):
         if f.endswith('.csv'):
             all_data[f] = read_csv(f)
+    # Also capture the append-only uploads log (raw source every upload) so it
+    # rides along with the backup dump into the daily git sync.
+    UL = os.path.join(DATA_DIR, 'uploads_log.jsonl')
+    if os.path.exists(UL):
+        try:
+            with open(UL, encoding='utf-8') as f:
+                all_data['uploads_log.jsonl'] = [json.loads(l) for l in f if l.strip()]
+        except Exception:
+            all_data['uploads_log.jsonl'] = []
     backup = {'data': all_data, 'backup_date': datetime.now().isoformat()}
     content = json.dumps(backup, ensure_ascii=False, indent=2)
     buf = io.BytesIO()
