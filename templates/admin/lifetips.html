@@ -1,0 +1,50 @@
+{% extends "admin/layout.html" %}
+{% block admin_content %}
+<h1>生活小知識管理</h1>
+<div class="mb" style="display:flex;gap:12px;flex-wrap:wrap">
+    <a href="#" onclick="document.getElementById('addForm').style.display='block';return false" class="btn btn-primary">+ 新增小知識</a>
+</div>
+<div id="addForm" style="display:none;background:#11111d;padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,.06);margin-bottom:24px">
+    <h3 style="margin-bottom:14px">新增小知識</h3>
+    <form method="POST">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div class="form-group"><label>中文標題</label><input name="title_zh" class="input" required></div>
+            <div class="form-group"><label>英文標題</label><input name="title_en" class="input"></div>
+            <div class="form-group"><label>日期</label><input name="date" class="input" type="date" value="{{ now.strftime('%Y-%m-%d') }}"></div>
+            <div class="form-group"><label>封面 / 圖片 URL（可貼 YouTube URL）</label><input name="image_url" class="input" placeholder="https://..."></div>
+            <div class="form-group"><label>狀態</label><select name="status" class="input"><option value="published">已發佈</option><option value="draft">草稿</option></select></div>
+            <div class="form-group"><label>地區</label><select name="region" class="input"><option value="hk">香港</option><option value="foreign">海外（不會顯示）</option></select></div>
+        </div>
+        <div class="form-group mb"><label>中文摘要</label><input name="summary_zh" class="input"></div>
+        <div class="form-group mb"><label>英文摘要</label><input name="summary_en" class="input"></div>
+        <div class="form-group mb"><label>中文內容（HTML；貼 YouTube link 會自動嵌入播放）</label><textarea name="content_zh" class="input" style="min-height:120px"></textarea></div>
+        <div class="form-group mb"><label>英文內容 (HTML)</label><textarea name="content_en" class="input" style="min-height:120px"></textarea></div>
+        <button type="submit" class="btn btn-primary">新增小知識</button>
+    </form>
+</div>
+<table>
+    <thead><tr><th>ID</th><th>標題</th><th>日期</th><th>狀態</th><th>地區</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for t in tip_items %}
+    <tr>
+        <td>{{ t['id'] }}</td>
+        <td><strong>{{ t['title_zh'] }}</strong></td>
+        <td>{{ t.get('date','') }}</td>
+        <td><span class="badge badge-{{ t.get('status','published') }}">{{ t.get('status','published') }}</span></td>
+        <td>{{ t.get('region','hk') }}</td>
+        <td>
+            <button onclick="editTip('{{ t['id'] }}','{{ t['title_zh']|e }}','{{ t.get('title_en','')|e }}','{{ t.get('date','') }}','{{ t.get('image_url','')|e }}','{{ t.get('status','published') }}','{{ t.get('region','hk') }}','{{ t.get('summary_zh','')|e }}','{{ t.get('content_zh','')|e }}')" class="btn btn-primary btn-sm">編輯</button>
+            <form method="POST" action="{{ url_for('admin_lifetips_delete', tip_id=t['id']) }}" style="display:inline" onsubmit="return confirm('確定刪除？')"><button class="btn btn-danger btn-sm">刪除</button></form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script>
+function editTip(id,title_zh,title_en,date,image_url,status,region,summary_zh,content_zh){
+    var f=document.createElement('form');f.method='POST';f.action='/admin/lifetips/edit/'+id;
+    f.innerHTML='<input name="title_zh" value="'+title_zh+'"><input name="title_en" value="'+title_en+'"><input name="date" value="'+date+'"><input name="image_url" value="'+image_url+'"><input name="status" value="'+status+'"><input name="region" value="'+region+'"><input name="summary_zh" value="'+summary_zh+'"><input name="summary_en" value=""><input name="content_zh" value="'+content_zh+'"><input name="content_en" value="">';
+    document.body.appendChild(f);f.submit();
+}
+</script>
+{% endblock %}

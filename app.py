@@ -1973,6 +1973,63 @@ def admin_news_delete(news_id):
     return redirect(url_for('admin_news'))
 
 
+# --- Admin 生活小知識 (life-tips) — mirrors 好去處 (news) admin ---
+_LIFETIPS_FIELDNAMES = ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region']
+
+
+@app.route('/admin/lifetips', methods=['GET', 'POST'])
+@admin_required
+def admin_lifetips():
+    if request.method == 'POST':
+        tips = read_csv('lifetips.csv')
+        max_num = max(int(t['id'].replace('t', '')) for t in tips) if tips else 0
+        tips.append({
+            'id': f"t{max_num + 1:03d}",
+            'title_zh': request.form.get('title_zh', ''),
+            'title_en': request.form.get('title_en', ''),
+            'content_zh': request.form.get('content_zh', ''),
+            'content_en': request.form.get('content_en', ''),
+            'summary_zh': request.form.get('summary_zh', ''),
+            'summary_en': request.form.get('summary_en', ''),
+            'date': request.form.get('date', datetime.now().strftime('%Y-%m-%d')),
+            'image_url': request.form.get('image_url', ''),
+            'status': request.form.get('status', 'published'),
+            'region': request.form.get('region', 'hk'),
+        })
+        write_csv('lifetips.csv', tips, _LIFETIPS_FIELDNAMES)
+        return redirect(url_for('admin_lifetips'))
+    return render_template('admin/lifetips.html', tip_items=read_csv('lifetips.csv'))
+
+
+@app.route('/admin/lifetips/edit/<tip_id>', methods=['POST'])
+@admin_required
+def admin_lifetips_edit(tip_id):
+    tips = read_csv('lifetips.csv')
+    for t in tips:
+        if t['id'] == tip_id:
+            t['title_zh'] = request.form.get('title_zh', t.get('title_zh', ''))
+            t['title_en'] = request.form.get('title_en', t.get('title_en', ''))
+            t['content_zh'] = request.form.get('content_zh', t.get('content_zh', ''))
+            t['content_en'] = request.form.get('content_en', t.get('content_en', ''))
+            t['summary_zh'] = request.form.get('summary_zh', t.get('summary_zh', ''))
+            t['summary_en'] = request.form.get('summary_en', t.get('summary_en', ''))
+            t['date'] = request.form.get('date', t.get('date', ''))
+            t['image_url'] = request.form.get('image_url', t.get('image_url', ''))
+            t['status'] = request.form.get('status', t.get('status', 'published'))
+            t['region'] = request.form.get('region', t.get('region', 'hk'))
+            break
+    write_csv('lifetips.csv', tips, _LIFETIPS_FIELDNAMES)
+    return redirect(url_for('admin_lifetips'))
+
+
+@app.route('/admin/lifetips/delete/<tip_id>', methods=['POST'])
+@admin_required
+def admin_lifetips_delete(tip_id):
+    tips = [t for t in read_csv('lifetips.csv') if t['id'] != tip_id]
+    write_csv('lifetips.csv', tips, _LIFETIPS_FIELDNAMES)
+    return redirect(url_for('admin_lifetips'))
+
+
 # --- Admin Contacts ---
 @app.route('/admin/contacts')
 @admin_required

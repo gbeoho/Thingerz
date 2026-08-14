@@ -52,6 +52,7 @@ a{color:#818cf8}
     <a href="{{ url_for('admin_submissions') }}" class="{% if request.endpoint == 'admin_submissions' %}active{% endif %}">提交審核</a>
     <a href="{{ url_for('admin_statistics') }}" class="{% if request.endpoint == 'admin_statistics' %}active{% endif %}">統計數據</a>
     <a href="{{ url_for('admin_news') }}" class="{% if 'admin_news' in request.endpoint %}active{% endif %}">好去處</a>
+    <a href="{{ url_for('admin_lifetips') }}" class="{% if 'admin_lifetips' in request.endpoint %}active{% endif %}">生活小知識</a>
     <a href="{{ url_for('admin_comments') }}" class="{% if request.endpoint == 'admin_comments' %}active{% endif %}">評論管理</a>
     <a href="{{ url_for('admin_contacts') }}" class="{% if request.endpoint == 'admin_contacts' %}active{% endif %}">聯絡查詢</a>
     <a href="{{ url_for('admin_freshness') }}" class="{% if request.endpoint == 'admin_freshness' %}active{% endif %}">內容新鮮度</a>
