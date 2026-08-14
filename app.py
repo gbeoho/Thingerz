@@ -201,7 +201,7 @@ TABLE_SCHEMAS = {
         track TEXT, direction TEXT, submitted_date TEXT)''',
     'news': '''CREATE TABLE IF NOT EXISTS news (
         id TEXT UNIQUE, title_zh TEXT, title_en TEXT, content_zh TEXT, content_en TEXT,
-        summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT, region TEXT)''',
+        summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT, region TEXT, district TEXT)''',
     'lifetips': '''CREATE TABLE IF NOT EXISTS lifetips (
         id TEXT UNIQUE, title_zh TEXT, title_en TEXT, content_zh TEXT, content_en TEXT,
         summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT, region TEXT)''',
@@ -244,6 +244,27 @@ def init_db():
             db.execute("ALTER TABLE news ADD COLUMN region TEXT DEFAULT 'hk'")
     except Exception:
         pass
+    # Migration: ensure news has district column (18區) so 好去處 can be filtered by district
+    try:
+        ncols = [r[1] for r in db.execute("PRAGMA table_info(news)").fetchall()]
+        if 'district' not in ncols:
+            db.execute("ALTER TABLE news ADD COLUMN district TEXT")
+        # Backfill: fill EMPTY district on existing rows from the curated news.csv
+        # labels (never overwrite a value already set). This makes 好去處 district
+        # filtering work on a persisted live DB right after deploy, not only on a
+        # fresh reseed.
+        _csv = os.path.join(DATA_DIR, 'news.csv')
+        if os.path.exists(_csv):
+            with open(_csv, 'r', encoding='utf-8-sig', newline='') as f:
+                for row in csv.DictReader(f):
+                    nid = (row.get('id') or '').strip()
+                    dist = (row.get('district') or '').strip()
+                    if nid and dist:
+                        db.execute(
+                            "UPDATE news SET district=? WHERE id=? AND (district IS NULL OR district='')",
+                            (dist, nid))
+    except Exception:
+        pass
     # Migration: ensure submissions has district column (pre-existing DBs created
     # before the field was added — without this every /submit POST crashes)
     try:
@@ -258,7 +279,7 @@ def init_db():
         'categories.csv': ('categories', ['id','category_id','name_slug','name_zh','name_en','track','direction','description_zh','description_en']),
         'subcategories.csv': ('subcategories', ['id','category_id','name_slug','name_zh','name_en']),
         'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']),
-        'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
+        'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region','district']),
         'lifetips.csv': ('lifetips', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
         'comments.csv': ('comments', ['id','video_id','author','content','date','status']),
         'submissions.csv': ('submissions', ['id','platform','platform_url','title_zh','title_en','category_id','subcategory_id','submitter_name','submitter_email','description_zh','direction','status','submitted_date']),
@@ -1496,7 +1517,12 @@ def submit_video():
 
 @app.route('/news')
 def news_list():
-    return render_template('news_list.html', news_items=get_news())
+    items = get_news()
+    district = (request.args.get('district', '') or '').strip()
+    if district:
+        items = [n for n in items if n.get('district', '') == district]
+    return render_template('news_list.html', news_items=items,
+                           districts=geo.DISTRICTS, selected_district=district)
 
 
 @app.route('/news/<news_id>')
@@ -2003,10 +2029,11 @@ def admin_news():
             'image_url': request.form.get('image_url', ''),
             'status': request.form.get('status', 'published'),
             'region': request.form.get('region', 'hk'),
+            'district': request.form.get('district', ''),
         })
-        write_csv('news.csv', news_list, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region'])
+        write_csv('news.csv', news_list, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region', 'district'])
         return redirect(url_for('admin_news'))
-    return render_template('admin/news.html', news_items=read_csv('news.csv'))
+    return render_template('admin/news.html', news_items=read_csv('news.csv'), districts=geo.DISTRICTS)
 
 
 @app.route('/admin/news/edit/<news_id>', methods=['POST'])
@@ -2025,8 +2052,9 @@ def admin_news_edit(news_id):
             n['image_url'] = request.form.get('image_url', n.get('image_url', ''))
             n['status'] = request.form.get('status', n.get('status', 'published'))
             n['region'] = request.form.get('region', n.get('region', 'hk'))
+            n['district'] = request.form.get('district', n.get('district', ''))
             break
-    write_csv('news.csv', news_list, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region'])
+    write_csv('news.csv', news_list, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region', 'district'])
     return redirect(url_for('admin_news'))
 
 
@@ -2034,7 +2062,7 @@ def admin_news_edit(news_id):
 @admin_required
 def admin_news_delete(news_id):
     news_list = [n for n in read_csv('news.csv') if n['id'] != news_id]
-    write_csv('news.csv', news_list, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region'])
+    write_csv('news.csv', news_list, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region', 'district'])
     return redirect(url_for('admin_news'))
 
 
@@ -2325,10 +2353,11 @@ def admin_news_fetch():
                 'image_url': f'https://picsum.photos/seed/{max_num}/800/400',
                 'status': 'published',
                 'region': 'hk',
+                'district': '',
             })
             existing_titles.add(title)
             fetched += 1
-        write_csv('news.csv', existing, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region'])
+        write_csv('news.csv', existing, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region', 'district'])
     except Exception as e:
         return f'<p>獲取失敗：{e}</p><a href="{url_for("admin_news")}">返回</a>', 500
     return redirect(url_for('admin_news'))

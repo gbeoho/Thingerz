@@ -9,8 +9,23 @@
     </div>
 </section>
 
+<section class="section" style="padding:0 0 8px">
+    <div class="container">
+        <div class="sticky-categories">
+            <a href="{{ url_for('news_list') }}" class="sticky-cat-chip{% if not selected_district %} active{% endif %}">全部</a>
+            {% for d in districts %}
+            <a href="{{ url_for('news_list', district=d['name_zh']) }}" class="sticky-cat-chip{% if selected_district == d['name_zh'] %} active{% endif %}" title="{{ d['name_en'] }}">{{ d['name_zh'] }}</a>
+            {% endfor %}
+        </div>
+        <p style="font-size:.76rem;color:#6a6a80;margin-top:10px">按 18 區搵本地景點、活動同美食好去處</p>
+    </div>
+</section>
+
 <section class="section">
     <div class="container">
+        {% if selected_district %}
+        <h2 style="font-size:1.25rem;margin-bottom:16px">{{ selected_district }} 好去處</h2>
+        {% endif %}
         <div class="news-grid-full">
             {% for item in news_items %}
             <article class="news-card-full">
@@ -18,7 +33,7 @@
                     <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
                 </div>
                 <div class="news-info">
-                    <time class="news-date">{{ item['date'] }}</time>
+                    <time class="news-date">{{ item['date'] }}{% if item.get('district') %} · <span class="district-tag">{{ item['district'] }}</span>{% endif %}</time>
                     <h2><a href="{{ url_for('news_detail', news_id=item['id']) }}">{{ item['title_zh'] }}</a></h2>
                     <p>{{ item['summary_zh'] }}</p>
                     <a href="{{ url_for('news_detail', news_id=item['id']) }}" class="read-more">閱讀全文 &rarr;</a>
