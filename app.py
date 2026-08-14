@@ -2410,6 +2410,13 @@ def _client_ip():
 # Durable (SQLite) so it survives Render restarts, unlike the 60s in-memory window.
 MAX_UPLOADS_PER_DAY = 20
 
+# Global per-IP request ceiling (ALL methods, ALL endpoints) — defense-in-depth
+# against single-source floods / scraping. DELIBERATELY HIGH so legit shared-NAT
+# users (one carrier IP, many people) are not caught; only trips on a sustained
+# near-flood from one source. Does NOT stop distributed (multi-IP) DDoS — that
+# is Cloudflare's job (hide origin IP + L3/L4/7 mitigation). Tunable via env.
+GLOBAL_REQ_PER_MIN = int(os.environ.get('GLOBAL_REQ_PER_MIN', '1200'))  # 20 req/sec sustained
+
 
 def _ip_hash(ip):
     import hashlib
@@ -2467,6 +2474,12 @@ def _rl_label():
 
 @app.before_request
 def _security_checks():
+    # --- Global per-IP request ceiling (all methods) — defense-in-depth vs
+    #     single-source floods / aggressive scraping. High, env-tunable threshold. ---
+    gip = _client_ip()
+    if not _rate_ok(f'rl:{gip}:global', GLOBAL_REQ_PER_MIN, 60):
+        return jsonify({'status': 'error', 'message': 'Too many requests'}), 429
+
     # --- Rate limiting (per-IP, per-endpoint) — DDoS / spam guard ---
     if request.method == 'POST':
         lab = _rl_label()
