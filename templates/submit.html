@@ -49,6 +49,15 @@
             <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交另一部影片</a>
             <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
         </div>
+        {% elif rate_limited %}
+        <div class="success-message" style="border-color:rgba(245,158,11,.4)">
+            <div class="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+            </div>
+            <h2>今日上載已達上限</h2>
+            <p>你今日上載嘅影片數量已達上限，聽日再試。</p>
+            <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
+        </div>
         {% else %}
         <form method="POST" class="submit-form">
             <div class="form-section">

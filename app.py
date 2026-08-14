@@ -215,6 +215,8 @@ TABLE_SCHEMAS = {
         id TEXT UNIQUE, name TEXT, email TEXT, subject TEXT, message TEXT, date TEXT, status TEXT)''',
     'view_counts': '''CREATE TABLE IF NOT EXISTS view_counts (\n        video_id TEXT UNIQUE, count INTEGER DEFAULT 0, clicks INTEGER DEFAULT 0)''',
     'page_views': '''CREATE TABLE IF NOT EXISTS page_views (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        page TEXT, ip_hash TEXT, viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''',
+    'upload_limits': '''CREATE TABLE IF NOT EXISTS upload_limits (
+        ip_hash TEXT, day TEXT, cnt INTEGER DEFAULT 0, PRIMARY KEY(ip_hash, day))''',
     'crawled_videos': '''CREATE TABLE IF NOT EXISTS crawled_videos (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        platform TEXT NOT NULL, platform_id TEXT NOT NULL,\n        sub_category TEXT, district TEXT, title TEXT, url TEXT,\n        thumbnail_url TEXT, author_name TEXT, author_url TEXT,\n        description TEXT, view_count INTEGER DEFAULT 0,\n        like_count INTEGER DEFAULT 0, comment_count INTEGER DEFAULT 0,\n        duration_sec INTEGER DEFAULT 0, published_at TEXT,\n        score REAL DEFAULT 0, updated_at TEXT,\n        district_confirmed INTEGER DEFAULT 0,\n        UNIQUE(platform, platform_id))''',
 }
 
@@ -1398,6 +1400,14 @@ def submit_video():
             return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
                                    platform_config=PLATFORM_CONFIG, success=False, blocked=True,
                                    block_reason=block_reason)
+        # Per-IP daily upload cap: reject without processing once an IP hits the
+        # daily ceiling (durable SQLite counter, survives restarts).
+        up_day = datetime.now().strftime('%Y-%m-%d')
+        up_ip = _ip_hash(_client_ip())
+        if _upload_count(up_ip, up_day) >= MAX_UPLOADS_PER_DAY:
+            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
+                                   platform_config=PLATFORM_CONFIG, success=False, rate_limited=True)
+        _inc_upload(up_ip, up_day)
         # Category verification: if the submitter's chosen sub-category clearly
         # does NOT match the content (confident match to a DIFFERENT category),
         # don't auto-post it in a wrong category — route to the admin review
@@ -2394,6 +2404,40 @@ def _client_ip():
     if xff:
         return xff.split(',')[0].strip()
     return request.remote_addr or '?'
+
+
+# Per-IP DAILY upload cap: one IP may upload at most this many videos per day.
+# Durable (SQLite) so it survives Render restarts, unlike the 60s in-memory window.
+MAX_UPLOADS_PER_DAY = 20
+
+
+def _ip_hash(ip):
+    import hashlib
+    return hashlib.sha256((ip or '?').encode('utf-8')).hexdigest()[:16]
+
+
+def _upload_count(ip_hash, day):
+    try:
+        db = get_db()
+        r = db.execute("SELECT cnt FROM upload_limits WHERE ip_hash=? AND day=?",
+                       (ip_hash, day)).fetchone()
+        db.close()
+        return r['cnt'] if r else 0
+    except Exception:
+        return 0
+
+
+def _inc_upload(ip_hash, day):
+    try:
+        db = get_db()
+        db.execute(
+            "INSERT INTO upload_limits(ip_hash, day, cnt) VALUES(?,?,1) "
+            "ON CONFLICT(ip_hash, day) DO UPDATE SET cnt=cnt+1",
+            (ip_hash, day))
+        db.commit()
+        db.close()
+    except Exception:
+        pass  # a counter failure must never break an upload
 
 
 def _get_csrf():
