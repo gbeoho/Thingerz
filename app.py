@@ -959,8 +959,14 @@ def extract_youtube_id(url):
 def extract_instagram_id(url):
     if not url:
         return ''
-    match = re.search(r'instagram\.com/(?:p|reel)/([a-zA-Z0-9_-]+)', url)
-    return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
+    # cover /p/, /reel/, /reels/ (new share format), /share/ short codes, and
+    # any trailing /path/?query so a full shared link always yields the code.
+    m = re.search(r'instagram\.com/(?:p|reel|reels|share)/([a-zA-Z0-9_-]+)', url)
+    if m:
+        return m.group(1)
+    # fallback: last non-empty path segment (strips / and ?query)
+    seg = url.strip().rstrip('/').split('/')[-1].split('?')[0]
+    return seg
 
 def extract_tiktok_id(url):
     if not url:
