@@ -66,7 +66,9 @@
                     <label for="platform">平台 <span class="required">*</span></label>
                     <select name="platform" id="platform" class="input" required>
                         {% for key, cfg in platform_config.items() %}
+                        {% if key != 'douyin' %}
                         <option value="{{ key }}">{{ cfg.name }}</option>
+                        {% endif %}
                         {% endfor %}
                     </select>
                 </div>

@@ -1045,6 +1045,24 @@ def extract_tiktok_id(url):
     return match.group(1) if match else url.strip().split('/')[-1].split('?')[0]
 
 
+def extract_douyin_id(url):
+    """Extract a Douyin video ID from douyin.com / iesdouyin / v.douyin links.
+    Falls back to the URL last segment (stripped of query + trailing slash)."""
+    if not url:
+        return ''
+    url = url.strip()
+    m = re.search(r'douyin\.com/(?:video|note)/([\w-]+)', url)
+    if m:
+        return m.group(1)
+    m = re.search(r'iesdouyin\.com/share/(?:video|note)/([\w-]+)', url)
+    if m:
+        return m.group(1)
+    m = re.search(r'v\.douyin\.com/([\w-]+)', url)
+    if m:
+        return m.group(1)
+    return url.split('/')[-1].split('?')[0]
+
+
 def extract_xiaohongshu_id(url):
     """Extract Xiaohongshu note ID from URL."""
     if not url:
@@ -1526,6 +1544,8 @@ def submit_video():
             platform_id = extract_threads_id(url)
         elif platform == 'tiktok':
             platform_id = extract_tiktok_id(url)
+        elif platform == 'douyin':
+            platform_id = extract_douyin_id(url)
         elif platform == 'xiaohongshu':
             platform_id = extract_xiaohongshu_id(url)
         elif platform == 'bilibili':
@@ -1938,6 +1958,8 @@ def admin_video_add():
         platform_id = extract_threads_id(platform_id_raw) or platform_id_raw
     elif platform == 'tiktok':
         platform_id = extract_tiktok_id(platform_id_raw) or platform_id_raw
+    elif platform == 'douyin':
+        platform_id = extract_douyin_id(platform_id_raw) or platform_id_raw
     elif platform == 'xiaohongshu':
         platform_id = extract_xiaohongshu_id(platform_id_raw) or platform_id_raw
     elif platform == 'bilibili':
