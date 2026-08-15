@@ -7,7 +7,7 @@ s005,cat001,interior-design,室內設計,Interior Design
 s006,cat001,medical,醫療服務,Medical Services
 s007,cat001,food-beverage,餐飲與酒類,Food & Beverage
 s008,cat001,events,活動與配對,Events & Networking
-s009,cat002,skills,技能教學,Skills Tutorial
+s009,cat002,skills,特別技能教學,Special Skills Training
 s010,cat002,performance-coaching,表演教練,Performance Coaching
 s011,cat002,music-learning,音樂學習,Music Learning
 s012,cat002,visual-arts,視覺創作課程,Visual Arts Course
@@ -70,3 +70,4 @@ s068,cat008,toys-mini4wd-beyblade,"玩具(四驅車,陀螺)",Toys (Mini-4WD & Be
 s069,cat006,lifestyle-accessories,生活小配件,Lifestyle Accessories
 s070,cat002,sports-coaching,體育運動教學,Sports & Coaching
 s071,cat004,asmr-relaxation,ASMR音效,ASMR Sound Effects
+s072,cat002,singing,唱歌教學,Singing Lessons
