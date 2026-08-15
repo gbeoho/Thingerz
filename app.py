@@ -89,12 +89,23 @@ def filter_profanity(text):
     return result
 
 def contains_blocked(text):
+    """Restricted/blood-block word scan (input gate for comments, submissions).
+
+    English words use WHOLE-WORD boundary match (\\bword\\b) so legitimate text like
+    "music" / "asmr" / "blogspot" / "photoshop" no longer false-positive on "
+    'sm'/'x'/'av' substrings (seen 2026-08: kitsmusicproduction.com rejected for
+    "sm"). Chinese words stay plain substring matches (no word boundaries in CJK).
+    """
     if not text:
         return False
     tl = text.lower()
     for w in BLOCKED_WORDS:
-        if w.lower() in tl:
-            return True
+        if w.isascii():
+            if re.search(r'\b' + re.escape(w) + r'\b', tl):
+                return True
+        else:
+            if w in tl:
+                return True
     return False
 
 HK_DISTRICTS = [
