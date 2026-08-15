@@ -60,11 +60,26 @@
     <div class="container">
         <div class="sticky-categories">
             {% for d in all_districts %}
-            <a href="{{ url_for('location_page', slug=d['slug']) }}" class="sticky-cat-chip {{ 'active' if d['slug'] == district['slug'] else '' }}">{{ d['name_zh'] }}</a>
+            <a href="{{ url_for('location_page', slug=d['slug']) }}{{ '?svc=' + selected_svc if selected_svc else '' }}" class="sticky-cat-chip {{ 'active' if d['slug'] == district['slug'] else '' }}">{{ d['name_zh'] }}</a>
             {% endfor %}
         </div>
     </div>
 </section>
+
+{% if svc_chips %}
+<section class="section" style="padding:0 0 8px">
+    <div class="container">
+        <div class="sticky-categories service-chips">
+            <a href="{{ url_for('location_page', slug=district['slug']) }}" class="sticky-cat-chip {{ 'active' if not selected_svc else '' }}">全部</a>
+            <a href="{{ url_for('location_page', slug=district['slug'], svc='teaching') }}" class="sticky-cat-chip {{ 'active' if selected_svc == 'teaching' else '' }}">教學/服務</a>
+            {% for c in svc_chips %}
+            <a href="{{ url_for('location_page', slug=district['slug'], svc=c['id']) }}" class="sticky-cat-chip {{ 'active' if selected_svc == c['id'] else '' }}">{{ c['name_zh'] }}</a>
+            {% endfor %}
+        </div>
+        <p style="font-size:.78rem;color:#6a6a80;margin:6px 0 0">按服務類型篩選：搵大埔音樂、體育或技能導師 — 直接睇佢嘅影片。</p>
+    </div>
+</section>
+{% endif %}
 
 <section class="section">
     <div class="container">

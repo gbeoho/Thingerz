@@ -502,12 +502,21 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
     try:
         db = get_db()
         crawl_rows = []
-        # Fetch top videos per sub-category for balanced coverage
-        subs = [r[0] for r in db.execute("SELECT DISTINCT sub_category FROM crawled_videos WHERE sub_category != ''").fetchall()]
-        for sc in subs:
+        if district:
+            # District pages need ALL confirmed rows for the district, not just
+            # the top-10-per-sub slice — otherwise most district content is
+            # invisible (e.g. 大埔 608 confirmed but only 5 surfaced).
             crawl_rows.extend(db.execute(
-                "SELECT * FROM crawled_videos WHERE sub_category=? ORDER BY view_count DESC LIMIT 10",
-                (sc,)).fetchall())
+                "SELECT * FROM crawled_videos WHERE district_confirmed=1 AND "
+                "district LIKE ? ORDER BY view_count DESC LIMIT 600",
+                ('%' + district + '%',)).fetchall())
+        else:
+            # Fetch top videos per sub-category for balanced coverage
+            subs = [r[0] for r in db.execute("SELECT DISTINCT sub_category FROM crawled_videos WHERE sub_category != ''").fetchall()]
+            for sc in subs:
+                crawl_rows.extend(db.execute(
+                    "SELECT * FROM crawled_videos WHERE sub_category=? ORDER BY view_count DESC LIMIT 10",
+                    (sc,)).fetchall())
         # Sort combined result by view_count
         crawl_rows.sort(key=lambda r: r['view_count'] or 0, reverse=True)
         db.close()
@@ -1559,7 +1568,14 @@ def lifetips_detail(tip_id):
 @app.route('/location/<slug>')
 def location_page(slug):
     """GEO district landing pages (18 districts). Each page: H1/H2, 2-sentence
-    intro, conversational FAQ, district-confirmed videos and Service JSON-LD."""
+    intro, conversational FAQ, district-confirmed videos and Service JSON-LD.
+    Optional ?svc=<subcategory_id|teaching> narrows the 區內影片 list to
+    teaching/service sub-categories (music, magic, sports coaching, ...) so
+    users can find a tutor/coach per district without a new top-level category."""
+    TEACHING_SUBS = {
+        's009', 's010', 's011', 's012', 's013', 's014', 's023', 's024', 's026',
+        's029', 's030', 's058', 's059', 's062', 's070',
+    }
     d = geo.DISTRICTS_BY_SLUG.get(slug)
     if not d:
         return redirect(url_for('index'))
@@ -1574,8 +1590,21 @@ def location_page(slug):
     for v in extra:
         if v['id'] not in seen:
             vids.append(v)
+    svc = (request.args.get('svc', '') or '').strip()
+    # chips: teaching/service sub-categories that actually have content in this district
+    svc_chips = []
+    sub_names = {s['id']: s['name_zh'] for s in get_subcategories()}
+    have = {v.get('subcategory_id') for v in vids}
+    for sid in sorted(TEACHING_SUBS):
+        if sid in have:
+            svc_chips.append({'id': sid, 'name_zh': sub_names.get(sid, sid)})
+    if svc == 'teaching':
+        vids = [v for v in vids if (v.get('subcategory_id') or '') in TEACHING_SUBS]
+    elif svc.startswith('s') and len(svc) == 4 and svc[1:].isdigit():
+        vids = [v for v in vids if (v.get('subcategory_id') or '') == svc]
     return render_template('location.html', district=d, videos=vids,
-                           all_districts=[x for x in geo.DISTRICTS])
+                           all_districts=[x for x in geo.DISTRICTS],
+                           svc_chips=svc_chips, selected_svc=svc)
 
 
 @app.route('/contact', methods=['GET', 'POST'])
