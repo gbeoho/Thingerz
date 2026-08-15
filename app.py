@@ -301,13 +301,33 @@ def init_db():
 
     # Reference tables (categories / subcategories) are the static source of
     # truth in CSV — always sync any missing rows from CSV so new sub-categories
-    # (e.g. s065-s069) appear on a persisted live DB after deploy, not just on a
-    # fresh one. Live-editable tables (news/videos/submissions/comments) keep the
-    # count==0 guard so a stale local CSV can't overwrite the live DB.
+    # (e.g. s065-s073) appear on a persisted live DB after deploy, not just on a
+    # fresh one.
+    #
+    # LIVE-EDITABLE tables (videos / submissions / comments / contacts) get a
+    # one-way CSV->DB backfill: INSERT OR IGNORE by id so repo-committed rows
+    # (e.g. v073+ uploaded before a deploy) are re-added to a persisted live DB
+    # that already has rows, WITHOUT overwriting live admin edits / live-only
+    # rows. This fixes the 2026-08-15 bug where a Render deploy wiped v073-v076
+    # (init_db skipped non-empty tables and never re-seeded them).
+    #
+    # news / lifetips keep the count==0 guard: they are daily-fetched and the
+    # live table is authoritative (a stale local CSV must never clobber the
+    # live articles a cron just wrote).
+    SYNC_TABLES = {
+        'categories': 'insert_or_replace',
+        'subcategories': 'insert_or_replace',
+        'videos': 'insert_ignore',
+        'submissions': 'insert_ignore',
+        'comments': 'insert_ignore',
+        'contacts': 'insert_ignore',
+    }
     for csv_file, (table_name, fields) in csv_to_table.items():
-        count = db.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
-        if count > 0 and table_name not in ('categories', 'subcategories'):
-            continue
+        mode = SYNC_TABLES.get(table_name, 'count0_only')
+        if mode == 'count0_only':
+            count = db.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()[0]
+            if count > 0:
+                continue
         csv_path = os.path.join(DATA_DIR, csv_file)
         if not os.path.exists(csv_path):
             continue
@@ -317,7 +337,8 @@ def init_db():
                 values = {k: row.get(k, '') for k in fields}
                 placeholders = ', '.join(['?' for _ in fields])
                 columns = ', '.join(fields)
-                db.execute(f"INSERT OR REPLACE INTO {table_name} ({columns}) VALUES ({placeholders})",
+                verb = 'INSERT OR REPLACE' if mode == 'insert_or_replace' else 'INSERT OR IGNORE'
+                db.execute(f"{verb} INTO {table_name} ({columns}) VALUES ({placeholders})",
                            [values[k] for k in fields])
     # Seed crawled_videos from JSONL if empty (survives Render ephemeral storage)
     seed_path = os.path.join(DATA_DIR, 'seed_crawled_videos.jsonl')
