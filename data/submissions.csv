@@ -1,9 +1,9 @@
 id,platform,platform_url,title_zh,title_en,category_id,subcategory_id,submitter_name,submitter_email,description_zh,direction,status,submitted_date,district
-sub_44909473,tiktok,https://tiktok.com/@user/video/123,Test,,cat001,s001,Test,,,business,pending,2026-07-22,
+sub_44909473,tiktok,https://tiktok.com/@user/video/123,Test,,cat001,s001,Test,,,business,rejected,2026-07-22,
 sub_3757c7f1,youtube,https://www.youtube.com/watch?v=pPCnARwyCrM,【四分鐘學識搵工方法】│香港社區組織協會SoCO,null,cat001,s004,Dee,gbeoho@gmail.com,"
 香港社區組織協會 SoCO",learning,approved,2026-07-23,
 sub_80fa2602,youtube,https://www.youtube.com/watch?v=pPCnARwyCrM,【四分鐘學識搵工方法】│香港社區組織協會SoCO,null,cat001,s004,Dee,gbeoho@gmail.com,香港社區組織協會 SoCO,learning,approved,2026-07-23,
-sub_a916efc3,youtube,https://www.youtube.com/watch?v=dQw4w9WgXcQ,測試影片,,cat001,s001,Test,,,,pending,2026-07-23,
+sub_a916efc3,youtube,https://www.youtube.com/watch?v=dQw4w9WgXcQ,測試影片,,cat001,s001,Test,,,,rejected,2026-07-23,
 sub_686be57e,youtube,https://youtube.com/watch?v=kJQP7kiw5Fk,HK Test,,cat001,s001,T,,,,approved,2026-07-23,
 sub_295383cd,youtube,https://youtube.com/watch?v=228SQpmwqsM,測試自動審核,,cat005,s029,Test,,,,approved,2026-07-25,
 sub_2e637e52,youtube,https://youtu.be/xnbUpV591XE?si=JrAAxyL301Bpvgbh,靜觀音樂 - 烤雞音樂台,Mindfulness Music by Roastchickenmusic,cat002,s014,G,,靜觀呼吸時可以聽聽,learning,approved,2026-08-08,
@@ -51,4 +51,9 @@ sub_6d0b68c5,instagram,https://www.instagram.com/reels/DXwd1Mqg5vR/,中環🇭�
 
 而且佢地推有個set好抵食‼️",fun,approved,2026-08-14,
 sub_2b4d7e8a,bilibili,https://www.bilibili.com/video/BV13bgn6gEg1/?spm_id_from=333.1007.tianma.4-1-11.click,最后离开的人，赢得这座百万豪宅！,,cat004,s028,Dee,,最后离开的人，赢得这座百万豪宅！,fun,approved,2026-08-14,
-sub_407aca4e,instagram,https://www.instagram.com/reel/DcBX8EnCH1v/?igsh=MXY2M3diZmJ6cTRyMQ==&igsi=MXY2M3diZmJ6cTRyMQ==,Ari 攝影教學,,cat002,s009,G,,,learning,pending,2026-08-15,
+sub_407aca4e,instagram,https://www.instagram.com/reel/DcBX8EnCH1v/?igsh=MXY2M3diZmJ6cTRyMQ==&igsi=MXY2M3diZmJ6cTRyMQ==,Ari 攝影教學,,cat002,s073,G,,,learning,approved,2026-08-15,
+sub_7edfcc70,instagram,https://www.instagram.com/reel/DbxrPvvTPlG/?igsh=M3k5aHFua2d0NmRt&igsi=M3k5aHFua2d0NmRt,廣東話學法文,,cat002,s013,G,,廣東話學法文,learning,approved,2026-08-15,
+sub_5b270007,instagram,https://www.instagram.com/reel/DbxrPvvTPlG/?igsh=M3k5aHFua2d0NmRt&igsi=M3k5aHFua2d0NmRt,廣東話學法文,,cat002,s013,G,,廣東話學法文,learning,approved,2026-08-15,
+sub_936262a4,threads,https://www.threads.com/share/BAPL_0DXWg/,中環手工意粉,Spaghetti in central,cat001,s007,G,,中環好味嘅手工意粉,fun,approved,2026-08-15,中西區
+sub_d9e4a70f,youtube,https://www.youtube.com/watch?v=SVgOddKlOds, 由《記憶棉》到《男人怎可以》：MC一直重複同緊同一個「唱歌公式」？ | Calvin歌唱小教室,,cat002,s072,C,,"👉 WhatsApp 9857 6836 預約 60分鐘試堂，用最輕鬆嘅方式開始唱好歌。
+宜家做緊暑期優惠，只需要HKD325就可以一對一60分鐘試堂，仲諗咩呀，我地上堂見啦！",learning,pending,2026-08-15,油尖旺區
