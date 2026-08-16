@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% set _vraw = (video['description_zh'] or '').strip() %}
+{% set _vdesc = _vraw if _vraw|length >= 40 else ((video['title_zh'] or '') + ' ｜ Thingerz 香港 18 區影音探索') %}
+{% set _vmeta = _vdesc | replace('\n', ' ') | replace('\r', ' ') %}
 {% block title %}{{ video['title_zh'] }} - Thingerz{% endblock %}
-{% block meta_description %}{{ (video['description_zh'] or video['title_zh'] or 'Thingerz 影片')[:150] }}{% endblock %}
+{% block meta_description %}{{ _vmeta[:150] }}{% endblock %}
 {% block og_title %}{{ video['title_zh'] }} - Thingerz{% endblock %}
-{% block og_description %}{{ (video['description_zh'] or video['title_zh'] or 'Thingerz 影片')[:150] }}{% endblock %}
+{% block og_description %}{{ _vmeta[:150] }}{% endblock %}
 {% block og_image %}{{ (video['thumbnail_url'] or url_for('static', filename='favicon.svg', _external=True)) }}{% endblock %}
 
 {% block extra_head %}
@@ -11,7 +14,7 @@
   "@context": "https://schema.org",
   "@type": "VideoObject",
   "name": {{ video['title_zh']|tojson }},
-  "description": {{ (video['description_zh'] or '')|tojson }},
+  "description": {{ _vmeta[:150]|tojson }},
   "thumbnailUrl": {{ video['thumbnail_url']|tojson }},
   "uploadDate": {{ (video['submitted_date'] or '2026-01-01')|tojson }},
   "url": "https://thingerz.com/video/{{ video['id'] }}"

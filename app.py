@@ -11,7 +11,7 @@ import time
 import urllib.request
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response, abort
 
 import geo  # 18-district GEO landing pages
 
@@ -922,8 +922,33 @@ def sitemap():
 
     urls = []
 
-    def add(path, priority=0.5, changefreq='weekly'):
-        urls.append((base + path, priority, changefreq))
+    def add(path, priority=0.5, changefreq='weekly', lastmod=None, video=None):
+        entry = {'loc': base + path, 'priority': priority,
+                 'changefreq': changefreq, 'lastmod': lastmod, 'video': video}
+        urls.append(entry)
+
+    def iso_date(s):
+        """Normalize a date string to YYYY-MM-DD if it looks like a date."""
+        if not s:
+            return None
+        m = re.match(r'(\d{4})-(\d{2})-(\d{2})', str(s))
+        return m.group(0) if m else None
+
+    def video_meta(v, platform_key='platform', id_key='platform_id',
+                   title_key='title_zh', desc_key='description_zh',
+                   thumb_key='thumbnail_url', **kw):
+        """Build video:video extension dict when the platform has a player URL."""
+        plat = v.get(platform_key, '')
+        pid = v.get(id_key, '')
+        if plat != 'youtube' or not pid:
+            return None
+        player = f'https://www.youtube.com/embed/{pid}'
+        return {
+            'thumbnail_loc': v.get(thumb_key, ''),
+            'title': (v.get(title_key, '') or '')[:100],
+            'description': (v.get(desc_key, '') or '')[:2000],
+            'player_loc': player,
+        }
 
     # Static pages
     add('/', priority=1.0, changefreq='daily')
@@ -953,40 +978,60 @@ def sitemap():
     video_ids = set()
     try:
         db = get_db()
-        rows = db.execute("SELECT id FROM crawled_videos WHERE district_confirmed=1 LIMIT 2000").fetchall()
+        rows = db.execute("SELECT id, platform, platform_id, title, description, thumbnail_url, updated_at FROM crawled_videos WHERE district_confirmed=1 LIMIT 2000").fetchall()
         for r in rows:
             video_ids.add('cv_' + str(r['id']))
+            add(f"/video/cv_{r['id']}", priority=0.4,
+                lastmod=iso_date(r['updated_at']),
+                video=video_meta(dict(r), platform_key='platform',
+                                 id_key='platform_id', title_key='title',
+                                 desc_key='description'))
         db.close()
     except Exception:
         pass
 
     # Manually approved videos
-    video_ids.update(v['id'] for v in get_videos(limit=10000)
-                     if v.get('id') and v.get('status') == 'approved')
-
-    for vid in list(video_ids)[:3000]:
-        add(f'/video/{vid}', priority=0.4)
+    for v in get_videos(limit=10000):
+        vid = v.get('id')
+        if not vid or v.get('status') != 'approved':
+            continue
+        add(f'/video/{vid}', priority=0.4,
+            lastmod=iso_date(v.get('submitted_date')),
+            video=video_meta(v))
 
     # News articles
     news_list = get_news() or []
     for n in news_list:
         if n.get('id') and n.get('status') == 'published':
-            add(f'/news/{n["id"]}', priority=0.7, changefreq='monthly')
+            add(f'/news/{n["id"]}', priority=0.7, changefreq='monthly',
+                lastmod=iso_date(n.get('date')))
 
     # Life-tips articles
     tips = get_lifetips() or []
     for t in tips:
         if t.get('id') and t.get('status') == 'published':
-            add(f'/life-tips/{t["id"]}', priority=0.6, changefreq='monthly')
+            add(f'/life-tips/{t["id"]}', priority=0.6, changefreq='monthly',
+                lastmod=iso_date(t.get('date')))
 
     # Build XML
     urlset = Element('urlset')
     urlset.set('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9')
-    for loc, priority, changefreq in urls:
+    urlset.set('xmlns:video', 'http://www.google.com/schemas/sitemap-video/1.1')
+    for e in urls:
         u = SubElement(urlset, 'url')
-        SubElement(u, 'loc').text = loc
-        SubElement(u, 'changefreq').text = changefreq
-        SubElement(u, 'priority').text = str(priority)
+        SubElement(u, 'loc').text = e['loc']
+        if e['lastmod']:
+            SubElement(u, 'lastmod').text = e['lastmod']
+        SubElement(u, 'changefreq').text = e['changefreq']
+        SubElement(u, 'priority').text = str(e['priority'])
+        if e['video']:
+            v = SubElement(u, 'video:video')
+            thumb = e['video'].get('thumbnail_loc') or ''
+            if thumb:
+                SubElement(v, 'video:thumbnail_loc').text = thumb
+            SubElement(v, 'video:title').text = e['video']['title']
+            SubElement(v, 'video:description').text = e['video']['description']
+            SubElement(v, 'video:player_loc').text = e['video']['player_loc']
     xml_str = minidom.parseString(tostring(urlset)).toprettyxml(indent='  ')
     return Response(xml_str, mimetype='application/xml')
 
@@ -1397,7 +1442,11 @@ def track_page(track):
 def category_page(slug):
     category = get_category_by_slug(slug)
     if not category:
-        return redirect(url_for('index'))
+        # Legacy numeric ids (cat001..008) -> 301 to canonical slug URL
+        legacy = get_category(slug)
+        if legacy and legacy.get('name_slug'):
+            return redirect(url_for('category_page', slug=legacy['name_slug']), code=301)
+        abort(404)
     subcategories = get_subcategories(category['category_id'])
     videos = get_videos(category_id=category['category_id'])
     district = request.args.get('district', '').strip()
@@ -1410,7 +1459,7 @@ def category_page(slug):
 def subcategory_page(subcategory_id):
     sub = get_subcategory(subcategory_id)
     if not sub:
-        return redirect(url_for('index'))
+        abort(404)
     category = get_category(sub['category_id'])
     subcategories = get_subcategories(sub['category_id'])
     videos = get_videos(subcategory_id=subcategory_id)
@@ -1424,7 +1473,7 @@ def subcategory_page(subcategory_id):
 def video_detail(video_id):
     video = get_video(video_id)
     if not video:
-        return redirect(url_for('index'))
+        abort(404)
     increment_view(video_id)
     category = get_category(video['category_id'])
     sub = get_subcategory(video['subcategory_id'])
@@ -1638,7 +1687,7 @@ def location_page(slug):
     }
     d = geo.DISTRICTS_BY_SLUG.get(slug)
     if not d:
-        return redirect(url_for('index'))
+        abort(404)
     vids = get_videos(district=d['name_zh']) or []
     # broaden: any curated video whose title/desc/tags mention the district name
     district = d['name_zh']
