@@ -27,7 +27,7 @@
         <td>{{ s['name_slug'] }}</td>
         <td>
             <a href="{{ url_for('admin_subcategory_edit', sub_id=s['id']) }}" class="btn btn-primary btn-sm">編輯</a>
-            <form method="POST" style="display:inline" onsubmit="return confirm('確定刪除 {{ s['name_zh'] }}？')"><input type="hidden" name="action" value="delete"><input type="hidden" name="sub_id" value="{{ s['id'] }}"><button class="btn btn-danger btn-sm">刪除</button></form>
+            <form method="POST" style="display:inline" onsubmit="return confirm('確定刪除？')"><input type="hidden" name="action" value="delete"><input type="hidden" name="sub_id" value="{{ s['id'] }}"><button class="btn btn-danger btn-sm">刪除</button></form>
         </td>
     </tr>
     {% endfor %}

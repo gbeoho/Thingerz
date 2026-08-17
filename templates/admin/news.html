@@ -32,7 +32,17 @@
         <td>{{ n.get('date','') }}</td>
         <td><span class="badge badge-{{ n.get('status','published') }}">{{ n.get('status','published') }}</span></td>
         <td>
-            <button onclick="editNews('{{ n['id'] }}','{{ n['title_zh']|e }}','{{ n.get('title_en','')|e }}','{{ n.get('date','') }}','{{ n.get('image_url','')|e }}','{{ n.get('status','published') }}','{{ n.get('summary_zh','')|e }}','{{ n.get('content_zh','')|e }}','{{ n.get('district','') }}')" class="btn btn-primary btn-sm">編輯</button>
+            <button class="btn btn-primary btn-sm"
+               data-id="{{ n['id'] }}"
+               data-title-zh="{{ n.get('title_zh','') }}"
+               data-title-en="{{ n.get('title_en','') }}"
+               data-date="{{ n.get('date','') }}"
+               data-image="{{ n.get('image_url','') }}"
+               data-status="{{ n.get('status','published') }}"
+               data-summary="{{ n.get('summary_zh','') }}"
+               data-content="{{ n.get('content_zh','') }}"
+               data-district="{{ n.get('district','') }}"
+               onclick="editNews(this)">編輯</button>
             <form method="POST" action="{{ url_for('admin_news_delete', news_id=n['id']) }}" style="display:inline" onsubmit="return confirm('確定刪除？')"><button class="btn btn-danger btn-sm">刪除</button></form>
         </td>
     </tr>
@@ -40,7 +50,8 @@
     </tbody>
 </table>
 <script>
-function editNews(id,title_zh,title_en,date,image_url,status,summary_zh,content_zh,district){
+function editNews(btn){
+    var id=btn.getAttribute('data-id'),title_zh=btn.getAttribute('data-title-zh'),title_en=btn.getAttribute('data-title-en'),date=btn.getAttribute('data-date'),image_url=btn.getAttribute('data-image'),status=btn.getAttribute('data-status'),summary_zh=btn.getAttribute('data-summary'),content_zh=btn.getAttribute('data-content'),district=btn.getAttribute('data-district');
     var f=document.createElement('form');f.method='POST';f.action='/admin/news/edit/'+id;
     f.innerHTML='<input name="title_zh" value="'+title_zh+'"><input name="title_en" value="'+title_en+'"><input name="date" value="'+date+'"><input name="image_url" value="'+image_url+'"><input name="status" value="'+status+'"><input name="summary_zh" value="'+summary_zh+'"><input name="summary_en" value=""><input name="content_zh" value="'+content_zh+'"><input name="content_en" value=""><input name="district" value="'+district+'">';
     document.body.appendChild(f);f.submit();

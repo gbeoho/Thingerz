@@ -33,7 +33,17 @@
         <td><span class="badge badge-{{ t.get('status','published') }}">{{ t.get('status','published') }}</span></td>
         <td>{{ t.get('region','hk') }}</td>
         <td>
-            <button onclick="editTip('{{ t['id'] }}','{{ t['title_zh']|e }}','{{ t.get('title_en','')|e }}','{{ t.get('date','') }}','{{ t.get('image_url','')|e }}','{{ t.get('status','published') }}','{{ t.get('region','hk') }}','{{ t.get('summary_zh','')|e }}','{{ t.get('content_zh','')|e }}')" class="btn btn-primary btn-sm">編輯</button>
+            <button class="btn btn-primary btn-sm"
+               data-id="{{ t['id'] }}"
+               data-title-zh="{{ t.get('title_zh','') }}"
+               data-title-en="{{ t.get('title_en','') }}"
+               data-date="{{ t.get('date','') }}"
+               data-image="{{ t.get('image_url','') }}"
+               data-status="{{ t.get('status','published') }}"
+               data-region="{{ t.get('region','hk') }}"
+               data-summary="{{ t.get('summary_zh','') }}"
+               data-content="{{ t.get('content_zh','') }}"
+               onclick="editTip(this)">編輯</button>
             <form method="POST" action="{{ url_for('admin_lifetips_delete', tip_id=t['id']) }}" style="display:inline" onsubmit="return confirm('確定刪除？')"><button class="btn btn-danger btn-sm">刪除</button></form>
         </td>
     </tr>
@@ -41,7 +51,8 @@
     </tbody>
 </table>
 <script>
-function editTip(id,title_zh,title_en,date,image_url,status,region,summary_zh,content_zh){
+function editTip(btn){
+    var id=btn.getAttribute('data-id'),title_zh=btn.getAttribute('data-title-zh'),title_en=btn.getAttribute('data-title-en'),date=btn.getAttribute('data-date'),image_url=btn.getAttribute('data-image'),status=btn.getAttribute('data-status'),region=btn.getAttribute('data-region'),summary_zh=btn.getAttribute('data-summary'),content_zh=btn.getAttribute('data-content');
     var f=document.createElement('form');f.method='POST';f.action='/admin/lifetips/edit/'+id;
     f.innerHTML='<input name="title_zh" value="'+title_zh+'"><input name="title_en" value="'+title_en+'"><input name="date" value="'+date+'"><input name="image_url" value="'+image_url+'"><input name="status" value="'+status+'"><input name="region" value="'+region+'"><input name="summary_zh" value="'+summary_zh+'"><input name="summary_en" value=""><input name="content_zh" value="'+content_zh+'"><input name="content_en" value="">';
     document.body.appendChild(f);f.submit();

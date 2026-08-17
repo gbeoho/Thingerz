@@ -709,9 +709,9 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
         # Non-confirmed videos stay on the main page but never in district search.
         result = [v for v in result
                   if v.get('district_confirmed', True)
-                  and (district in v.get('tags', '')
-                       or district in v.get('title_zh', '')
-                       or district in v.get('description_zh', ''))]
+                  and (district in (v.get('tags') or '')
+                       or district in (v.get('title_zh') or '')
+                       or district in (v.get('description_zh') or ''))]
     # Ordering (user directive): USER-UPLOADED content first (videos.csv — includes IG
     # submissions), newest first by submitted date; then crawled videos by publish
     # recency (newest first via relative published_at). So a freshly uploaded IG reel
@@ -828,7 +828,7 @@ def get_news(news_id=None):
         n['video_url'] = f"https://www.youtube.com/watch?v={vid}" if vid else ''
     if news_id:
         for n in news_list:
-            if n['id'] == news_id:
+            if n['id'] == news_id and n.get('status') == 'published' and n.get('region', 'hk') != 'foreign':
                 return n
         return None
     result = [n for n in news_list if n['status'] == 'published' and n.get('region', 'hk') != 'foreign']
@@ -844,7 +844,7 @@ def get_lifetips(tip_id=None):
         r['video_url'] = f"https://www.youtube.com/watch?v={vid}" if vid else ''
     if tip_id:
         for r in rows:
-            if r['id'] == tip_id:
+            if r['id'] == tip_id and r.get('status') == 'published' and r.get('region', 'hk') != 'foreign':
                 return r
         return None
     result = [r for r in rows if r.get('status') == 'published' and r.get('region', 'hk') != 'foreign']
@@ -993,10 +993,12 @@ def sitemap():
     except Exception:
         pass
 
-    # Manually approved videos
+    # Manually approved videos (skip cv_* — already added from crawled_videos above)
     for v in get_videos(limit=10000):
         vid = v.get('id')
         if not vid or v.get('status') != 'approved':
+            continue
+        if str(vid).startswith('cv_') and vid in video_ids:
             continue
         add(f'/video/{vid}', priority=0.4,
             lastmod=iso_date(v.get('submitted_date')),
@@ -1454,7 +1456,7 @@ def category_page(slug):
     videos = get_videos(category_id=category['category_id'])
     district = request.args.get('district', '').strip()
     if district:
-        videos = [v for v in videos if v.get('district_confirmed', True) and (district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', ''))]
+        videos = [v for v in videos if v.get('district_confirmed', True) and (district in (v.get('tags') or '') or district in (v.get('title_zh') or '') or district in (v.get('description_zh') or ''))]
     return render_template('category.html', category=category, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
@@ -1468,7 +1470,7 @@ def subcategory_page(subcategory_id):
     videos = get_videos(subcategory_id=subcategory_id)
     district = request.args.get('district', '').strip()
     if district:
-        videos = [v for v in videos if v.get('district_confirmed', True) and (district in v.get('tags', '') or district in v.get('title_zh', '') or district in v.get('description_zh', ''))]
+        videos = [v for v in videos if v.get('district_confirmed', True) and (district in (v.get('tags') or '') or district in (v.get('title_zh') or '') or district in (v.get('description_zh') or ''))]
     return render_template('subcategory.html', category=category, sub=sub, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
@@ -1493,7 +1495,7 @@ def search():
     if not q:
         return redirect(url_for('index'))
     all_videos = get_videos()
-    results = [v for v in all_videos if q.lower() in v.get('title_zh', '').lower() or q.lower() in v.get('title_en', '').lower() or q.lower() in v.get('tags', '').lower() or q.lower() in v.get('description_zh', '').lower()]
+    results = [v for v in all_videos if q.lower() in (v.get('title_zh') or '').lower() or q.lower() in (v.get('title_en') or '').lower() or q.lower() in (v.get('tags') or '').lower() or q.lower() in (v.get('description_zh') or '').lower()]
     return render_template('search.html', query=q, results=results, platform_config=PLATFORM_CONFIG)
 
 
@@ -1776,7 +1778,7 @@ def _login_allowed(ip):
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        ip = request.remote_addr or '?'
+        ip = _client_ip()
         ok, wait = _login_allowed(ip)
         if not ok:
             return render_template('admin/login.html',
@@ -1809,8 +1811,8 @@ def track_click(video_id):
     found = False
     for r in vc:
         if r['video_id'] == video_id:
-            r['count'] = str(int(r.get('count', 0)) + 1)
-            r['clicks'] = str(int(r.get('clicks', 0)) + 1)
+            r['count'] = str(int(r.get('count') or 0) + 1)
+            r['clicks'] = str(int(r.get('clicks') or 0) + 1)
             found = True
             break
     if not found:
@@ -1831,7 +1833,7 @@ def admin_statistics():
     vc = read_csv('view_counts.csv')
     vc_map = {}
     for r in vc:
-        vc_map[r['video_id']] = {'views': int(r.get('count', 0)), 'clicks': int(r.get('clicks', 0))}
+        vc_map[r['video_id']] = {'views': int(r.get('count') or 0), 'clicks': int(r.get('clicks') or 0)}
     video_stats = []
     total_views = 0
     total_clicks = 0
@@ -2361,6 +2363,11 @@ def admin_restore():
     if 'data' not in backup:
         return 'Invalid backup file', 400
     for filename, rows in backup['data'].items():
+        # Only restore real CSV tables. Skipping non-table keys (e.g.
+        # uploads_log.jsonl) prevents write_csv -> DELETE FROM <no-table>
+        # from crashing mid-restore AND wiping already-restored tables.
+        if not filename.endswith('.csv'):
+            continue
         if rows:
             write_csv(filename, rows, list(rows[0].keys()))
     return redirect(url_for('admin_dashboard'))

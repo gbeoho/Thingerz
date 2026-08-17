@@ -2,7 +2,7 @@
 {% block title %}{{ tip['title_zh'] }} - 生活小知識 - Thingerz{% endblock %}
 {% block og_title %}{{ tip['title_zh'] }} - 生活小知識 - Thingerz{% endblock %}
 {% block og_description %}{{ (tip['summary_zh'] or tip['title_zh'] or 'Thingerz 生活小知識')[:150] }}{% endblock %}
-{% block og_image %}{{ tip['image_url'] or url_for('static', filename='favicon.svg', _external=True) }}{% endblock %}
+{% block og_image %}{{ tip['image_url'] or url_for('static', filename='fb_cover.jpg', _external=True) }}{% endblock %}
 
 {% block content %}
 <article class="news-article-page">

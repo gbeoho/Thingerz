@@ -29,7 +29,7 @@
         <td>{{ c.get('direction','') }}</td>
         <td>
             <a href="{{ url_for('admin_category_edit', category_id=c['category_id']) }}" class="btn btn-primary btn-sm">編輯</a>
-            <form method="POST" style="display:inline" onsubmit="return confirm('確定刪除 {{ c['name_zh'] }}？')"><input type="hidden" name="action" value="delete"><input type="hidden" name="cat_id" value="{{ c['category_id'] }}"><button class="btn btn-danger btn-sm">刪除</button></form>
+            <form method="POST" style="display:inline" onsubmit="return confirm('確定刪除？')"><input type="hidden" name="action" value="delete"><input type="hidden" name="cat_id" value="{{ c['category_id'] }}"><button class="btn btn-danger btn-sm">刪除</button></form>
         </td>
     </tr>
     {% endfor %}
