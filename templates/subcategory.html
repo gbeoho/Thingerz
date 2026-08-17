@@ -54,8 +54,8 @@
                 <div class="card-info">
                     <h3 class="card-title">{{ video['title_zh'] }}</h3>
                     <div class="card-tags">
-                        {% for tag in video['tags'].split('|')[:2] %}
-                        <span class="tag">{{ tag }}</span>
+                        {% for tag in video['tags'].split('|')[:2] if tag.strip() %}
+                        <span class="tag">{{ tag.strip() }}</span>
                         {% endfor %}
                     </div>
                 </div>
@@ -63,11 +63,16 @@
             {% endfor %}
         </div>
         {% if not videos %}
-        <div class="empty-state">
-            <p>此子分類暫無影片內容</p>
-            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交第一個影片</a>
-        </div>
-        {% endif %}
+                <div class="empty-state">
+                    {% if selected_district %}
+                    <p>「{{ selected_district }}」暫時冇符合嘅影片，試吓其他地區或者睇晒全部影片</p>
+                    <a href="{{ url_for('subcategory_page', subcategory_id=sub['id']) }}" class="btn btn-primary">睇全部影片</a>
+                    {% else %}
+                    <p>此子分類暫無影片內容</p>
+                    <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交第一個影片</a>
+                    {% endif %}
+                </div>
+                {% endif %}
     </div>
 </section>
 {% endblock %}

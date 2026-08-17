@@ -72,8 +72,8 @@
                 {% endif %}
                 <div class="video-meta">
                     <div class="meta-tags">
-                        {% for tag in video['tags'].split('|') %}
-                        <span class="tag tag-lg">{{ tag }}</span>
+                        {% for tag in video['tags'].split('|') if tag.strip() %}
+                        <span class="tag tag-lg">{{ tag.strip() }}</span>
                         {% endfor %}
                     </div>
                     <div class="meta-info">

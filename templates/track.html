@@ -41,8 +41,8 @@
                 <div class="card-info">
                     <h3 class="card-title">{{ video['title_zh'] }}</h3>
                     <div class="card-tags">
-                        {% for tag in video['tags'].split('|')[:2] %}
-                        <span class="tag">{{ tag }}</span>
+                        {% for tag in video['tags'].split('|')[:2] if tag.strip() %}
+                        <span class="tag">{{ tag.strip() }}</span>
                         {% endfor %}
                     </div>
                 </div>
