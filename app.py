@@ -228,7 +228,7 @@ TABLE_SCHEMAS = {
     'page_views': '''CREATE TABLE IF NOT EXISTS page_views (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        page TEXT, ip_hash TEXT, viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''',
     'upload_limits': '''CREATE TABLE IF NOT EXISTS upload_limits (
         ip_hash TEXT, day TEXT, cnt INTEGER DEFAULT 0, PRIMARY KEY(ip_hash, day))''',
-    'crawled_videos': '''CREATE TABLE IF NOT EXISTS crawled_videos (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        platform TEXT NOT NULL, platform_id TEXT NOT NULL,\n        sub_category TEXT, district TEXT, title TEXT, url TEXT,\n        thumbnail_url TEXT, author_name TEXT, author_url TEXT,\n        description TEXT, view_count INTEGER DEFAULT 0,\n        like_count INTEGER DEFAULT 0, comment_count INTEGER DEFAULT 0,\n        duration_sec INTEGER DEFAULT 0, published_at TEXT,\n        score REAL DEFAULT 0, updated_at TEXT,\n        district_confirmed INTEGER DEFAULT 0,\n        UNIQUE(platform, platform_id))''',
+    'crawled_videos': '''CREATE TABLE IF NOT EXISTS crawled_videos (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        platform TEXT NOT NULL, platform_id TEXT NOT NULL,\n        sub_category TEXT, district TEXT, title TEXT, url TEXT,\n        thumbnail_url TEXT, author_name TEXT, author_url TEXT,\n        description TEXT, view_count INTEGER DEFAULT 0,\n        like_count INTEGER DEFAULT 0, comment_count INTEGER DEFAULT 0,\n        duration_sec INTEGER DEFAULT 0, published_at TEXT,\n        score REAL DEFAULT 0, updated_at TEXT,\n        district_confirmed INTEGER DEFAULT 0, sport_tag TEXT,\n        UNIQUE(platform, platform_id))''',
 }
 
 
@@ -248,6 +248,8 @@ def init_db():
         cols = [r[1] for r in db.execute("PRAGMA table_info(crawled_videos)").fetchall()]
         if 'district_confirmed' not in cols:
             db.execute("ALTER TABLE crawled_videos ADD COLUMN district_confirmed INTEGER DEFAULT 0")
+        if 'sport_tag' not in cols:
+            db.execute("ALTER TABLE crawled_videos ADD COLUMN sport_tag TEXT")
     except Exception:
         pass
     # Migration: ensure news has region column (hk/foreign) so 好去處 can stay HK-focused
@@ -365,8 +367,8 @@ def init_db():
                             (platform, platform_id, sub_category, district, title, url,
                              thumbnail_url, author_name, author_url, description,
                              view_count, like_count, comment_count, duration_sec,
-                             published_at, score, updated_at, district_confirmed)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                             published_at, score, updated_at, district_confirmed, sport_tag)
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                             (platform, platform_id,
                              str(item.get('sub_category', '')).strip(),
                              str(item.get('district', '')).strip(),
@@ -383,7 +385,8 @@ def init_db():
                              str(item.get('published_at', '')).strip(),
                              float(item.get('score', 0) or 0),
                              datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                             1 if item.get('district_confirmed') else 0))
+                             1 if item.get('district_confirmed') else 0,
+                             str(item.get('sport_tag', '')).strip()))
                         imported += 1
                     except Exception:
                         pass
@@ -612,7 +615,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                 'description_en': '',
                 'thumbnail_url': thumb,
                 'aspect_ratio': '16:9',
-                'tags': cr['district'] or '',
+                'tags': ' | '.join(x for x in [cr['district'] or '', (cr['sport_tag'] if 'sport_tag' in cr.keys() else '') or ''] if x),
                 'district_confirmed': bool(cr['district_confirmed']),
                 'status': 'approved',
                 'track': trk,
@@ -682,7 +685,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                     'description_en': '',
                     'thumbnail_url': thumb,
                     'aspect_ratio': '16:9',
-                    'tags': cr['district'] or '',
+                    'tags': ' | '.join(x for x in [cr['district'] or '', (cr['sport_tag'] if 'sport_tag' in cr.keys() else '') or ''] if x),
                     'district_confirmed': bool(cr['district_confirmed']),
                     'status': 'approved',
                     'track': trk,
@@ -766,7 +769,7 @@ def get_video(video_id):
                     'title_zh': r['title'] or '', 'title_en': '',
                     'description_zh': r['description'] or '', 'description_en': '',
                     'thumbnail_url': r['thumbnail_url'] or '',
-                    'aspect_ratio': '16:9', 'tags': r['district'] or '',
+                    'aspect_ratio': '16:9', 'tags': ' | '.join(x for x in [r['district'] or '', (r['sport_tag'] if 'sport_tag' in r.keys() else '') or ''] if x),
                     'district_confirmed': bool(r['district_confirmed']),
                     'status': 'approved', 'track': trk, 'direction': trk,
                     'submitted_date': r['published_at'] or '',
@@ -1373,7 +1376,7 @@ def get_top_viewed(limit=100):
             'title_zh': cr['title'] or '', 'title_en': '',
             'description_zh': cr['description'] or '', 'description_en': '',
             'thumbnail_url': thumb, 'aspect_ratio': '16:9',
-            'tags': cr['district'] or '', 'district_confirmed': bool(cr['district_confirmed']),
+            'tags': ' | '.join(x for x in [cr['district'] or '', (cr['sport_tag'] if 'sport_tag' in cr.keys() else '') or ''] if x), 'district_confirmed': bool(cr['district_confirmed']),
             'status': 'approved', 'track': trk, 'direction': trk,
             'submitted_date': cr['published_at'] or '',
         })
@@ -2728,8 +2731,8 @@ def api_content():
                 (platform, platform_id, sub_category, district, title, url,
                  thumbnail_url, author_name, author_url, description,
                  view_count, like_count, comment_count, duration_sec,
-                 published_at, score, updated_at)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                 published_at, score, updated_at, sport_tag)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (platform, platform_id,
                  sub_category,
                  str(item.get('district', '')).strip(),
@@ -2745,7 +2748,8 @@ def api_content():
                  int(item.get('duration_sec') or 0),
                  str(item.get('published_at', '')).strip(),
                  float(item.get('score') or 0),
-                 updated_at))
+                 updated_at,
+                 str(item.get('sport_tag', '')).strip()))
             if cur.rowcount > 0:
                 inserted += 1
             else:
