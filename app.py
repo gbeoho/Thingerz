@@ -1149,6 +1149,7 @@ def extract_threads_id(url):
       https://www.threads.net/@foo/post/AbC123        -> @foo/post/AbC123
       https://www.threads.net/@foo/post/AbC123/embed  -> @foo/post/AbC123
       https://www.threads.net/t/AbC123                -> t/AbC123
+      https://www.threads.com/share/BAQF5WMX1X/       -> BAQF5WMX1X  (trailing slash OK)
     """
     if not url:
         return ''
@@ -1158,7 +1159,11 @@ def extract_threads_id(url):
     m = re.search(r'threads\.(?:net|com)/(t/[\w.-]+)', url)
     if m:
         return m.group(1)
-    return url.strip().split('/')[-1].split('?')[0]
+    m = re.search(r'threads\.(?:net|com)/share/([\w.-]+)', url)
+    if m:
+        return m.group(1)
+    # last path segment, robust to trailing slash / query
+    return url.rstrip('/').split('/')[-1].split('?')[0]
 
 
 def get_platform_thumb(platform, platform_id, api_url=''):
