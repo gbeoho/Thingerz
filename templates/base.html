@@ -141,8 +141,9 @@
         .cat-info h3{font-size:.92rem;font-weight:600;line-height:1.3}
         .cat-info p{font-size:.73rem;color:#6a6a80;margin-top:3px}
 
-        .sticky-categories{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start;padding-bottom:10px}
-        .sticky-cat-chip{flex-shrink:0;padding:9px 22px;border-radius:24px;background:#11111d;border:1px solid rgba(255,255,255,.05);font-size:.84rem;font-weight:500;color:#9898b0;transition:all .25s;white-space:nowrap}
+        .sticky-categories{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding-bottom:10px;scrollbar-width:none}
+        .sticky-categories::-webkit-scrollbar{display:none}
+        .sticky-cat-chip{flex-shrink:0;padding:8px 16px;border-radius:24px;background:#11111d;border:1px solid rgba(255,255,255,.05);font-size:.8rem;font-weight:500;color:#9898b0;transition:all .25s;white-space:nowrap}
         .sticky-cat-chip:hover{color:#fff;border-color:rgba(129,140,248,.35);background:#1a1a2e}
         .sticky-cat-chip.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3)}
 
