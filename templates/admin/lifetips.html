@@ -55,6 +55,7 @@ function editTip(btn){
     var id=btn.getAttribute('data-id'),title_zh=btn.getAttribute('data-title-zh'),title_en=btn.getAttribute('data-title-en'),date=btn.getAttribute('data-date'),image_url=btn.getAttribute('data-image'),status=btn.getAttribute('data-status'),region=btn.getAttribute('data-region'),summary_zh=btn.getAttribute('data-summary'),content_zh=btn.getAttribute('data-content');
     var f=document.createElement('form');f.method='POST';f.action='/admin/lifetips/edit/'+id;
     f.innerHTML='<input name="title_zh" value="'+title_zh+'"><input name="title_en" value="'+title_en+'"><input name="date" value="'+date+'"><input name="image_url" value="'+image_url+'"><input name="status" value="'+status+'"><input name="region" value="'+region+'"><input name="summary_zh" value="'+summary_zh+'"><input name="summary_en" value=""><input name="content_zh" value="'+content_zh+'"><input name="content_en" value="">';
+    var t=document.querySelector('meta[name="csrf-token"]');if(t){var csrfIn=document.createElement('input');csrfIn.type='hidden';csrfIn.name='csrf_token';csrfIn.value=t.getAttribute('content');f.appendChild(csrfIn);}
     document.body.appendChild(f);f.submit();
 }
 </script>
