@@ -1249,14 +1249,66 @@ def ig_cover_proxy(platform_id):
 
 @app.route('/cover/threads/<key>')
 def threads_cover_proxy(key):
-    """Serve a captured Threads cover (data/covers/threads_<key>.jpg), written by
-    the local Playwright capture script. Falls back to 404 (card then shows its
-    fallback) if the cover hasn't been generated yet."""
+    """Serve a Threads cover. Tries a locally-captured file first
+    (data/covers/threads_<key>.jpg, written by grab_threads_covers.py); if
+    missing, lazily fetches the post's server-side og:image (works for video
+    poster frames, no browser) and caches it. On total failure, redirects to a
+    stable picsum placeholder so cards NEVER render a broken-image icon.
+    Re-caches lazily after a redeploy wipes the ephemeral disk."""
     safe = re.sub(r'[^A-Za-z0-9_.-]', '', key) or 'x'
-    path = os.path.join(DATA_DIR, 'covers', f'threads_{safe}.jpg')
-    if os.path.exists(path):
-        return send_file(path, mimetype='image/jpeg', max_age=86400)
-    return Response('', 404)
+    cache_dir = os.path.join(DATA_DIR, 'covers')
+    try:
+        os.makedirs(cache_dir, exist_ok=True)
+    except OSError:
+        pass
+    path = os.path.join(cache_dir, f'threads_{safe}.jpg')
+    if not os.path.exists(path):
+        data = _threads_cover_bytes(safe)
+        if not data:
+            # placeholder so the card never shows a broken-image icon
+            return redirect(f'https://picsum.photos/seed/th_{safe}/400/300')
+        try:
+            with open(path, 'wb') as f:
+                f.write(data)
+        except OSError:
+            return Response(data, mimetype='image/jpeg')
+    return send_file(path, mimetype='image/jpeg', max_age=86400)
+
+
+def _threads_cover_bytes(key):
+    """Fetch a Threads post cover WITHOUT login or a browser, best-effort.
+    Threads serves the canonical post page (note: NO trailing slash — one
+    returns a JS shell without og:image) containing the CDN og:image meta
+    (the first frame for videos). We resolve it and fetch the (signed, but
+    currently valid) CDN bytes. Returns JPEG bytes or None."""
+    ua = {'User-Agent': 'Mozilla/5.0'}
+    key = (key or '').rstrip('/')
+    if not key:
+        return None
+    cands = []
+    if '/' in key:
+        cands.append(f'https://www.threads.net/{key}')
+    cands.append(f'https://www.threads.net/share/{key}')
+    for url in cands:
+        try:
+            html = urllib.request.urlopen(urllib.request.Request(url, headers=ua), timeout=15) \
+                       .read().decode('utf-8', 'ignore')
+        except Exception:
+            continue
+        m = re.search(r'property="og:image"[^>]*content="(https:[^"]+)"', html) or \
+            re.search(r'content="(https:[^"]+)"[^>]*property="og:image"', html)
+        if not m:
+            continue
+        img_url = m.group(1).replace('&amp;', '&')
+        try:
+            data = urllib.request.urlopen(urllib.request.Request(
+                img_url, headers={'User-Agent': ua['User-Agent'],
+                                  'Referer': 'https://www.threads.net/'}), timeout=20).read()
+        except Exception:
+            continue
+        if data[:3] == b'\xff\xd8\xff':
+            return data
+    return None
 
 
 BACKUP_FILE = os.path.join(DATA_DIR, '_auto_backup.json')
