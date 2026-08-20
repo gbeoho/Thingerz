@@ -2193,7 +2193,9 @@ def admin_news():
         })
         write_csv('news.csv', news_list, ['id', 'title_zh', 'title_en', 'content_zh', 'content_en', 'summary_zh', 'summary_en', 'date', 'image_url', 'status', 'region', 'district'])
         return redirect(url_for('admin_news'))
-    return render_template('admin/news.html', news_items=read_csv('news.csv'), districts=geo.DISTRICTS)
+    _news_items = read_csv('news.csv')
+    _news_items.sort(key=lambda x: (x.get('date', ''), x.get('id', '')), reverse=True)
+    return render_template('admin/news.html', news_items=_news_items, districts=geo.DISTRICTS)
 
 
 @app.route('/admin/news/edit/<news_id>', methods=['POST'])
@@ -2251,7 +2253,9 @@ def admin_lifetips():
         })
         write_csv('lifetips.csv', tips, _LIFETIPS_FIELDNAMES)
         return redirect(url_for('admin_lifetips'))
-    return render_template('admin/lifetips.html', tip_items=read_csv('lifetips.csv'))
+    _tip_items = read_csv('lifetips.csv')
+    _tip_items.sort(key=lambda x: (x.get('date', ''), x.get('id', '')), reverse=True)
+    return render_template('admin/lifetips.html', tip_items=_tip_items)
 
 
 @app.route('/admin/lifetips/edit/<tip_id>', methods=['POST'])

@@ -2,11 +2,12 @@
 {% block admin_content %}
 <h1>好去處管理</h1>
 <div class="mb" style="display:flex;gap:12px;flex-wrap:wrap">
-    <a href="#" onclick="document.getElementById('addForm').style.display='block';return false" class="btn btn-primary">+ 新增推介</a>
+    <a href="#" onclick="resetForm();return false" class="btn btn-primary">+ 新增推介</a>
 </div>
 <div id="addForm" style="display:none;background:#11111d;padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,.06);margin-bottom:24px">
-    <h3 style="margin-bottom:14px">新增推介</h3>
-    <form method="POST">
+    <h3 id="formTitle" style="margin-bottom:14px">新增推介</h3>
+    <form method="POST" id="editForm" action="{{ url_for('admin_news') }}">
+        <input type="hidden" name="news_id" id="newsId" value="">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
             <div class="form-group"><label>中文標題</label><input name="title_zh" class="input" required></div>
             <div class="form-group"><label>英文標題</label><input name="title_en" class="input"></div>
@@ -14,12 +15,16 @@
             <div class="form-group"><label>圖片 URL</label><input name="image_url" class="input" placeholder="https://..."></div>
             <div class="form-group"><label>狀態</label><select name="status" class="input"><option value="published">已發佈</option><option value="draft">草稿</option></select></div>
             <div class="form-group"><label>18區 (可選)</label><select name="district" class="input"><option value="">全部／無指定</option>{% for d in districts %}<option value="{{ d['name_zh'] }}">{{ d['name_zh'] }}</option>{% endfor %}</select></div>
+            <div class="form-group"><label>地區</label><select name="region" class="input"><option value="hk">香港</option><option value="foreign">海外（不會顯示）</option></select></div>
         </div>
         <div class="form-group mb"><label>中文摘要</label><input name="summary_zh" class="input"></div>
         <div class="form-group mb"><label>英文摘要</label><input name="summary_en" class="input"></div>
         <div class="form-group mb"><label>中文內容 (HTML)</label><textarea name="content_zh" class="input" style="min-height:120px"></textarea></div>
         <div class="form-group mb"><label>英文內容 (HTML)</label><textarea name="content_en" class="input" style="min-height:120px"></textarea></div>
-        <button type="submit" class="btn btn-primary">新增新聞</button>
+        <div style="display:flex;gap:8px">
+            <button type="submit" class="btn btn-success" id="saveBtn">新增新聞</button>
+            <button type="button" class="btn" onclick="resetForm()">取消</button>
+        </div>
     </form>
 </div>
 <table>
@@ -39,10 +44,13 @@
                data-date="{{ n.get('date','') }}"
                data-image="{{ n.get('image_url','') }}"
                data-status="{{ n.get('status','published') }}"
-               data-summary="{{ n.get('summary_zh','') }}"
-               data-content="{{ n.get('content_zh','') }}"
+               data-summary-zh="{{ n.get('summary_zh','') }}"
+               data-summary-en="{{ n.get('summary_en','') }}"
+               data-content-zh="{{ n.get('content_zh','') }}"
+               data-content-en="{{ n.get('content_en','') }}"
                data-district="{{ n.get('district','') }}"
-               onclick="editNews(this)">編輯</button>
+               data-region="{{ n.get('region','hk') }}"
+               onclick="editFill(this)">編輯</button>
             <form method="POST" action="{{ url_for('admin_news_delete', news_id=n['id']) }}" style="display:inline" onsubmit="return confirm('確定刪除？')"><button class="btn btn-danger btn-sm">刪除</button></form>
         </td>
     </tr>
@@ -50,12 +58,37 @@
     </tbody>
 </table>
 <script>
-function editNews(btn){
-    var id=btn.getAttribute('data-id'),title_zh=btn.getAttribute('data-title-zh'),title_en=btn.getAttribute('data-title-en'),date=btn.getAttribute('data-date'),image_url=btn.getAttribute('data-image'),status=btn.getAttribute('data-status'),summary_zh=btn.getAttribute('data-summary'),content_zh=btn.getAttribute('data-content'),district=btn.getAttribute('data-district');
-    var f=document.createElement('form');f.method='POST';f.action='/admin/news/edit/'+id;
-    f.innerHTML='<input name="title_zh" value="'+title_zh+'"><input name="title_en" value="'+title_en+'"><input name="date" value="'+date+'"><input name="image_url" value="'+image_url+'"><input name="status" value="'+status+'"><input name="summary_zh" value="'+summary_zh+'"><input name="summary_en" value=""><input name="content_zh" value="'+content_zh+'"><input name="content_en" value=""><input name="district" value="'+district+'">';
-    var t=document.querySelector('meta[name="csrf-token"]');if(t){var csrfIn=document.createElement('input');csrfIn.type='hidden';csrfIn.name='csrf_token';csrfIn.value=t.getAttribute('content');f.appendChild(csrfIn);}
-    document.body.appendChild(f);f.submit();
+function resetForm(){
+    var panel=document.getElementById('addForm');panel.style.display='block';
+    document.getElementById('formTitle').textContent='新增推介';
+    document.getElementById('saveBtn').textContent='儲存新聞';
+    var f=document.getElementById('editForm');f.action="{{ url_for('admin_news') }}";
+    document.getElementById('newsId').value='';
+    f.title_zh.value='';f.title_en.value='';f.image_url.value='';f.summary_zh.value='';f.summary_en.value='';f.content_zh.value='';f.content_en.value='';
+    f.status.value='published';f.region.value='hk';f.district.value='';
+    f.date.value="{{ now.strftime('%Y-%m-%d') }}";
+    // scroll to panel so the user SEES it
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function editFill(btn){
+    var panel=document.getElementById('addForm');panel.style.display='block';
+    document.getElementById('formTitle').textContent='編輯推介 — '+btn.getAttribute('data-id');
+    document.getElementById('saveBtn').textContent='↓ 儲存編輯';
+    var f=document.getElementById('editForm');
+    f.action='/admin/news/edit/'+btn.getAttribute('data-id');
+    document.getElementById('newsId').value=btn.getAttribute('data-id');
+    f.title_zh.value=btn.getAttribute('data-title-zh');
+    f.title_en.value=btn.getAttribute('data-title-en');
+    f.date.value=btn.getAttribute('data-date');
+    f.image_url.value=btn.getAttribute('data-image');
+    f.status.value=btn.getAttribute('data-status');
+    f.summary_zh.value=btn.getAttribute('data-summary-zh');
+    f.summary_en.value=btn.getAttribute('data-summary-en');
+    f.content_zh.value=btn.getAttribute('data-content-zh');
+    f.content_en.value=btn.getAttribute('data-content-en');
+    f.district.value=btn.getAttribute('data-district');
+    f.region.value=btn.getAttribute('data-region');
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
 }
 </script>
 {% endblock %}
