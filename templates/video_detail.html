@@ -60,6 +60,10 @@
                 <div class="video-title-row">
                     <h1 class="video-title">{{ video['title_zh'] }}</h1>
                 </div>
+                <div class="video-summary" style="margin-top:14px;line-height:1.8">
+                    {% set _intro = (video['description_zh'] or '').split('\n')[0]|trim %}
+                    <p>呢條影片收錄喺 Thingerz 香港 18 區影音庫，主題係「{{ video['title_zh'] }}」{% if category and category.get('name_zh') %}，屬{{ category['name_zh'] }}類別{% endif %}{% if sub and sub.get('name_zh') %}（{{ sub['name_zh'] }}）{% endif %}。{% if video['description_zh'] %}內容重點：{{ _intro }}{% else %}想了解呢個題目嘅實際操作同細節，睇片就最清楚。{% endif %}</p>
+                </div>
                 <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
                     <a href="{{ plat_cfg['watch_base'] | replace('{id}', video['platform_id']) | replace('{user}', '') }}" target="_blank" rel="noopener" class="external-link">在 {{ plat_cfg['name'] }} 觀看 &nearr;</a>
                     <span style="font-size:.78rem;color:#6a6a80">如嵌入播放器無法載入，請按此連結直接觀看</span>
