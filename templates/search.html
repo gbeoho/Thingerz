@@ -19,7 +19,7 @@
                     <div class="card-overlay"><div class="play-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div></div>
                     {% include "_platform_badge.html" %}
                 </div>
-                <div class="card-info"><h3 class="card-title">{{ video['title_zh'] }}</h3></div>
+                <div class="card-info"><h3 class="card-title">{{ video['title_zh'] }}</h3>{% if video.get('submitter_name') %}<p class="card-submitter">投稿 by {{ video['submitter_name'] }}</p>{% endif %}</div>
             </a>
             {% endfor %}
         </div>

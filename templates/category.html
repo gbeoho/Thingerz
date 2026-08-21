@@ -76,6 +76,7 @@
                 </div>
                 <div class="card-info">
                     <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    {% if video.get('submitter_name') %}<p class="card-submitter">投稿 by {{ video['submitter_name'] }}</p>{% endif %}
                     <div class="card-tags">
                         {% for tag in (video['tags'] or '').split('|')[:2] if tag.strip() %}
                                                 <span class="tag">{{ tag.strip() }}</span>
@@ -96,6 +97,13 @@
                     {% endif %}
                 </div>
                 {% endif %}
+        {% if videos %}
+        <div class="submit-cta">
+            <h3>你有好嘢想分享？</h3>
+            <p>將你嘅影片放入「{{ category['name_zh'] }}」分類，幫同區街坊搵到好內容。</p>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">免費提交影片 +</a>
+        </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

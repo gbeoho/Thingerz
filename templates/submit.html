@@ -17,9 +17,32 @@
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
             </div>
             <h2>提交成功！</h2>
-            <p>你的影片已成功提交，正在等待審核。審核通過後將自動顯示在對應的分類頁面中。</p>
+                        {% if new_video_url %}
+                        <p style="margin-top:4px">你嘅影片<strong>已上架</strong>: <a href="{{ new_video_url }}" style="color:#10b981">{{ new_video_title }}</a></p>
+                        <div style="margin:18px auto 6px;max-width:420px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:14px;padding:16px">
+                            <p style="font-size:.85rem;margin-bottom:10px"><strong>叫埋朋友過嚟睇</strong> — 分享你嘅影片:</p>
+                            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+                                <button type="button" class="btn btn-primary" data-share-title="{{ new_video_title }}" data-share-url="{{ new_video_url }}" onclick="tzhShareVideo(this)">分享到 IG / 更多</button>
+                                <a class="btn btn-outline" href="https://wa.me/?text={{ (new_video_title + ' 喺 Thingerz 上架咗 ' + new_video_url) | urlencode }}" target="_blank" rel="noopener">WhatsApp</a>
+                                <a class="btn btn-outline" href="https://t.me/share/url?url={{ new_video_url | urlencode }}&text={{ (new_video_title + ' - Thingerz') | urlencode }}" target="_blank" rel="noopener">Telegram</a>
+                                <a class="btn btn-outline" href="https://www.threads.net/intent/post?text={{ (new_video_title + ' 喺 Thingerz 上架咗 ' + new_video_url) | urlencode }}" target="_blank" rel="noopener">Threads</a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p>你的影片已成功提交，正在等待審核。審核通過後將自動顯示在對應的分類頁面中。</p>
+                        {% endif %}
+                        <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交另一部影片</a>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
+        </div>
+        {% elif already_exists %}
+        <div class="success-message" style="border-color:rgba(245,158,11,.4)">
+            <div class="success-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h2>呢條片已經收錄咗</h2>
+            <p>你好似提交咗一條已經上咗 Thingerz 嘅影片。唔使重複提交 — 直接去睇佢個頁面: <a href="{{ dup_link }}" style="color:#f59e0b">{{ dup_title or '呢條片' }}</a></p>
+            <a href="{{ dup_link }}" class="btn btn-outline">睇已收錄嘅片</a>
             <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交另一部影片</a>
-            <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
         </div>
         {% elif invalid %}
         <div class="success-message" style="border-color:rgba(239,68,68,.3)">

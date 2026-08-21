@@ -209,7 +209,7 @@ TABLE_SCHEMAS = {
         id TEXT UNIQUE, subcategory_id TEXT, category_id TEXT, platform TEXT, platform_id TEXT,
         title_zh TEXT, title_en TEXT, description_zh TEXT, description_en TEXT,
         thumbnail_url TEXT, aspect_ratio TEXT, tags TEXT, status TEXT,
-        track TEXT, direction TEXT, submitted_date TEXT)''',
+        track TEXT, direction TEXT, submitted_date TEXT, submitter_name TEXT)''',
     'news': '''CREATE TABLE IF NOT EXISTS news (
         id TEXT UNIQUE, title_zh TEXT, title_en TEXT, content_zh TEXT, content_en TEXT,
         summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT, region TEXT, district TEXT)''',
@@ -250,6 +250,13 @@ def init_db():
             db.execute("ALTER TABLE crawled_videos ADD COLUMN district_confirmed INTEGER DEFAULT 0")
         if 'sport_tag' not in cols:
             db.execute("ALTER TABLE crawled_videos ADD COLUMN sport_tag TEXT")
+    except Exception:
+        pass
+    # Migration: ensure videos has submitter_name column (submitter credit on cards)
+    try:
+        vcols = [r[1] for r in db.execute("PRAGMA table_info(videos)").fetchall()]
+        if 'submitter_name' not in vcols:
+            db.execute("ALTER TABLE videos ADD COLUMN submitter_name TEXT")
     except Exception:
         pass
     # Migration: ensure news has region column (hk/foreign) so 好去處 can stay HK-focused
@@ -293,7 +300,7 @@ def init_db():
     csv_to_table = {
         'categories.csv': ('categories', ['id','category_id','name_slug','name_zh','name_en','track','direction','description_zh','description_en']),
         'subcategories.csv': ('subcategories', ['id','category_id','name_slug','name_zh','name_en']),
-        'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']),
+        'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name']),
         'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region','district']),
         'lifetips.csv': ('lifetips', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
         'comments.csv': ('comments', ['id','video_id','author','content','date','status']),
@@ -1604,6 +1611,40 @@ def submit_video():
             return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
                                    platform_config=PLATFORM_CONFIG, success=False, blocked=True,
                                    block_reason=block_reason)
+        # Resolve the platform id up-front so we can dedupe (and so the rate cap
+        # isn't consumed by a repeat submission of an already-listed video).
+        platform = request.form.get('platform', 'youtube')
+        url = request.form.get('platform_url', '')
+        if platform == 'youtube':
+            platform_id = extract_youtube_id(url)
+        elif platform == 'instagram':
+            platform_id = extract_instagram_id(url)
+        elif platform == 'threads':
+            platform_id = extract_threads_id(url)
+        elif platform == 'tiktok':
+            platform_id = extract_tiktok_id(url)
+        elif platform == 'douyin':
+            platform_id = extract_douyin_id(url)
+        elif platform == 'xiaohongshu':
+            platform_id = extract_xiaohongshu_id(url)
+        elif platform == 'bilibili':
+            platform_id = extract_bilibili_id(url)
+        else:
+            platform_id = url.split('/')[-1].split('?')[0]
+        if not platform_id:
+            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
+                                   platform_config=PLATFORM_CONFIG, invalid=True, platform=platform)
+        # Dedupe: same platform+id already in videos.csv → don't create a second
+        # v-row, tell the submitter it's already listed and link the existing page.
+        if platform_id:
+            existing = [v for v in read_csv('videos.csv')
+                        if v.get('platform') == platform and v.get('platform_id') == platform_id]
+            if existing:
+                vid = existing[0]
+                dup_link = url_for('video_detail', video_id=vid.get('id', ''))
+                return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
+                                       platform_config=PLATFORM_CONFIG, success=False,
+                                       already_exists=True, dup_link=dup_link, dup_title=vid.get('title_zh', ''))
         # Per-IP daily upload cap: reject without processing once an IP hits the
         # daily ceiling (durable SQLite counter, survives restarts).
         up_day = datetime.now().strftime('%Y-%m-%d')
@@ -1670,28 +1711,7 @@ def submit_video():
         }
         fieldnames = ['id', 'platform', 'platform_url', 'title_zh', 'title_en', 'category_id', 'subcategory_id', 'submitter_name', 'submitter_email', 'description_zh', 'direction', 'status', 'submitted_date', 'district']
         append_csv('submissions.csv', submission, fieldnames)
-        # Auto-add to videos
-        platform = submission['platform']
-        url = submission.get('platform_url', '')
-        if platform == 'youtube':
-            platform_id = extract_youtube_id(url)
-        elif platform == 'instagram':
-            platform_id = extract_instagram_id(url)
-        elif platform == 'threads':
-            platform_id = extract_threads_id(url)
-        elif platform == 'tiktok':
-            platform_id = extract_tiktok_id(url)
-        elif platform == 'douyin':
-            platform_id = extract_douyin_id(url)
-        elif platform == 'xiaohongshu':
-            platform_id = extract_xiaohongshu_id(url)
-        elif platform == 'bilibili':
-            platform_id = extract_bilibili_id(url)
-        else:
-            platform_id = url.split('/')[-1].split('?')[0]
-        if not platform_id:
-            return render_template('submit.html', categories=categories, districts=HK_DISTRICTS,
-                                   platform_config=PLATFORM_CONFIG, invalid=True, platform=platform)
+        # Auto-add to videos (platform/platform_id already resolved & deduped above)
         thumb = get_platform_thumb(platform, platform_id)
         vids = read_csv('videos.csv')
         max_num = max(int(v['id'].replace('v', '')) for v in vids) if vids else 0
@@ -1715,9 +1735,10 @@ def submit_video():
             'status': 'approved',
             'track': track_val,
             'direction': request.form.get('direction', track_val),
-            'submitted_date': datetime.now().strftime('%Y-%m-%d')
+            'submitted_date': datetime.now().strftime('%Y-%m-%d'),
+            'submitter_name': submission['submitter_name']
         })
-        vfieldnames = ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date']
+        vfieldnames = ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name']
         write_csv('videos.csv', vids, vfieldnames)
         log_upload({'event': 'submit_approved', 'id': vids[-1]['id'],
                     'platform': platform, 'platform_url': url,
@@ -1727,7 +1748,8 @@ def submit_video():
                     'district': district,
                     'submitter_name': submission['submitter_name'],
                     'status': 'approved'})
-        return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=True)
+        return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=True,
+                               new_video_id=vids[-1]['id'], new_video_url=url_for('video_detail', video_id=vids[-1]['id']), new_video_title=title_zh)
     return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=False, blocked=False)
 
 
@@ -2123,7 +2145,7 @@ def admin_video_add():
         'submitted_date': datetime.now().strftime('%Y-%m-%d')
     }
     vids.append(vid)
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date']
+    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
     write_csv('videos.csv', vids, fieldnames)
     log_upload({'event': 'admin_add', 'id': vid['id'],
                 'platform': platform, 'platform_id': platform_id,
@@ -2153,7 +2175,7 @@ def admin_video_edit(video_id):
             v['track'] = request.form.get('track', v.get('track', 'fun'))
             v['direction'] = request.form.get('direction', v.get('direction', 'fun'))
             break
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date']
+    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
     write_csv('videos.csv', vids, fieldnames)
     return redirect(url_for('admin_videos'))
 
@@ -2162,7 +2184,7 @@ def admin_video_edit(video_id):
 @admin_required
 def admin_video_delete(video_id):
     vids = [v for v in read_csv('videos.csv') if v['id'] != video_id]
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date']
+    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
     write_csv('videos.csv', vids, fieldnames)
     return redirect(url_for('admin_videos'))
 
@@ -2229,9 +2251,10 @@ def admin_approve_submission(submission_id):
             'status': 'approved',
             'track': 'fun',
             'direction': submission.get('direction', 'fun'),
-            'submitted_date': datetime.now().strftime('%Y-%m-%d')
+            'submitted_date': datetime.now().strftime('%Y-%m-%d'),
+            'submitter_name': submission.get('submitter_name', '')
         })
-        fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date']
+        fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
         write_csv('videos.csv', vids, fieldnames)
     return redirect(url_for('admin_submissions'))
 
