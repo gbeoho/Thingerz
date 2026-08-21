@@ -3,7 +3,7 @@ id,category_id,name_slug,name_zh,name_en,track,direction,description_zh,descript
 2,cat002,education,教學與培訓,Education & Training,learning,learning,技能教學、表演教練、音樂學習、視覺創作、語言翻譯、心理自我提升,Skills training
 3,cat003,arts,藝術與設計,Arts & Design,fun,fun,平面設計、服飾設計、手作工藝、配件設計、攝影影像、印刷工藝、藝術裝置、繪畫素描,Graphic design
 4,cat004,performance,表演與娛樂,Performance & Entertainment,fun,fun,音樂演出、舞蹈表演、戲劇短劇、魔術奇技、特技雜耍、互動娛樂、創意舞台,Music
-5,cat005,food,飲食與手作,Food & Crafts,fun,fun,烘焙、餐飲教學、飲品品味、食物創作、香氛感官、園藝種植、飲食品牌,Baking
+5,cat005,food,飲食與手作,Food & Crafts,fun,fun,烘焙、餐飲教學、飲食與品味、食物創作、香氛感官、園藝種植、飲食品牌,Baking
 6,cat006,wedding,婚禮與生活,Wedding & Lifestyle,learning,learning,婚禮策劃、婚禮設計、婚禮造型、婚禮甜點、親子活動、日常生活美學、節慶禮品,Wedding planning
 7,cat007,beauty,美容與形象,Beauty & Image,fun,fun,化妝、護膚、造型形象、美感內容、個人品牌形象、美容服務、簡單醫美,Cosmetics
 8,cat008,community,親子與社區,Family & Community,learning,learning,親子教育、兒童活動、社區組織、公共參與、社交配對、公眾講座,Parenting
