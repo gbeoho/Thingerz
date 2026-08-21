@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% set _nsumm = (news_item['summary_zh'] or news_item['title_zh'] or 'Thingerz 好去處') | replace('\n', ' ') | replace('\r', ' ') %}
 {% block title %}{{ news_item['title_zh'] }} - 本月好去處 - Thingerz{% endblock %}
+{% block meta_description %}{{ _nsumm[:150] }}{% endblock %}
 {% block og_title %}{{ news_item['title_zh'] }} - 好去處 - Thingerz{% endblock %}
-{% block og_description %}{{ (news_item['summary_zh'] or news_item['title_zh'] or 'Thingerz 好去處')[:150] }}{% endblock %}
+{% block og_description %}{{ _nsumm[:150] }}{% endblock %}
 {% block og_image %}{{ news_item['image_url'] or url_for('static', filename='fb_cover.jpg', _external=True) }}{% endblock %}
 
 {% block content %}
