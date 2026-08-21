@@ -1,10 +1,13 @@
 {% extends "base.html" %}
-{% block title %}本月好去處 - Thingerz{% endblock %}
+{% block title %}香港好去處 2026｜本月最新景點・活動・美食推介 - Thingerz{% endblock %}
+{% block meta_description %}發掘香港好去處2026：每月最新本地景點、活動、行山路線同美食推介，按 18 區分類，附詳細攻略同交通資訊，幫你假期搵啱地方玩。{% endblock %}
+{% block og_title %}香港好去處 2026｜本月最新景點・活動・美食推介 - Thingerz{% endblock %}
+{% block og_description %}每月更新嘅香港好去處攻略：最新景點、活動、行山路線同美食推介，按 18 區分類，附詳細交通資訊。{% endblock %}
 
 {% block content %}
 <section class="page-hero">
     <div class="container">
-        <h1>本月好去處</h1>
+        <h1>香港好去處</h1>
         <p class="page-subtitle">香港每月最新景點、活動及美食推介</p>
     </div>
 </section>
@@ -26,6 +29,7 @@
         {% if selected_district %}
         <h2 style="font-size:1.25rem;margin-bottom:16px">{{ selected_district }} 好去處</h2>
         {% endif %}
+        <p style="font-size:.95rem;color:#a9a9c0;line-height:1.8;margin-bottom:24px">想搵香港好去處？無論係週末想行山放空、帶屋企人去親子景點、定係約朋友掃街食好嘢，喺度都可以按 18 區慢慢揀——由中西區文青打卡、離島水鄉漁村，到屯門菠蘿山大峽谷、下白泥日落，全部收錄實用攻略同交通貼士，慳返你盲試嘅時間。</p>
         <div class="news-grid-full">
             {% for item in news_items %}
             <article class="news-card-full">

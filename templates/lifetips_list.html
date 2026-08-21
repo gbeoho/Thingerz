@@ -1,16 +1,20 @@
 {% extends "base.html" %}
-{% block title %}生活小知識 - Thingerz{% endblock %}
+{% block title %}香港生活小知識｜慳錢慳位・家居實用貼士大全 - Thingerz{% endblock %}
+{% block meta_description %}香港人嘅生活小知識大全：慳錢慳位小技巧、廚房收納、淘寶/拼多多小物家居妙用、清潔貼士，睇片學識實用生活智慧，慳錢又慳時間。{% endblock %}
+{% block og_title %}香港生活小知識｜慳錢慳位・家居實用貼士大全 - Thingerz{% endblock %}
+{% block og_description %}香港人必睇生活小知識：廚房收納、清潔技巧、淘寶家居小物妙用、慳錢慳位貼士，實用又易學。{% endblock %}
 
 {% block content %}
 <section class="page-hero">
     <div class="container">
-        <h1>生活小知識</h1>
+        <h1>香港生活小知識</h1>
         <p class="page-subtitle">香港人嘅實用生活貼士、慳錢慳位小技巧、淘寶/拼多多小物家居妙用</p>
     </div>
 </section>
 
 <section class="section">
     <div class="container">
+        <p style="font-size:.95rem;color:#a9a9c0;line-height:1.8;margin-bottom:24px">唔使買貴嘢，都可以將屋企變得更實用企理。呢度集合晒最啱香港人嘅生活小知識——廚房點樣收納先慳位、清潔有咩天才技巧、淘寶拼多多平價小物點樣家居妙用，全部有片一步步教你，慳錢又慳時間，睇完即刻用得着。</p>
         <div class="news-grid-full">
             {% for tip in tip_items %}
             <article class="news-card-full">
