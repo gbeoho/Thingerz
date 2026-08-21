@@ -90,8 +90,12 @@
                             {{ 'Fun' if video.get('track', '') == 'fun' else 'Learning' }}
                         </span>
                         <span class="meta-item">
-                            <span class="meta-label">觀看次數</span>
+                            <span class="meta-label">{{ '觀看次數' if (views or 0) >= 20 else '狀態' }}</span>
+                            {% if (views or 0) >= 20 %}
                             {{ views }}
+                            {% else %}
+                            <span style="font-size:.72rem;font-weight:600;color:#818cf8;background:rgba(129,140,248,.12);padding:2px 10px;border-radius:14px">新上架</span>
+                            {% endif %}
                         </span>
                         <span class="meta-item">
                             <span class="meta-label">提交日期</span>

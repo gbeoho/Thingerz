@@ -1,4 +1,4 @@
-id,subcategory_id,category_id,platform,platform_id,title_zh,title_en,description_zh,description_en,thumbnail_url,aspect_ratio,tags,status,track,direction,submitted_date,submitter_name
+﻿id,subcategory_id,category_id,platform,platform_id,title_zh,title_en,description_zh,description_en,thumbnail_url,aspect_ratio,tags,status,track,direction,submitted_date,submitter_name
 v001,s001,cat001,youtube,Vgxk1C0_xpg,香港生活實錄：浮華背後的真實故事,香港生活實錄：浮華背後的真實故事,香港生活實錄：浮華背後的真實故事,,https://img.youtube.com/vi/Vgxk1C0_xpg/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-24,
 v002,s001,cat001,youtube,lZTKWHiICjE,探索香港獨特城市文化,探索香港獨特城市文化,探索香港獨特城市文化,,https://img.youtube.com/vi/lZTKWHiICjE/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-23,
 v003,s002,cat001,youtube,hTUfndy2TvM,香港品牌推廣策略與市場定位,香港品牌推廣策略與市場定位,香港品牌推廣策略與市場定位,,https://img.youtube.com/vi/hTUfndy2TvM/hqdefault.jpg,16:9,香港 YouTube,approved,learning,learning,2026-07-22,
@@ -78,10 +78,9 @@ v068,s002,cat001,instagram,DQbwoxkj0Dk,香港人上遊輪,,,,https://thingerz.co
 v069,s009,cat002,instagram,DaVJ7lvOR9e,香港人教雜耍,,係香港既都會教,,https://thingerz.com/cover/instagram/DaVJ7lvOR9e,9:16,北區,approved,learning,,2026-08-09,
 v070,s007,cat001,threads,@kong.food.kee/post/DOa4HuWiaHO,中環高質手工意粉推薦,,中環好味手工意粉,,https://thingerz.com/cover/threads/DOa4HuWiaHO,1:1,中西區,approved,learning,fun,2026-08-13,
 v071,s035,cat005,threads,@kong.food.kee/post/DOa4HuWiaHO,中環好味手工意粉,pasta Bar,,,https://thingerz.com/cover/threads/DOa4HuWiaHO,1:1,中西區,approved,fun,fun,2026-08-14,
-v072,s028,cat004,bilibili,BV13bgn6gEg1,最后离开的人，赢得这座百万豪宅！,,最后离开的人，赢得这座百万豪宅！,,https://picsum.photos/seed/bili_BV13bgn6gEg1/400/225,16:9,,approved,fun,fun,2026-08-14,
+v072,s028,cat004,bilibili,BV13bgn6gEg1,最后离开的人，赢得这座百万豪宅！,,最后离开的人，赢得这座百万豪宅！,,https://i1.hdslb.com/bfs/archive/2501581a0337cd89cf45807d8e24b712ecd2bd08.jpg,16:9,,approved,fun,fun,2026-08-14,
 v073,s073,cat002,instagram,DcBX8EnCH1v,Ari 攝影教學,,,,https://thingerz.com/cover/instagram/DcBX8EnCH1v,9:16,,approved,fun,learning,2026-08-15,
 v074,s013,cat002,instagram,DbxrPvvTPlG,廣東話學法文,,廣東話學法文,,https://thingerz.com/cover/instagram/DbxrPvvTPlG,9:16,,approved,learning,learning,2026-08-15,
-v076,s007,cat001,threads,,中環手工意粉,Spaghetti in central,中環好味嘅手工意粉,,https://picsum.photos/seed//400/711,1:1,中西區,approved,fun,fun,2026-08-15,
 v077,s072,cat002,youtube,SVgOddKlOds, 由《記憶棉》到《男人怎可以》：MC一直重複同緊同一個「唱歌公式」？ | Calvin歌唱小教室,,"👉 WhatsApp 9857 6836 預約 60分鐘試堂，用最輕鬆嘅方式開始唱好歌。
 宜家做緊暑期優惠，只需要HKD325就可以一對一60分鐘試堂，仲諗咩呀，我地上堂見啦！",,https://img.youtube.com/vi/SVgOddKlOds/hqdefault.jpg,16:9,,approved,fun,learning,2026-08-15,
 v078,s072,cat002,youtube,qw33imZSUcw, 【歌唱分析】張敬軒《靈魂相願》| 完整歌唱技術分析 | 唱歌絕對不可缺少的元素,,"✨精選皇牌課程✨
