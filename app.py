@@ -524,9 +524,31 @@ def _published_ago_days(s):
     if not s:
         return float('inf')
     m = _AGO_RE.search(str(s))
-    if not m:
+    if m:
+        return int(m.group(1)) * _AGO_MULT[m.group(2)]
+    # Absolute ISO/datetime upload timestamps (freshly curated rows write
+    # published_at=now-ISO, not YouTube's relative "8 日前" string). Parse them so
+    # batch-curated videos sort by real publish date, not dumped last at inf.
+    try:
+        t = str(s).strip()
+        parsed = None
+        if 'T' in t:
+            parsed = datetime.fromisoformat(t.replace('Z', '+00:00'))
+        else:
+            # bare date like 2026-08-21
+            from datetime import date
+            parsed = datetime.combine(date.fromisoformat(t[:10]), datetime.min.time())
+        if parsed.tzinfo is not None:
+            from datetime import datetime as _dt, timezone
+            now = _dt.now(timezone.utc)
+            diff = now - parsed
+            return max(0.0, diff.total_seconds() / 86400.0)
+        else:
+            from datetime import datetime as _dt, timezone
+            diff = _dt.now(timezone.utc).replace(tzinfo=None) - parsed
+            return max(0.0, diff.total_seconds() / 86400.0)
+    except Exception:
         return float('inf')
-    return int(m.group(1)) * _AGO_MULT[m.group(2)]
 
 
 def get_videos(subcategory_id=None, category_id=None, track=None, direction=None, status='approved', district=None, limit=None):
