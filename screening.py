@@ -92,6 +92,14 @@ EXTRA_TITLE_BLOCK = [
 FOREIGN_PROP = ["溫哥華", "温哥華", "vancouver", "台山房产", "台山房產", "多倫多地產",
                 "多伦多地产", "悉尼樓", "悉尼楼", "列治文"]
 
+# ─────────────────────────────────────────────────────────────────────────
+# 呃人 / negative-news shops — shops named in recent HK consumer-scam /
+# bad-sales / food-safety news (2026-08). Never curate/feature these brands:
+#   "opatra"      → Opatra London 美容店 (沙田/元朗分店突停業, 海關拘兩管理層涉不良銷售)
+#   "極上帝王水產"  → 旺角兆萬中心 放題, 食物中毒事件 + 已結業 (2025 food-safety, closed 2026-03)
+# Substring match (case-insensitive) so brand variants/URLs are caught too.
+SCAM_SHOPS = ["opatra", "極上帝王水產"]
+
 # simplified-Chinese chars => mainland content signal
 SIMP_CHARS = set("这为们个实设际销润让从现样买卖单东广车场产应网图学时书处头发开关兴长里问问确华职观员务财历专显标级联县经权机路线过分响应扩园年纪识计记认该部级环规达标价却据边总运输贺银华")
 FOREIGN_STOCK = ["SK海力士", "韓股", "韓國股市", "韩国股市", "韩股", "美股夜視鏡", "存儲股", "存储股"]
@@ -119,6 +127,11 @@ def screen_upload(title="", description="", author=""):
     description = description or ""
     author = author or ""
     text_all = " ".join([title, description, author]).lower()
+
+    # 呃人/negative-news shops — generic reject (never name the brand to users)
+    for s in SCAM_SHOPS:
+        if s.lower() in text_all:
+            return f"blocked shop: {s}"
 
     # general blocklist (any-field, word-boundary for English)
     for w in KEYWORDS:
@@ -235,6 +248,9 @@ SUB_CAT_KEYWORDS = {
     's069': ['生活小配件','生活用品'],
     's070': ['運動教學','健身教學','足球教學','籃球教學','游泳','sports'],
     's071': ['asmr','助眠','白噪音','放鬆音效'],
+    's072': ['唱歌教學','唱歌班','聲樂','練唱歌','學唱歌','vocal lesson','singing lesson'],
+    's073': ['攝影教學','影相教學','學影相','影相班','學攝影','攝影班','影相課程'],
+    's074': ['醫美','醫學美容','簡單醫美','針清','水光','脫毛','激光療程','hifu','皮秒','微針','美容療程','medical aesthetics'],
 }
 
 # length-1 / too-generic keys that must not trigger a category match alone
