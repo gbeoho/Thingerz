@@ -340,15 +340,28 @@ def init_db():
         csv_path = os.path.join(DATA_DIR, csv_file)
         if not os.path.exists(csv_path):
             continue
+        csv_ids = set()
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
+                csv_ids.add(str(row.get(fields[0], '')).strip())
                 values = {k: row.get(k, '') for k in fields}
                 placeholders = ', '.join(['?' for _ in fields])
                 columns = ', '.join(fields)
                 verb = 'INSERT OR REPLACE' if mode == 'insert_or_replace' else 'INSERT OR IGNORE'
                 db.execute(f"{verb} INTO {table_name} ({columns}) VALUES ({placeholders})",
                            [values[k] for k in fields])
+        # Reference tables are CSV-authoritative: DB rows removed from the CSV
+        # (e.g. deleted s007 餐飲與酒類, merged into s031 2026-08-21) must be
+        # pruned on every start, or a persisted live DB keeps serving the stale
+        # sub/nav page + sitemap URL forever. NEVER applied to live-editable
+        # tables (videos/submissions/...) — those are merge-add only.
+        if mode == 'insert_or_replace':
+            db_id = fields[0]
+            if csv_ids:
+                placeholders = ','.join(['?' for _ in csv_ids])
+                db.execute(f"DELETE FROM {table_name} WHERE {db_id} NOT IN ({placeholders})",
+                           list(csv_ids))
     # Seed crawled_videos from JSONL if empty (survives Render ephemeral storage)
     seed_path = os.path.join(DATA_DIR, 'seed_crawled_videos.jsonl')
     if os.path.exists(seed_path):
@@ -615,6 +628,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 72: cat_id = 'cat002'  # 唱歌教學
             elif sub_num == 73: cat_id = 'cat002'  # 攝影教學
             elif sub_num == 74: cat_id = 'cat007'  # 簡單醫美
+            elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
@@ -693,6 +707,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 72: cat_id = 'cat002'  # 唱歌教學
             elif sub_num == 73: cat_id = 'cat002'  # 攝影教學
             elif sub_num == 74: cat_id = 'cat007'  # 簡單醫美
+            elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
             seen = {v['id'] for v in result}
@@ -793,6 +808,7 @@ def get_video(video_id):
                 elif sub_num == 72: cat_id = 'cat002'  # 唱歌教學
                 elif sub_num == 73: cat_id = 'cat002'  # 攝影教學
                 elif sub_num == 74: cat_id = 'cat007'  # 簡單醫美
+                elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
                 else: cat_id = 'cat001'
                 trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
                 return {
@@ -1441,6 +1457,7 @@ def _map_subcat(sub_num):
     elif sub_num == 72: return 'cat002'  # 唱歌教學
     elif sub_num == 73: return 'cat002'  # 攝影教學
     elif sub_num == 74: return 'cat007'  # 簡單醫美
+    elif sub_num == 75: return 'cat004'  # 空間/打卡場地
     return 'cat001'
 
 
@@ -1552,6 +1569,12 @@ def category_page(slug):
 
 @app.route('/subcategory/<subcategory_id>')
 def subcategory_page(subcategory_id):
+    # Merged-out subs: s007 餐飲與酒類 folded into s031 飲食與品味 (2026-08-21).
+    # 301 so old bookmarks + search-indexed URLs land on the replacement page
+    # instead of 404 (SEO-friendly, keeps link equity).
+    MERGED_SUBS = {'s007': 's031'}
+    if subcategory_id in MERGED_SUBS:
+        return redirect(url_for('subcategory_page', subcategory_id=MERGED_SUBS[subcategory_id]), code=301)
     sub = get_subcategory(subcategory_id)
     if not sub:
         abort(404)

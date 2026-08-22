@@ -1,11 +1,10 @@
-id,category_id,name_slug,name_zh,name_en
+﻿id,category_id,name_slug,name_zh,name_en
 s001,cat001,market-research,市場研究與分析,Market Research & Analysis
 s002,cat001,branding,品牌推廣,Branding & Promotion
 s003,cat001,online-business,網上生意,Online Business
 s004,cat001,consulting,專業顧問,Professional Consulting
 s005,cat001,interior-design,室內設計,Interior Design
 s006,cat001,medical,醫療服務,Medical Services
-s007,cat001,food-beverage,餐飲與酒類,Food & Beverage
 s008,cat001,events,活動與配對,Events & Networking
 s009,cat002,skills,特別技能教學,Special Skills Training
 s010,cat002,performance-coaching,表演教練,Performance Coaching
@@ -73,3 +72,4 @@ s071,cat004,asmr-relaxation,ASMR音效,ASMR Sound Effects
 s072,cat002,singing,唱歌教學,Singing Lessons
 s073,cat002,photography-teaching,攝影教學,Photography Lessons
 s074,cat007,simple-medical-beauty,簡單醫美,Simple Medical Beauty
+s075,cat004,hk-spaces-photo-spots,空間/打卡場地,HK Spaces & Photo Spots
