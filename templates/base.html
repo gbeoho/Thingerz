@@ -78,7 +78,6 @@
         .home-hero{padding:46px 16px 10px;text-align:center;position:relative}
         .home-h1{font-size:clamp(1.5rem,3.2vw,2.4rem);font-weight:900;letter-spacing:-.02em;line-height:1.2;margin:0 0 8px;background:linear-gradient(135deg,#f472b6 0%,#c084fc 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
         .home-h1-sub{font-size:1rem;color:rgba(255,255,255,.45);letter-spacing:.04em;margin:0}
-        .home-h1-keywords{font-size:.8rem;color:rgba(255,255,255,.3);letter-spacing:.02em;margin:.35rem 0 0}
         .hero-split{display:flex;min-height:calc(100vh - 64px);overflow:hidden;position:relative}
         .hero-half{flex:1;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:flex .5s cubic-bezier(.4,0,.2,1)}
         .hero-half:hover{flex:1.25}
@@ -355,6 +354,7 @@
         .footer-links a{display:block;font-size:.85rem;color:#9898b0;padding:5px 0;transition:color .2s}
         .footer-links a:hover{color:#818cf8}
         .footer-bottom{padding-top:24px;border-top:1px solid rgba(255,255,255,.03);text-align:center;font-size:.78rem;color:#6a6a80}
+        .footer-tagline{font-size:.85rem;color:#9898b0;letter-spacing:.04em;font-weight:600;margin-bottom:8px}
         .disclaimer{margin-top:16px;padding:16px;background:rgba(255,255,255,.015);border-radius:12px;font-size:.7rem;line-height:1.7;max-width:800px;margin-left:auto;margin-right:auto}
         .disclaimer p{margin-bottom:6px}
 
@@ -554,7 +554,8 @@
                 <div class="footer-links"><h4>分類</h4>{% for cat in categories %}<a href="{{ url_for('category_page', slug=cat['name_slug']) }}">{{ cat['name_zh'] }}</a>{% endfor %}</div>
             </div>
             <div class="footer-bottom">
-                <p style="margin-bottom:12px">&copy; {{ now.year }} Thingerz. All rights reserved.</p>
+                <p class="footer-tagline">搵興趣 · 搵活動 · 搵課程 · 搵好去處</p>
+                <p style="margin-bottom:12px;margin-top:6px">&copy; {{ now.year }} Thingerz. All rights reserved.</p>
                 <div class="disclaimer">
                     <p><strong>免責聲明 Disclaimer</strong></p>
                     <p>All contacts provided in "Thingerz" are referrals. Although every reasonable effort is made to monitor performance, Thingerz makes no guarantee of any kind. Information on Thingerz is subject to change without prior notice. Users are strictly prohibited from contacting the referrals on the website directly and those who violated this regulation shall be judged by the law.</p>
