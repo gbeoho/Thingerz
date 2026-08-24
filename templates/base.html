@@ -92,11 +92,13 @@
         .hero-fun .hero-track-label{background:linear-gradient(135deg,#f472b6 0%,#c084fc 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(168,85,247,.3))}
         .hero-learning .hero-track-label{background:linear-gradient(135deg,#22d3ee 0%,#34d399 50%,#a3e635 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(6,182,212,.3))}
         .hero-track-desc{font-size:1.1rem;color:rgba(255,255,255,.45);margin-bottom:40px;letter-spacing:.02em}
-        .hero-cta-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);margin:0 auto;transition:all .3s;backdrop-filter:blur(10px)}
-        .hero-cta-circle svg{animation:bounceUp 2s infinite ease-in-out;opacity:.8}
-        @keyframes bounceUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-        .hero-half:hover .hero-cta-circle{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);transform:scale(1.15);box-shadow:0 0 50px rgba(129,140,248,.15)}
-        .hero-hint{display:block;margin-top:20px;font-size:.82rem;color:rgba(255,255,255,.3);letter-spacing:.05em}
+        .hero-cta-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 26px;border-radius:40px;font-size:.95rem;font-weight:700;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);backdrop-filter:blur(10px);transition:all .3s;cursor:pointer}
+                .hero-cta-btn svg{transition:transform .3s}
+                .hero-half:hover .hero-cta-btn{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.45);transform:translateY(-2px);box-shadow:0 8px 30px rgba(129,140,248,.25)}
+                .hero-half:hover .hero-cta-btn svg{transform:translateX(4px)}
+                .hero-fun .hero-cta-btn{background:linear-gradient(135deg,#ec4899,#a855f7);border-color:transparent}
+                .hero-learning .hero-cta-btn{background:linear-gradient(135deg,#06b6d4,#34d399);border-color:transparent}
+                .hero-cat-hints{display:block;margin-top:18px;font-size:.82rem;color:rgba(255,255,255,.35);letter-spacing:.04em}
 
         .section{padding:80px 0}
         .section-title{font-size:1.6rem;font-weight:700;letter-spacing:-.02em;margin-bottom:36px;display:flex;align-items:center;gap:14px}
@@ -390,7 +392,7 @@
             .hero-split{flex-direction:column;min-height:auto}
             .hero-half{min-height:50vh}.hero-half:hover{flex:1}
             .hero-track-label{font-size:3.2rem}
-            .hero-cta-circle{width:64px;height:64px}
+            .hero-cta-btn{padding:10px 22px;font-size:.9rem}
             .nav-container{padding:0 16px}
             .nav-links{display:flex;flex-direction:row;flex-wrap:wrap;width:100%;align-items:center;justify-content:center;gap:6px 12px;padding:8px 16px 6px;border-top:1px solid rgba(255,255,255,.06);background:none}
             .nav-links .nav-link{font-size:.92rem;padding:6px 2px;white-space:nowrap;border-bottom:none;width:auto}
@@ -433,7 +435,7 @@
             .cta-card{padding:36px 16px}
             .cta-card h2{font-size:1.2rem}
             .hero-track-label{font-size:2.2rem}.hero-half{min-height:45vh}
-            .hero-cta-circle{width:56px;height:56px}
+            .hero-cta-btn{padding:10px 20px;font-size:.85rem}
             .hero-track-desc{font-size:.9rem}
             .section{padding:36px 0}
             .section-title{font-size:1.15rem}
