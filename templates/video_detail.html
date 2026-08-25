@@ -209,6 +209,35 @@
     </div>
 </section>
 {% endif %}
+
+<section class="section" style="padding-top:0">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent"></span>
+            繼續探索
+        </h2>
+        <div class="continue-cta">
+            <a href="{{ url_for('submit_video') }}" class="cont-card">
+                <h3>分享類似內容</h3>
+                <p>都有相關嘅 YouTube / IG / Threads 片？提交俾我哋，更多人睇到你嘅創作。</p>
+                <span class="btn btn-primary">提交類似影片</span>
+            </a>
+            {% if video_district %}
+            <a href="{{ url_for('location_page', slug=video_district['slug']) }}" class="cont-card">
+                <h3>探索更多「{{ video_district['name_zh'] }}」</h3>
+                <p>睇返{{ video_district['name_zh'] }}其他本地課程、服務同好去處。</p>
+                <span class="btn btn-outline">睇{{ video_district['name_zh'] }}內容 &rarr;</span>
+            </a>
+            {% else %}
+            <a href="{{ url_for('track_page', track=video.get('track', 'fun')) }}" class="cont-card">
+                <h3>探索更多同類影片</h3>
+                <p>搵返{{ 'Fun' if video.get('track', '') == 'fun' else 'Learning' }}頻道更多有趣內容。</p>
+                <span class="btn btn-outline">睇更多 &rarr;</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block extra_scripts %}

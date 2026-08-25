@@ -12,6 +12,26 @@
     </div>
 </section>
 
+
+{% if news_items %}
+<section class="section" style="padding:28px 0 8px">
+    <div class="container">
+        <h2 class="section-title"><span class="title-accent"></span>本月精選</h2>
+        <div class="news-pick-grid">
+            {% for item in news_items[:4] %}
+            <a href="{{ url_for('news_detail', news_id=item['id']) }}" class="news-pick">
+                <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                <span class="news-pick-overlay">
+                    <span class="news-pick-title">{{ item['title_zh'] }}</span>
+                    <span class="news-pick-meta">{{ item['date'] }}{% if item.get('district') %} · {{ item['district'] }}{% endif %}</span>
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <section class="section news-filter-section" style="padding:0">
     <div class="news-filter-sticky">
     <div class="container">
@@ -34,7 +54,7 @@
         <p style="font-size:.95rem;color:#a9a9c0;line-height:1.8;margin-bottom:24px">想搵香港好去處？無論係週末想行山放空、帶屋企人去親子景點、定係約朋友掃街食好嘢，喺度都可以按 18 區慢慢揀——由中西區文青打卡、離島水鄉漁村，到屯門菠蘿山大峽谷、下白泥日落，全部收錄實用攻略同交通貼士，慳返你盲試嘅時間。</p>
         <div class="news-grid-full">
             {% for item in news_items %}
-            <article class="news-card-full">
+            <article class="news-card-full{% if loop.index > 6 %} news-hidden{% endif %}">
                 <div class="news-image">
                     <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
                 </div>
@@ -53,6 +73,27 @@
             </div>
             {% endif %}
         </div>
+
+{% if news_items|length > 6 %}
+<div class="load-more-wrap" id="loadMoreWrap">
+    <button type="button" class="btn btn-outline btn-lg" id="loadMoreBtn">載入更多</button>
+</div>
+{% endif %}
     </div>
 </section>
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+    var btn = document.getElementById('loadMoreBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+        var hidden = document.querySelectorAll('.news-hidden');
+        hidden.forEach(function(el){ el.classList.remove('news-hidden'); });
+        btn.closest('.load-more-wrap').style.display = 'none';
+    });
+})();
+</script>
+{% endblock %}
+

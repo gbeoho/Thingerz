@@ -11,6 +11,7 @@ import time
 import urllib.request
 import zlib
 from datetime import datetime
+from collections import Counter
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response, abort
 
@@ -1610,7 +1611,18 @@ def video_detail(video_id):
     related = get_related_videos(video)
     platform = PLATFORM_CONFIG.get(video.get('platform', 'youtube'), PLATFORM_CONFIG['youtube'])
     views = get_view_counts().get(video_id, 0)
-    return render_template('video_detail.html', video=video, category=category, sub=sub, comments=comments, related_videos=related, platform=platform, platform_config=PLATFORM_CONFIG, views=views)
+    # derive the primary district(s) this video is tagged with (for 探索同區 CTA)
+    v_district = None
+    _tok = set()
+    for raw in (video.get('tags') or '').split('|'):
+        for t in raw.split('、'):
+            if t.strip():
+                _tok.add(t.strip())
+    for d in getattr(geo, 'DISTRICTS', []) or []:
+        if d.get('name_zh') in _tok:
+            v_district = d
+            break
+    return render_template('video_detail.html', video=video, category=category, sub=sub, comments=comments, related_videos=related, platform=platform, platform_config=PLATFORM_CONFIG, views=views, video_district=v_district)
 
 
 @app.route('/search')
@@ -1860,9 +1872,14 @@ def location_page(slug):
         vids = [v for v in vids if (v.get('subcategory_id') or '') in TEACHING_SUBS]
     elif svc.startswith('s') and len(svc) == 4 and svc[1:].isdigit():
         vids = [v for v in vids if (v.get('subcategory_id') or '') == svc]
+    # 本區熱門分類: sub-categories actually present in this district's videos (top 6)
+    _cnt = Counter((v.get('subcategory_id') or '') for v in vids)
+    hot_subs = [{'id': sid, 'name_zh': sub_names.get(sid, sid), 'n': n}
+                for sid, n in _cnt.most_common(6) if sid]
     return render_template('location.html', district=d, videos=vids,
                            all_districts=[x for x in geo.DISTRICTS],
-                           svc_chips=svc_chips, selected_svc=svc)
+                           svc_chips=svc_chips, selected_svc=svc,
+                           hot_subs=hot_subs)
 
 
 @app.route('/contact', methods=['GET', 'POST'])
