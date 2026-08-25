@@ -1783,7 +1783,12 @@ def submit_video():
                     'submitter_name': submission['submitter_name'],
                     'status': 'approved'})
         return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=True,
-                               new_video_id=vids[-1]['id'], new_video_url=url_for('video_detail', video_id=vids[-1]['id']), new_video_title=title_zh)
+                               new_video_id=vids[-1]['id'],
+                               # Full absolute URL (not just /video/cv_xxx) so the
+                               # WhatsApp/Telegram/IG/Threads share buttons carry a
+                               # clickable link instead of a bare cv id.
+                               new_video_url='https://' + CANONICAL_HOST + url_for('video_detail', video_id=vids[-1]['id']),
+                               new_video_title=title_zh)
     return render_template('submit.html', categories=categories, districts=HK_DISTRICTS, platform_config=PLATFORM_CONFIG, success=False, blocked=False)
 
 
@@ -1892,6 +1897,43 @@ def add_comment(video_id):
 @app.route('/api/subcategories/<category_id>')
 def api_subcategories(category_id):
     return jsonify(get_subcategories(category_id))
+
+
+@app.route('/api/video-preview', methods=['GET'])
+def api_video_preview():
+    """Lightweight submit-page helper: given a platform + URL, resolve the
+    platform id and fetch a thumbnail so the submit wizard can show a live
+    preview. Read-only, no DB writes. Silently returns ok=False on failure so
+    the front-end just prompts the user to continue with the correct link."""
+    url = (request.args.get('url') or '').strip()
+    platform = (request.args.get('platform') or 'youtube').strip()
+    if not url:
+        return jsonify({'ok': False, 'error': 'missing url'}), 400
+    if platform == 'youtube':
+        pid = extract_youtube_id(url)
+    elif platform == 'instagram':
+        pid = extract_instagram_id(url)
+    elif platform == 'threads':
+        pid = extract_threads_id(url)
+    elif platform == 'tiktok':
+        pid = extract_tiktok_id(url)
+    elif platform == 'douyin':
+        pid = extract_douyin_id(url)
+    elif platform == 'xiaohongshu':
+        pid = extract_xiaohongshu_id(url)
+    elif platform == 'bilibili':
+        pid = extract_bilibili_id(url)
+    else:
+        pid = url.rstrip('/').split('/')[-1].split('?')[0]
+    if not pid:
+        return jsonify({'ok': False, 'error': 'unrecognized_link'}), 200
+    thumb = ''
+    try:
+        thumb = get_platform_thumb(platform, pid) or ''
+    except Exception:
+        thumb = ''
+    return jsonify({'ok': True, 'platform': platform, 'platform_id': pid,
+                    'thumbnail_url': thumb})
 
 
 # ==================== ADMIN ROUTES ====================

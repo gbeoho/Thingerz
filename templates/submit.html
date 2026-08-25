@@ -82,91 +82,125 @@
             <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
         </div>
         {% else %}
-        <form method="POST" class="submit-form">
-            <div class="form-section">
-                <h3>影片資訊</h3>
-                <div class="form-row">
-                    <label for="platform">平台 <span class="required">*</span></label>
-                    <select name="platform" id="platform" class="input" required>
-                        {% for key, cfg in platform_config.items() %}
-                        {% if key != 'douyin' %}
-                        <option value="{{ key }}">{{ cfg.name }}</option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label for="platform_url">影片網址 <span class="required">*</span></label>
-                    <input type="url" name="platform_url" id="platform_url" class="input" placeholder="貼上 YouTube / Facebook / Instagram / TikTok / Threads 的影片連結" required>
-                </div>
-                <div class="form-row">
-                    <label for="title_zh">中文標題 <span class="required">*</span></label>
-                    <input type="text" name="title_zh" id="title_zh" class="input" placeholder="為你的影片取一個吸引人的中文標題" required maxlength="100">
-                </div>
-                <div class="form-row">
-                    <label for="title_en">英文標題</label>
-                    <input type="text" name="title_en" id="title_en" class="input" placeholder="English title (optional)" maxlength="200">
-                </div>
-                <div class="form-row">
-                    <label for="description_zh">影片描述</label>
-                    <textarea name="description_zh" id="description_zh" class="input textarea" rows="4" placeholder="簡單描述影片內容（選填）" maxlength="500"></textarea>
-                </div>
-                <div class="form-row">
-                    <label for="direction">內容方向</label>
-                    <select name="direction" id="direction" class="input">
-                        <option value="">自動（根據分類決定）</option>
-                        <option value="fun">Fun 頻道</option>
-                        <option value="learning">Learning 頻道</option>
-                        <option value="business">商業配對</option>
-                        <option value="skills_exchange">技能互換</option>
-                    </select>
-                    <small class="form-hint">選擇內容的主要方向，方便日後分類與配對</small>
-                </div>
-            </div>
+        <form method="POST" class="submit-form" id="submitForm" novalidate>
+    <div class="wizard-progress">
+        <div class="wstep active" data-step="1"><span class="ws-num">1</span><span class="ws-label">貼連結</span></div>
+        <div class="wstep" data-step="2"><span class="ws-num">2</span><span class="ws-label">填標題</span></div>
+        <div class="wstep" data-step="3"><span class="ws-num">3</span><span class="ws-label">分類・地區</span></div>
+        <div class="wstep" data-step="4"><span class="ws-num">4</span><span class="ws-label">確認提交</span></div>
+    </div>
 
-            <div class="form-section">
-                <h3>分類設定</h3>
-                <div class="form-row">
-                    <label for="category_id">主分類 <span class="required">*</span></label>
-                    <select name="category_id" id="category_id" class="input" required>
-                        <option value="">請選擇主分類</option>
-                        {% for cat in categories %}
-                        <option value="{{ cat['category_id'] }}" data-track="{{ cat.get('track', '') }}" data-direction="{{ cat.get('direction', '') }}">{{ cat['name_zh'] }} ({{ cat['name_en'] }}) - {{ 'Fun' if cat.get('track', '') == 'fun' else 'Learning' }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label for="subcategory_id">子分類 <span class="required">*</span></label>
-                    <select name="subcategory_id" id="subcategory_id" class="input" required disabled>
-                        <option value="">請先選擇主分類</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label for="district">所在地區（可選多個）</label>
-                                        <select name="district" id="district" class="input" multiple size="6">
-                                            <option value="">不指定（選填）</option>
-                                            {% for d in districts %}
-                                            <option value="{{ d }}">{{ d }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <small class="form-hint">選填，可按住 Ctrl/Cmd 揀一個以上地區（例：跨區活動）。揀左嘅地區會同時喺主分類、子分類同「18區搜尋」出現；影片都可以屬多個區。</small>
-                </div>
+    <!-- STEP 1: platform + link with live preview -->
+    <div class="step-panel active" data-panel="1">
+        <div class="form-section">
+            <h3>① 貼上影片連結</h3>
+            <div class="form-row">
+                <label for="platform">平台 <span class="required">*</span></label>
+                <select name="platform" id="platform" class="input" required>
+                    {% for key, cfg in platform_config.items() %}
+                    {% if key != 'douyin' %}
+                    <option value="{{ key }}">{{ cfg.name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
             </div>
-
-            <div class="form-section">
-                <h3>你的資料</h3>
-                <div class="form-row">
-                    <label for="submitter_name">你的名字 <span class="required">*</span></label>
-                    <input type="text" name="submitter_name" id="submitter_name" class="input" placeholder="如何稱呼你？" required maxlength="50">
-                </div>
-                <div class="form-row">
-                    <label for="submitter_email">電郵地址</label>
-                    <input type="email" name="submitter_email" id="submitter_email" class="input" placeholder="your@email.com（選填）">
-                </div>
+            <div class="form-row">
+                <label for="platform_url">影片網址 <span class="required">*</span></label>
+                <input type="url" name="platform_url" id="platform_url" class="input" placeholder="貼上 YouTube / Facebook / Instagram / TikTok / Threads 的影片連結" required>
             </div>
+            <div id="linkPreview" class="link-preview" style="display:none">
+                <img id="linkPreviewImg" alt="影片縮圖預覽" style="display:none">
+                <span id="linkPreviewMsg"></span>
+            </div>
+            <div class="step-error" id="err1">請先填寫有效嘅影片連結（揀啱平台）。</div>
+        </div>
+    </div>
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block">提交影片</button>
-        </form>
+    <!-- STEP 2: title + description -->
+    <div class="step-panel" data-panel="2">
+        <div class="form-section">
+            <h3>② 標題同描述</h3>
+            <div class="form-row">
+                <label for="title_zh">中文標題 <span class="required">*</span></label>
+                <input type="text" name="title_zh" id="title_zh" class="input" placeholder="為你的影片取一個吸引人的中文標題" required maxlength="100">
+            </div>
+            <div class="form-row">
+                <label for="title_en">英文標題</label>
+                <input type="text" name="title_en" id="title_en" class="input" placeholder="English title (optional)" maxlength="200">
+            </div>
+            <div class="form-row">
+                <label for="description_zh">影片描述</label>
+                <textarea name="description_zh" id="description_zh" class="input textarea" rows="4" placeholder="簡單描述影片內容（選填）" maxlength="500"></textarea>
+            </div>
+            <div class="step-error" id="err2">請填寫中文標題（必填）。</div>
+        </div>
+    </div>
+
+    <!-- STEP 3: category + direction + district -->
+    <div class="step-panel" data-panel="3">
+        <div class="form-section">
+            <h3>③ 揀分類・地區</h3>
+            <div class="form-row">
+                <label for="category_id">主分類 <span class="required">*</span></label>
+                <select name="category_id" id="category_id" class="input" required>
+                    <option value="">請選擇主分類</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat['category_id'] }}" data-track="{{ cat.get('track', '') }}" data-direction="{{ cat.get('direction', '') }}">{{ cat['name_zh'] }} ({{ cat['name_en'] }}) - {{ 'Fun' if cat.get('track', '') == 'fun' else 'Learning' }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="subcategory_id">子分類 <span class="required">*</span></label>
+                <select name="subcategory_id" id="subcategory_id" class="input" required disabled>
+                    <option value="">請先選擇主分類</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="direction">內容方向</label>
+                <select name="direction" id="direction" class="input">
+                    <option value="">自動（根據分類決定）</option>
+                    <option value="fun">Fun 頻道</option>
+                    <option value="learning">Learning 頻道</option>
+                    <option value="business">商業配對</option>
+                    <option value="skills_exchange">技能互換</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="district">所在地區（可選多個）</label>
+                <select name="district" id="district" class="input" multiple size="4">
+                    <option value="">不指定（選填）</option>
+                    {% for d in districts %}
+                    <option value="{{ d }}">{{ d }}</option>
+                    {% endfor %}
+                </select>
+                <small class="form-hint">選填，可按住 Ctrl/Cmd 揀一個以上地區。揀左嘅地區會同時喺「18區搜尋」出現。</small>
+            </div>
+            <div class="step-error" id="err3">請選擇主分類同子分類。</div>
+        </div>
+    </div>
+
+    <!-- STEP 4: your details + submit -->
+    <div class="step-panel" data-panel="4">
+        <div class="form-section">
+            <h3>④ 你的資料</h3>
+            <div class="form-row">
+                <label for="submitter_name">你的名字 <span class="required">*</span></label>
+                <input type="text" name="submitter_name" id="submitter_name" class="input" placeholder="如何稱呼你？" required maxlength="50">
+            </div>
+            <div class="form-row">
+                <label for="submitter_email">電郵地址</label>
+                <input type="email" name="submitter_email" id="submitter_email" class="input" placeholder="your@email.com（選填）">
+            </div>
+            <div class="step-error" id="err4">請填寫你的名字。</div>
+        </div>
+    </div>
+
+    <div class="wizard-nav">
+        <button type="button" class="btn btn-outline" id="wPrev" style="display:none">← 上一步</button>
+        <button type="button" class="btn btn-primary" id="wNext">下一步 →</button>
+        <button type="submit" class="btn btn-primary btn-lg" id="wSubmit" style="display:none">提交影片</button>
+    </div>
+</form>
         {% endif %}
     </div>
 </section>
@@ -175,35 +209,94 @@
 {% block extra_scripts %}
 <script>
 (function() {
+    var CURRENT = 1, TOTAL = 4;
+    var form = document.getElementById('submitForm');
+    var wPrev = document.getElementById('wPrev');
+    var wNext = document.getElementById('wNext');
+    var wSubmit = document.getElementById('wSubmit');
+    if (!form || !wPrev || !wNext) return;
+    var panels = document.querySelectorAll('.step-panel');
+    var steps = document.querySelectorAll('.wstep');
+
+    function showStep(n) {
+        if (n < 1) n = 1; if (n > TOTAL) n = TOTAL;
+        CURRENT = n;
+        panels.forEach(function(p){ p.classList.toggle('active', parseInt(p.getAttribute('data-panel'),10) === n); });
+        steps.forEach(function(s){ var sn=parseInt(s.getAttribute('data-step'),10); s.classList.toggle('active', sn===n); s.classList.toggle('done', sn<n); });
+        wPrev.style.display = n===1 ? 'none' : 'inline-flex';
+        wNext.style.display = n===TOTAL ? 'none' : 'inline-flex';
+        wSubmit.style.display = n===TOTAL ? 'inline-flex' : 'none';
+        document.querySelectorAll('.step-error').forEach(function(e){ e.classList.remove('show'); });
+        if (window.scrollY > 60) window.scrollTo({top: window.scrollY - 110, behavior: 'smooth'});
+    }
+
+    function validStep(i) {
+        var bad = false;
+        if (i===1) bad = !document.getElementById('platform_url').value.trim();
+        else if (i===2) bad = !document.getElementById('title_zh').value.trim();
+        else if (i===3) bad = !document.getElementById('category_id').value || !document.getElementById('subcategory_id').value;
+        else if (i===4) bad = !document.getElementById('submitter_name').value.trim();
+        if (bad) { var e=document.getElementById('err'+i); if (e) e.classList.add('show'); }
+        return !bad;
+    }
+
+    wNext.addEventListener('click', function(){ if (validStep(CURRENT)) showStep(CURRENT+1); });
+    wPrev.addEventListener('click', function(){ showStep(CURRENT-1); });
+
+    // Sub-category loader (unchanged behaviour)
     var categorySelect = document.getElementById('category_id');
     var subcategorySelect = document.getElementById('subcategory_id');
-    if (!categorySelect || !subcategorySelect) return;
-
-    categorySelect.addEventListener('change', function() {
-        var categoryId = this.value;
-        subcategorySelect.disabled = true;
-        subcategorySelect.innerHTML = '<option value="">載入中...</option>';
-        if (!categoryId) {
-            subcategorySelect.innerHTML = '<option value="">請先選擇主分類</option>';
+    if (categorySelect && subcategorySelect) {
+        categorySelect.addEventListener('change', function() {
+            var categoryId = this.value;
             subcategorySelect.disabled = true;
-            return;
-        }
-        fetch('/api/subcategories/' + categoryId)
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                subcategorySelect.innerHTML = '<option value="">請選擇子分類</option>';
-                data.forEach(function(s) {
-                    var opt = document.createElement('option');
-                    opt.value = s.id;
-                    opt.textContent = s.name_zh + ' (' + s.name_en + ')';
-                    subcategorySelect.appendChild(opt);
-                });
-                subcategorySelect.disabled = false;
+            subcategorySelect.innerHTML = '<option value="">載入中...</option>';
+            if (!categoryId) { subcategorySelect.innerHTML='<option value="">請先選擇主分類</option>'; subcategorySelect.disabled=true; return; }
+            fetch('/api/subcategories/' + categoryId)
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    subcategorySelect.innerHTML = '<option value="">請選擇子分類</option>';
+                    data.forEach(function(s){ var o=document.createElement('option'); o.value=s.id; o.textContent=s.name_zh+' ('+s.name_en+')'; subcategorySelect.appendChild(o); });
+                    subcategorySelect.disabled = false;
+                })
+                .catch(function(){ subcategorySelect.innerHTML='<option value="">載入失敗，請重試</option>'; });
+        });
+    }
+
+    // Live link preview (debounced)
+    var urlInput = document.getElementById('platform_url');
+    var platSel = document.getElementById('platform');
+    var previewEl = document.getElementById('linkPreview');
+    var previewImg = document.getElementById('linkPreviewImg');
+    var previewMsg = document.getElementById('linkPreviewMsg');
+    var t = null;
+    function doPreview(){
+        var url = urlInput.value.trim();
+        if (!url) { if (previewEl) previewEl.style.display='none'; return; }
+        if (!previewEl || !previewMsg) return;
+        previewEl.style.display='flex';
+        previewMsg.className='loading'; previewMsg.textContent='讀取中…';
+        if (previewImg){ previewImg.style.display='none'; }
+        fetch('/api/video-preview?platform=' + encodeURIComponent(platSel.value) + '&url=' + encodeURIComponent(url))
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                if (d && d.ok && d.thumbnail_url) {
+                    previewMsg.className='suc';
+                    previewMsg.textContent='已認到你條片，可以繼續下一步。';
+                    if (previewImg){ previewImg.src=d.thumbnail_url; previewImg.style.display='block'; }
+                } else {
+                    previewMsg.className='err';
+                    previewMsg.textContent='暫時讀唔到條連結，但你都可以繼續。';
+                    if (previewImg) previewImg.style.display='none';
+                }
             })
-            .catch(function() {
-                subcategorySelect.innerHTML = '<option value="">載入失敗，請重試</option>';
-            });
-    });
+            .catch(function(){ previewMsg.className='err'; previewMsg.textContent='預覽載入失敗，但你可以繼續。'; });
+    }
+    if (urlInput && platSel) {
+        urlInput.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(doPreview, 450); });
+        platSel.addEventListener('change', function(){ clearTimeout(t); t=setTimeout(doPreview, 200); });
+    }
+    showStep(1);
 })();
 </script>
 {% endblock %}
