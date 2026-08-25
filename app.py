@@ -1646,13 +1646,80 @@ def video_detail(video_id):
     return render_template('video_detail.html', video=video, category=category, sub=sub, comments=comments, related_videos=related, platform=platform, platform_config=PLATFORM_CONFIG, views=views, video_district=v_district)
 
 
+_GENERIC_QUERY_DROP = {'香港'}
+_DISTRICT_SPLIT_TOKENS = sorted(
+    {d['name_zh'] for d in geo.DISTRICTS}
+    | {'中西', '灣仔', '油尖旺', '深水埗', '九龍城', '黃大仙', '觀塘', '葵青',
+       '荃灣', '屯門', '元朗', '大埔', '沙田', '西貢', '離島'},
+    key=len, reverse=True)
+
+
+def _search_tokens(q):
+    """Tokenize a search query into latin words + CJK runs, splitting HK district
+    names out of compounds (觀塘美食 → [觀塘, 美食]) so long-tail queries match."""
+    tokens = []
+    for word in re.findall(r'[A-Za-z0-9]+|[\u4e00-\u9fff]+', q):
+        if not re.search(r'[\u4e00-\u9fff]', word):
+            tokens.append(word.lower())
+            continue
+        buf = ''
+        i = 0
+        while i < len(word):
+            hit = next((t for t in _DISTRICT_SPLIT_TOKENS if word.startswith(t, i)), None)
+            if hit:
+                if buf:
+                    tokens.append(buf)
+                    buf = ''
+                tokens.append(hit)
+                i += len(hit)
+            else:
+                buf += word[i]
+                i += 1
+        if buf:
+            tokens.append(buf)
+    return tokens
+
+
+def _token_expand(toks):
+    """Add CJK bigrams for tokens >=4 chars so compound queries can OR-match
+    (婚禮攝影 → 婚禮, 禮攝, 攝影)."""
+    out = set(toks)
+    for t in toks:
+        if re.search(r'[\u4e00-\u9fff]', t) and len(t) >= 4:
+            for j in range(len(t) - 1):
+                out.add(t[j:j + 2])
+    return list(out)
+
+
 @app.route('/search')
 def search():
     q = request.args.get('q', '').strip()
     if not q:
         return redirect(url_for('index'))
     all_videos = get_videos()
-    results = [v for v in all_videos if q.lower() in (v.get('title_zh') or '').lower() or q.lower() in (v.get('title_en') or '').lower() or q.lower() in (v.get('tags') or '').lower() or q.lower() in (v.get('description_zh') or '').lower()]
+    toks = _search_tokens(q) or [q]
+    if len(toks) > 1:
+        # drop generic scopes (香港 etc.) from compound queries so 香港品牌 → 品牌
+        toks = [t for t in toks if t not in _GENERIC_QUERY_DROP]
+
+    def _hit(v, t):
+        tl = t.lower()
+        return (tl in (v.get('title_zh') or '').lower()
+                or tl in (v.get('title_en') or '').lower()
+                or tl in (v.get('tags') or '').lower()
+                or tl in (v.get('description_zh') or '').lower())
+
+    # AND first: precise (觀塘美食 → videos tagged 觀塘 whose content mentions 美食)
+    results = [v for v in all_videos if all(_hit(v, t) for t in toks)]
+    if not results:
+        # OR fallback: multi-token OR (觀塘 OR 美食) or CJK-bigram expansion
+        # (婚禮攝影 → 婚禮/禮攝/攝影), ranked by #tokens matched then views, cap
+        pool = _token_expand(toks)
+        if len(toks) > 1 or set(pool) != set(toks):
+            scored = [(-sum(_hit(v, t) for t in pool), -(v.get('view_count') or 0), v)
+                      for v in all_videos if any(_hit(v, t) for t in pool)]
+            scored.sort(key=lambda x: x[:2])
+            results = [v for _, _, v in scored[:60]]
     return render_template('search.html', query=q, results=results, platform_config=PLATFORM_CONFIG)
 
 
