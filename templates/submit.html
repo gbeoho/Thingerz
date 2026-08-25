@@ -142,14 +142,14 @@
                     </select>
                 </div>
                 <div class="form-row">
-                    <label for="district">所在地區</label>
-                    <select name="district" id="district" class="input">
-                        <option value="">不指定（選填）</option>
-                        {% for d in districts %}
-                        <option value="{{ d }}">{{ d }}</option>
-                        {% endfor %}
-                    </select>
-                    <small class="form-hint">選填。如選擇地區，影片會同時喺主分類、子分類同「18區搜尋」出現；唔填就只會喺主分類／子分類出現。</small>
+                    <label for="district">所在地區（可選多個）</label>
+                                        <select name="district" id="district" class="input" multiple size="6">
+                                            <option value="">不指定（選填）</option>
+                                            {% for d in districts %}
+                                            <option value="{{ d }}">{{ d }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="form-hint">選填，可按住 Ctrl/Cmd 揀一個以上地區（例：跨區活動）。揀左嘅地區會同時喺主分類、子分類同「18區搜尋」出現；影片都可以屬多個區。</small>
                 </div>
             </div>
 

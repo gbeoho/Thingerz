@@ -69,9 +69,7 @@
                     <h3 class="card-title">{{ video['title_zh'] }}</h3>
                     {% if video.get('submitter_name') %}<p class="card-submitter">投稿 by {{ video['submitter_name'] }}</p>{% endif %}
                     <div class="card-tags">
-                        {% for tag in (video['tags'] or '').split('|')[:2] if tag.strip() %}
-                                                <span class="tag">{{ tag.strip() }}</span>
-                                                {% endfor %}
+                        {% for raw in (video['tags'] or '').split('|')[:2] if raw.strip() %}{% for tag in raw.split('、') if tag.strip() %}<span class="tag">{{ tag.strip() }}</span>{% endfor %}{% endfor %}
                     </div>
                 </div>
             </a>

@@ -1635,7 +1635,7 @@ def submit_video():
                 category_id = sub['category_id']
         title_zh = request.form.get('title_zh', '')
         desc_zh = request.form.get('description_zh', '')
-        district = (request.form.get('district', '') or '').strip()  # 選填 18區
+        district = '、'.join(x for x in request.form.getlist('district') if x)  # 可選多個 18區（、隔開）
         block_reason = None
         if contains_blocked(title_zh) or contains_blocked(desc_zh):
             block_reason = "含有不當用語"
