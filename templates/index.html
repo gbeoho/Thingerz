@@ -88,12 +88,28 @@
     <div class="container">
         <h2 class="section-title">
             <span class="title-accent"></span>
-            按地區探索 · 18 District
+            按香港地圖探索 · 18 District
             <a href="{{ url_for('search') }}" class="section-link">搜尋全港 &rarr;</a>
         </h2>
-        <div class="sticky-categories">
-            {% for d in districts %}
-            <a href="{{ url_for('location_page', slug=d['slug']) }}" class="sticky-cat-chip" title="{{ d.name_en }}">{{ d['name_zh'] }}</a>
+        {% set nte = ['屯門區','元朗區','北區','大埔區','沙田區','西貢區','荃灣區','葵青區','離島區'] %}
+        {% set kl = ['深水埗區','油尖旺區','九龍城區','黃大仙區','觀塘區'] %}
+        {% set hk = ['中西區','灣仔區','東區','南區'] %}
+        <div class="map-band-label">新界及離島</div>
+        <div class="map-band">
+            {% for d in districts if d['name_zh'] in nte %}
+            <a href="{{ url_for('location_page', slug=d['slug']) }}" class="map-district" title="{{ d['name_en'] }}">{{ d['name_zh'] }}<span class="md-arrow">→</span></a>
+            {% endfor %}
+        </div>
+        <div class="map-band-label">九龍</div>
+        <div class="map-band">
+            {% for d in districts if d['name_zh'] in kl %}
+            <a href="{{ url_for('location_page', slug=d['slug']) }}" class="map-district" title="{{ d['name_en'] }}">{{ d['name_zh'] }}<span class="md-arrow">→</span></a>
+            {% endfor %}
+        </div>
+        <div class="map-band-label">港島</div>
+        <div class="map-band">
+            {% for d in districts if d['name_zh'] in hk %}
+            <a href="{{ url_for('location_page', slug=d['slug']) }}" class="map-district" title="{{ d['name_en'] }}">{{ d['name_zh'] }}<span class="md-arrow">→</span></a>
             {% endfor %}
         </div>
         <p style="font-size:.78rem;color:#6a6a80;margin-top:10px">按地區搵本地服務、課程、好去處同創意人才 — 18 區 GEO 導覽</p>

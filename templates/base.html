@@ -93,6 +93,15 @@
         .hot-chip{font-size:.72rem;color:#9898b0;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.14);padding:5px 12px;border-radius:16px;transition:all .2s}
         .hot-chip:hover{color:#fff;border-color:rgba(129,140,248,.45);background:rgba(129,140,248,.08)}
         @media(max-width:600px){.hero-search{flex-direction:column}.hero-search button{width:100%}}
+        /* 18區香港地圖視圖 (Grok UI review: 地圖式探索) */
+        .map-band-label{font-size:.72rem;font-weight:800;color:#7c7c96;letter-spacing:.06em;margin:16px 0 8px;display:flex;align-items:center;gap:10px}
+        .map-band-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+        .map-band{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+        .map-district{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);font-size:.82rem;font-weight:650;color:#d6d6e4;transition:all .22s;white-space:nowrap;overflow:hidden}
+        .map-district:hover{transform:translateY(-2px);border-color:rgba(129,140,248,.55);background:rgba(129,140,248,.14);color:#fff;box-shadow:0 8px 24px rgba(99,102,241,.25)}
+        .map-district .md-arrow{opacity:0;font-size:.7rem;transform:translateX(-4px);transition:all .2s}
+        .map-district:hover .md-arrow{opacity:1;transform:none}
+        @media(max-width:600px){.map-band{grid-template-columns:repeat(2,1fr)}.map-district{padding:11px 12px;font-size:.78rem}}
         .hero-split{display:flex;min-height:clamp(500px,62vh,640px);overflow:hidden;position:relative}
         .hero-half{flex:1;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:flex .5s cubic-bezier(.4,0,.2,1)}
         .hero-half:hover{flex:1.25}
