@@ -679,6 +679,9 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                 'status': 'approved',
                 'track': trk,
                 'direction': trk,
+                'author_name': cr['author_name'] or '',
+                'view_count': cr['view_count'] or 0,
+                'duration_sec': cr['duration_sec'] or 0,
                 'submitted_date': cr['published_at'] or '',
             })
     except:
@@ -753,6 +756,9 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
                     'status': 'approved',
                     'track': trk,
                     'direction': trk,
+                    'author_name': cr['author_name'] or '',
+                    'view_count': cr['view_count'] or 0,
+                    'duration_sec': cr['duration_sec'] or 0,
                     'submitted_date': cr['published_at'] or '',
                 })
         except Exception:
@@ -839,6 +845,9 @@ def get_video(video_id):
                     'aspect_ratio': '16:9', 'tags': ' | '.join(x for x in [r['district'] or '', (r['sport_tag'] if 'sport_tag' in r.keys() else '') or ''] if x),
                     'district_confirmed': bool(r['district_confirmed']),
                     'status': 'approved', 'track': trk, 'direction': trk,
+                    'author_name': r['author_name'] or '',
+                    'view_count': r['view_count'] or 0,
+                    'duration_sec': r['duration_sec'] or 0,
                     'submitted_date': r['published_at'] or '',
                 }
         except:
@@ -1508,6 +1517,9 @@ def get_top_viewed(limit=100):
             'thumbnail_url': thumb, 'aspect_ratio': '16:9',
             'tags': ' | '.join(x for x in [cr['district'] or '', (cr['sport_tag'] if 'sport_tag' in cr.keys() else '') or ''] if x), 'district_confirmed': bool(cr['district_confirmed']),
             'status': 'approved', 'track': trk, 'direction': trk,
+            'author_name': cr['author_name'] or '',
+            'view_count': cr['view_count'] or 0,
+            'duration_sec': cr['duration_sec'] or 0,
             'submitted_date': cr['published_at'] or '',
         })
     return result

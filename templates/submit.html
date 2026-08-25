@@ -4,8 +4,8 @@
 {% block content %}
 <section class="page-hero">
     <div class="container">
-        <h1>分享你的精彩影片</h1>
-        <p class="page-subtitle">支援 YouTube / Instagram / TikTok / Facebook / Threads — 貼上連結，自動抓取標題同封面</p>
+        <h1>提交影片、品牌或本地服務</h1>
+        <p class="page-subtitle">貼上連結即自動抓取標題同封面 — 快速提交只需要 4 步，1-2 個工作天內完成審核</p>
     </div>
 </section>
 
@@ -30,8 +30,10 @@
                         </div>
                         {% else %}
                         <p>你的影片已成功提交，正在等待審核。審核通過後將自動顯示在對應的分類頁面中。</p>
+                        <p style="font-size:.85rem;color:#9898b0;margin-top:6px">⏳ 預計 1-2 個工作天內審核完成 — 通過後會自動上架。</p>
                         {% endif %}
                         <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交另一部影片</a>
+                        <a href="https://wa.me/?text={{ ('我啱啱喺 Thingerz 提交咗影片，你都可以分享你嘅作品或服務 — thingerz.com/submit') | urlencode }}" target="_blank" rel="noopener" class="btn btn-outline">推薦另一位創作者</a>
                         <a href="{{ url_for('index') }}" class="btn btn-outline">返回首頁</a>
         </div>
         {% elif already_exists %}

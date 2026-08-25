@@ -36,12 +36,18 @@
                 <span class="title-accent {{ 'fun-accent' if category['track'] == 'fun' else 'learning-accent' }}"></span>
                 影片列表
             </h2>
+            <div class="sort-bar">
+                <span style="font-size:.72rem;color:#6a6a80">排序:</span>
+                <button type="button" class="sort-btn active" data-sort="default">預設</button>
+                <button type="button" class="sort-btn" data-sort="views">最多觀看</button>
+                <button type="button" class="sort-btn" data-sort="newest">最新上架</button>
+            </div>
             {% include "_district_filter.html" %}
             <span class="result-count">{{ videos|length }} 個影片</span>
         </div>
         <div class="masonry-grid">
             {% for video in videos %}
-            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}">
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}" data-views="{{ video.get('view_count') or 0 }}" data-date="{{ video.get('submitted_date') or '' }}">
                 <div class="card-media">
                     <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
                     <div class="card-overlay">
@@ -50,9 +56,14 @@
                         </div>
                     </div>
                     {% include "_platform_badge.html" %}
+                    {% if (video.get('duration_sec') or 0) > 0 %}<span class="card-duration">{{ (video['duration_sec']|int // 60) }}:{{ '%02d' % (video['duration_sec']|int % 60) }}</span>{% endif %}
                 </div>
                 <div class="card-info">
                     <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    <div class="card-meta">
+                        {% if video.get('author_name') %}<span class="card-author">{{ video['author_name'] }}</span>{% endif %}
+                        {% if (video.get('view_count') or 0) > 0 %}<span class="card-views">{{ video['view_count'] }} 次觀看</span>{% endif %}
+                    </div>
                     {% if video.get('submitter_name') %}<p class="card-submitter">投稿 by {{ video['submitter_name'] }}</p>{% endif %}
                     <div class="card-tags">
                         {% for raw in (video['tags'] or '').split('|')[:2] if raw.strip() %}{% for tag in raw.split('、') if tag.strip() %}<span class="tag">{{ tag.strip() }}</span>{% endfor %}{% endfor %}
@@ -81,4 +92,23 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+    var grid = document.querySelector('.masonry-grid');
+    var btns = document.querySelectorAll('.sort-btn');
+    if(!grid || !btns.length) return;
+    var cards = Array.prototype.slice.call(grid.children);
+    function apply(mode){
+        var arr = cards.slice();
+        if(mode === 'views') arr.sort(function(a,b){ return (parseInt(b.dataset.views,10)||0) - (parseInt(a.dataset.views,10)||0); });
+        if(mode === 'newest') arr.sort(function(a,b){ return (b.dataset.date||'').localeCompare(a.dataset.date||''); });
+        arr.forEach(function(c){ grid.appendChild(c); });
+        btns.forEach(function(b){ b.classList.toggle('active', b.dataset.sort === mode); });
+    }
+    btns.forEach(function(b){ b.addEventListener('click', function(){ apply(b.dataset.sort); }); });
+})();
+</script>
 {% endblock %}

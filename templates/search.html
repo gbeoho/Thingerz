@@ -13,13 +13,19 @@
         {% if results %}
         <div class="masonry-grid">
             {% for video in results %}
-            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}">
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}" data-views="{{ video.get('view_count') or 0 }}" data-date="{{ video.get('submitted_date') or '' }}">
                 <div class="card-media">
                     <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
                     <div class="card-overlay"><div class="play-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div></div>
                     {% include "_platform_badge.html" %}
+                    {% if (video.get('duration_sec') or 0) > 0 %}<span class="card-duration">{{ (video['duration_sec']|int // 60) }}:{{ '%02d' % (video['duration_sec']|int % 60) }}</span>{% endif %}
                 </div>
-                <div class="card-info"><h3 class="card-title">{{ video['title_zh'] }}</h3>{% if video.get('submitter_name') %}<p class="card-submitter">投稿 by {{ video['submitter_name'] }}</p>{% endif %}</div>
+                <div class="card-info"><h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    <div class="card-meta">
+                        {% if video.get('author_name') %}<span class="card-author">{{ video['author_name'] }}</span>{% endif %}
+                        {% if (video.get('view_count') or 0) > 0 %}<span class="card-views">{{ video['view_count'] }} 次觀看</span>{% endif %}
+                    </div>
+                    {% if video.get('submitter_name') %}<p class="card-submitter">投稿 by {{ video['submitter_name'] }}</p>{% endif %}</div>
             </a>
             {% endfor %}
         </div>
