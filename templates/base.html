@@ -343,7 +343,7 @@
 
         /* Submit wizard — multi-step with progress + live link preview */
         .wizard-progress{display:flex;gap:8px;margin-bottom:28px}
-        .wstep{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);opacity:.45;transition:all .25s}
+        .wstep{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);opacity:.45;transition:all .25s;position:relative}
         .wstep.active{opacity:1;border-color:rgba(129,140,248,.45);background:rgba(99,102,241,.08)}
         .wstep.done{opacity:.9;border-color:rgba(52,211,153,.3)}
         .ws-num{width:26px;height:26px;border-radius:50%;background:#1a1e2e;border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:#e4e4ed}
@@ -400,8 +400,24 @@
         @media(max-width:1100px){.news-pick-grid{grid-template-columns:repeat(2,1fr)}}
         @media(max-width:600px){.news-pick-grid{grid-template-columns:1fr 1fr;gap:10px}}
         @media(max-width:768px){
-            .wizard-nav{position:sticky;bottom:0;background:rgba(10,10,18,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);z-index:60;margin:0 -14px}
+            .wizard-nav{position:sticky;bottom:0;background:rgba(10,10,18,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:12px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.06);z-index:60;margin:0 -14px}
+            /* compact: keep the wizard nav free from the chat bubble in bottom-right */
+            .wizard-nav{justify-content:flex-start;gap:10px}
+            .wizard-nav #wNext,.wizard-nav #wSubmit{flex:1;max-width:64%;justify-content:center}
             .dchip-label{font-size:.78rem;padding:8px 14px}
+            /* progress -> dots + current-step label on the smallest phones */
+            .wizard-progress{margin-bottom:20px}
+            .wstep{flex-direction:row;justify-content:center;padding:8px 4px;min-width:0}
+            .wstep .ws-label{display:none}
+            .wstep.active .ws-label{display:none}
+        }
+        @media(max-width:480px){
+            .wizard-progress{display:flex;gap:6px;align-items:center}
+            .wstep{flex:0 0 auto;width:22px;height:22px;padding:0;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);opacity:.5}
+            .wstep .ws-num{width:100%;height:100%;font-size:.68rem}
+            .wstep.done{background:rgba(16,185,129,.25);border-color:rgba(16,185,129,.4)}
+            .wstep.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;opacity:1}
+            .wstep .ws-label{display:inline !important;font-size:.6rem;margin-left:8px;position:absolute;white-space:nowrap;left:50%;transform:translateX(-50%);top:calc(100% + 4px);color:#9898b0}
         }
 
         .success-message{text-align:center;padding:80px 24px;background:#11111d;border-radius:18px;border:1px solid rgba(255,255,255,.05)}

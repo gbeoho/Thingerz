@@ -9,6 +9,7 @@ import json
 import threading
 import time
 import urllib.request
+import urllib.parse
 import zlib
 from datetime import datetime
 from collections import Counter
@@ -1957,8 +1958,19 @@ def api_video_preview():
         thumb = get_platform_thumb(platform, pid) or ''
     except Exception:
         thumb = ''
+    # Best-effort title via YouTube oEmbed (auto-filled into the 中文標題 field by the
+    # wizard so the submitter edits instead of retypes). Non-YouTube / fetch failure -> ''.
+    title = ''
+    if platform == 'youtube' and pid:
+        try:
+            o = json.load(urllib.request.urlopen(
+                'https://www.youtube.com/oembed?url=' + urllib.parse.quote(f'https://www.youtube.com/watch?v={pid}') + '&format=json',
+                timeout=4))
+            title = (o.get('title') or '')[:100]
+        except Exception:
+            title = ''
     return jsonify({'ok': True, 'platform': platform, 'platform_id': pid,
-                    'thumbnail_url': thumb})
+                    'thumbnail_url': thumb, 'title': title})
 
 
 # ==================== ADMIN ROUTES ====================

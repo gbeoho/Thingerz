@@ -124,6 +124,7 @@
             <div class="form-row">
                 <label for="title_zh">中文標題 <span class="required">*</span></label>
                 <input type="text" name="title_zh" id="title_zh" class="input" placeholder="為你的影片取一個吸引人的中文標題" required maxlength="100">
+                <small class="form-hint" id="titleAutoHint" style="display:none;color:#10b981">✓ 已自動填入影片標題（可修改）</small>
             </div>
             <div class="form-row">
                 <label for="title_en">英文標題</label>
@@ -378,6 +379,15 @@
                         var up = new Image();                 // then upgrade to hi-res
                         up.onload = function(){ if (previewImg && previewImg.src !== hi) previewImg.src = hi; };
                         up.src = hi;
+                    }
+                    // 自動回填中文標題 (如未手動輸入/仍係預設值) — 「魔法」位
+                    if (d.title) {
+                        var tz = document.getElementById('title_zh');
+                        if (tz && !tz.value.trim()) {
+                            tz.value = d.title;
+                            var hint = document.getElementById('titleAutoHint');
+                            if (hint) hint.style.display = 'block';
+                        }
                     }
                 } else {
                     previewMsg.className='err';
