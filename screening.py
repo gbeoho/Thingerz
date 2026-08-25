@@ -253,6 +253,7 @@ SUB_CAT_KEYWORDS = {
     's074': ['醫美','醫學美容','簡單醫美','針清','水光','脫毛','激光療程','hifu','皮秒','微針','美容療程','medical aesthetics'],
     's075': ['打卡場地','影相打卡','空間','打卡位','影樓空間'],
     's076': ['roblox','roblox studio','羅布樂思','robux','luau','obby','遊戲製作','遊戲開發','遊戲設計','game making','game dev','metaverse'],
+    's077': ['python','javascript','web development','網頁設計','app 開發','寫code','寫程式','學程式','程式教學','編程','coding','developer','html css','react','node.js','c++','java','程式語言','寫網站','做網站','app development','software dev','android studio','swift'],
 }
 
 # length-1 / too-generic keys that must not trigger a category match alone
