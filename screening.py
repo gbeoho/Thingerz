@@ -251,6 +251,8 @@ SUB_CAT_KEYWORDS = {
     's072': ['唱歌教學','唱歌班','聲樂','練唱歌','學唱歌','vocal lesson','singing lesson'],
     's073': ['攝影教學','影相教學','學影相','影相班','學攝影','攝影班','影相課程'],
     's074': ['醫美','醫學美容','簡單醫美','針清','水光','脫毛','激光療程','hifu','皮秒','微針','美容療程','medical aesthetics'],
+    's075': ['打卡場地','影相打卡','空間','打卡位','影樓空間'],
+    's076': ['roblox','roblox studio','羅布樂思','robux','luau','obby','遊戲製作','遊戲開發','遊戲設計','game making','game dev','metaverse'],
 }
 
 # length-1 / too-generic keys that must not trigger a category match alone

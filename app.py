@@ -641,6 +641,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 73: cat_id = 'cat002'  # 攝影教學
             elif sub_num == 74: cat_id = 'cat007'  # 簡單醫美
             elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
+            elif sub_num == 76: cat_id = 'cat003'  # Roblox Studio 遊戲製作
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
@@ -720,6 +721,7 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 73: cat_id = 'cat002'  # 攝影教學
             elif sub_num == 74: cat_id = 'cat007'  # 簡單醫美
             elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
+            elif sub_num == 76: cat_id = 'cat003'  # Roblox Studio 遊戲製作
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
             seen = {v['id'] for v in result}
@@ -821,6 +823,7 @@ def get_video(video_id):
                 elif sub_num == 73: cat_id = 'cat002'  # 攝影教學
                 elif sub_num == 74: cat_id = 'cat007'  # 簡單醫美
                 elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
+                elif sub_num == 76: cat_id = 'cat003'  # Roblox Studio 遊戲製作
                 else: cat_id = 'cat001'
                 trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
                 return {
@@ -1470,6 +1473,7 @@ def _map_subcat(sub_num):
     elif sub_num == 73: return 'cat002'  # 攝影教學
     elif sub_num == 74: return 'cat007'  # 簡單醫美
     elif sub_num == 75: return 'cat004'  # 空間/打卡場地
+    elif sub_num == 76: return 'cat003'  # Roblox Studio 遊戲製作
     return 'cat001'
 
 
