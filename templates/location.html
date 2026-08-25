@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{{ district.short_en }} Services & Talent ({{ district.name_zh }}) | Thingerz{% endblock %}
-{% block meta_description %}{{ district.intro }}{% endblock %}
+{% block meta_description %}{{ district.intro_zh or district.intro }}{% endblock %}
 {% block og_title %}{{ district.short_en }} Services & Talent ({{ district.name_zh }}) | Thingerz{% endblock %}
-{% block og_description %}{{ district.intro }}{% endblock %}
+{% block og_description %}{{ district.intro_zh or district.intro }}{% endblock %}
 
 {% block extra_head %}
 <script type="application/ld+json">
@@ -20,10 +20,28 @@
     { "@type": "AdministrativeArea", "name": "{{ district.name_en }}" }
   ],
   "url": "{{ request.url.split('?')[0] if request else 'https://thingerz.com' }}",
-  "description": "{{ district.intro }}"
-}
-</script>
-<script type="application/ld+json">
+  "description": {{ (district.intro_zh or district.intro)|tojson }}
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "Place",
+  "name": "{{ district.name_zh }}",
+  "alternateName": "{{ district.name_en }}",
+  "address": {
+  "@type": "PostalAddress",
+  "addressRegion": "Hong Kong",
+  "addressLocality": "{{ district.name_zh }}"
+  },
+  "geo": {
+  "@type": "GeoCoordinates",
+  "latitude": {{ district.geo[0] }},
+  "longitude": {{ district.geo[1] }}
+  }
+  }
+  </script>
+  <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -52,7 +70,7 @@
         </div>
         <h1>Services &amp; Talent in {{ district.short_en }} ({{ district.name_zh }}) | Thingerz</h1>
         <p class="page-subtitle">Micro-services, Tutors &amp; Creative Freelancers in {{ district.short_en }} — 點搵你</p>
-        <p class="page-desc">{{ district.intro }}</p>
+        <p class="page-desc">{{ district.intro_zh or district.intro }}</p>
         <div class="location-cta">
             <a href="{{ url_for('news_list', district=district.name_zh) }}" class="btn btn-outline">睇本區好去處</a>
             <a href="{{ url_for('track_page', track='fun') }}" class="btn btn-outline">本區 Fun 頻道</a>
@@ -92,7 +110,7 @@
         <h2 class="section-title" style="font-size:1.25rem;margin-bottom:18px">本區熱門分類 / {{ district.short_en }} Popular Categories</h2>
         <div class="sticky-categories" style="justify-content:flex-start">
             {% for hs in hot_subs %}
-            <a href="{{ url_for('subcategory_page', subcategory_id=hs['id']) }}?district={{ district['name_zh'] }}" class="sticky-cat-chip">{{ hs['name_zh'] }}</a>
+            <a href="{{ url_for('subcategory_page', subcategory_id=hs['id']) }}?district={{ district['name_zh'] }}" class="sticky-cat-chip" title="{{ hs['name_zh'] }} {{ hs['n'] }} 條影片">{{ hs['name_zh'] }}（{{ hs['n'] }}）</a>
             {% endfor %}
         </div>
     </div>

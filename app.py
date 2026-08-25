@@ -1895,10 +1895,19 @@ def location_page(slug):
         vids = [v for v in vids if (v.get('subcategory_id') or '') == svc]
     # 本區熱門分類: sub-categories actually present in this district's videos (top 6)
     _cnt = Counter((v.get('subcategory_id') or '') for v in vids)
+    # skip s007 (orphan sub no longer in subcategories.csv — shows raw id as name)
     hot_subs = [{'id': sid, 'name_zh': sub_names.get(sid, sid), 'n': n}
-                for sid, n in _cnt.most_common(6) if sid]
-    # 本區精選: top 3 by view count, computed BEFORE svc filtering so it's stable
-    featured = sorted(vids, key=lambda v: v.get('view_count') or 0, reverse=True)[:3]
+                for sid, n in _cnt.most_common(10) if sid and sid != 's007']
+    # 本區精選: computed BEFORE svc filtering so it's stable. Prefer teaching/
+    # service subs + real content, exclude orphan s007 and ad-like titles so the
+    # featured rail shows 服務/興趣/好去處 相關影片, not 純廣告/無關內容.
+    _AD_MARKERS = ('地產', '代理', '睇樓', '示範單位', '樓盤', '展銷', '招租', '放盤')
+    _fpool = [v for v in vids
+              if (v.get('subcategory_id') or '') != 's007'
+              and not any(m in ((v.get('title_zh') or '') + (v.get('author_name') or '')) for m in _AD_MARKERS)]
+    featured = sorted(_fpool,
+                      key=lambda v: ((0 if (v.get('subcategory_id') or '') in TEACHING_SUBS else 1),
+                                     -(v.get('view_count') or 0)))[:3]
     # 本區好去處: district-tagged 好去處 news (already published + non-foreign + date-sorted)
     district_news = [n for n in (get_news() or []) if n.get('district') == d['name_zh']][:3]
     return render_template('location.html', district=d, videos=vids,

@@ -9,6 +9,8 @@ engines (ChatGPT / Gemini / Perplexity) can cite Thingerz for hyper-local
 DISTRICTS = [
     {
         "slug": "central-and-western",
+        "intro_zh": "中西區涵蓋中環、上環同西環，係香港嘅歷史核心地帶，亦係唔少專業顧問、設計師同手作工作室嘅集中地。無論你想搵中西區補習老師、中環室內設計師，定係上環烘焙班，喺 Thingerz 都可以按區搵到相關影片同服務，睇片了解質素先至聯絡。",
+        "geo": [22.287, 114.15],
         "name_zh": "中西區",
         "name_en": "Central and Western District",
         "short_en": "Central & Western",
@@ -25,6 +27,8 @@ DISTRICTS = [
     },
     {
         "slug": "wan-chai",
+        "intro_zh": "灣仔區由灣仔、銅鑼灣延伸至跑馬地，商業同生活配套都齊全。想搵灣仔活動攝影師、銅鑼灣健身教練，或者灣仔區嘅語言課程同品牌推廣團隊，喺 Thingerz 用「灣仔區」篩選就可以一次過睇晒相關影片同服務介紹。",
+        "geo": [22.278, 114.182],
         "name_zh": "灣仔區",
         "name_en": "Wan Chai District",
         "short_en": "Wan Chai",
@@ -40,6 +44,8 @@ DISTRICTS = [
     },
     {
         "slug": "eastern",
+        "intro_zh": "東區覆蓋北角、鰂魚涌同太古，係港島東嘅住宅同商業區。無論你想搵北角鋼琴老師、鰂魚涌室內設計師，定係東區嘅攝影師同心理輔導服務，Thingerz 都有按區分類嘅影片同服務資料，方便你睇完片再比較。",
+        "geo": [22.282, 114.225],
         "name_zh": "東區",
         "name_en": "Eastern District",
         "short_en": "Eastern",
@@ -55,6 +61,8 @@ DISTRICTS = [
     },
     {
         "slug": "southern",
+        "intro_zh": "南區包括香港仔、黃竹坑同赤柱，近海環境特別啱水上活動同戶外運動。想搵黃竹坑水上運動教練、赤柱攝影師，或者南區親子活動導師同表演教練，喺 Thingerz 搜尋「南區」即可搵到相關影片同服務推介。",
+        "geo": [22.242, 114.157],
         "name_zh": "南區",
         "name_en": "Southern District",
         "short_en": "Southern",
@@ -70,6 +78,8 @@ DISTRICTS = [
     },
     {
         "slug": "yau-tsim-mong",
+        "intro_zh": "油尖旺區橫跨尖沙咀、旺角同油麻地，係全港最繁忙嘅商業同消費區。無論你想搵旺角跳舞班、尖沙咀美甲化妝師，定係油麻地嘅專業顧問同創業服務，Thingerz 都收錄咗區內相關影片，睇片揀啱心水先聯絡。",
+        "geo": [22.316, 114.17],
         "name_zh": "油尖旺區",
         "name_en": "Yau Tsim Mong District",
         "short_en": "Yau Tsim Mong",
@@ -85,6 +95,8 @@ DISTRICTS = [
     },
     {
         "slug": "sham-shui-po",
+        "intro_zh": "深水埗區近年係文創同手作嘅集中地，深水埗、長沙灣同荔枝角一帶有大量設計工作室同寵物友善小店。想搵深水埗 pet cafe、荔枝角手作班，或者區內嘅親子活動同網上生意導師，喺 Thingerz 按「深水埗區」篩選即可。",
+        "geo": [22.33, 114.162],
         "name_zh": "深水埗區",
         "name_en": "Sham Shui Po District",
         "short_en": "Sham Shui Po",
@@ -100,6 +112,8 @@ DISTRICTS = [
     },
     {
         "slug": "kowloon-city",
+        "intro_zh": "九龍城區包括九龍城、土瓜灣同九龍塘，舊區同名校區並存。想搵九龍城補習老師、九龍塘音樂班，或者區內嘅配件設計師同專業顧問，Thingerz 按區收錄咗相關影片同服務，幫你慳返四圍問人嘅時間。",
+        "geo": [22.327, 114.19],
         "name_zh": "九龍城區",
         "name_en": "Kowloon City District",
         "short_en": "Kowloon City",
@@ -115,6 +129,8 @@ DISTRICTS = [
     },
     {
         "slug": "wong-tai-sin",
+        "intro_zh": "黃大仙區覆蓋黃大仙、鑽石山同彩虹，社區配套成熟。無論你想搵黃大仙裝修師傅、鑽石山室內設計公司，定係區內嘅醫療服務同進修課程，喺 Thingerz 搜尋「黃大仙區」即可睇到相關影片同服務介紹。",
+        "geo": [22.342, 114.196],
         "name_zh": "黃大仙區",
         "name_en": "Wong Tai Sin District",
         "short_en": "Wong Tai Sin",
@@ -130,6 +146,8 @@ DISTRICTS = [
     },
     {
         "slug": "kwun-tong",
+        "intro_zh": "觀塘區係東九龍嘅工業同創意核心，觀塘站一帶聚集咗大量設計工作室、健身室同專業顧問。想搵觀塘健身教練、進修課程或者舞蹈班，甚至係牛頭角、藍田嘅設計服務，喺 Thingerz 按「觀塘區」篩選就可以一次過睇晒。",
+        "geo": [22.312, 114.226],
         "name_zh": "觀塘區",
         "name_en": "Kwun Tong District",
         "short_en": "Kwun Tong",
@@ -145,6 +163,8 @@ DISTRICTS = [
     },
     {
         "slug": "kwai-tsing",
+        "intro_zh": "葵青區包括葵涌、葵芳同青衣，交通方便，社區設施齊全。無論你想搵葵芳音樂班、青衣運動教練，定係區內嘅食物創作同室內設計服務，Thingerz 都收錄咗相關影片，睇片確認質素先決定最穩陣。",
+        "geo": [22.365, 114.128],
         "name_zh": "葵青區",
         "name_en": "Kwai Tsing District",
         "short_en": "Kwai Tsing",
@@ -160,6 +180,8 @@ DISTRICTS = [
     },
     {
         "slug": "tsuen-wan",
+        "intro_zh": "荃灣區以荃灣市中心為核心，係新界西嘅重要樞紐。想搵荃灣學琴、室內設計師、跳舞班或者藝術創作課程，喺 Thingerz 搜尋「荃灣區」即可搵到區內相關影片同服務推介，睇片揀啱先約。",
+        "geo": [22.361, 114.106],
         "name_zh": "荃灣區",
         "name_en": "Tsuen Wan District",
         "short_en": "Tsuen Wan",
@@ -175,6 +197,8 @@ DISTRICTS = [
     },
     {
         "slug": "tuen-mun",
+        "intro_zh": "屯門區係新界西嘅門戶，屯門市中心同周邊屋苑生活配套齊全。無論你想搵屯門學 bass、音樂課程，定係區內嘅室內設計師同繪畫班，Thingerz 都按區收錄咗相關影片同服務，方便你比較完再聯絡。",
+        "geo": [22.391, 113.977],
         "name_zh": "屯門區",
         "name_en": "Tuen Mun District",
         "short_en": "Tuen Mun",
@@ -190,6 +214,8 @@ DISTRICTS = [
     },
     {
         "slug": "yuen-long",
+        "intro_zh": "元朗區涵蓋元朗市同天水圍，係新界西北最大嘅社區。想搵元朗補習老師、天水圍興趣班，或者區內嘅醫療服務同專業顧問，喺 Thingerz 用「元朗區」篩選即可睇到相關影片同服務介紹。",
+        "geo": [22.441, 114.022],
         "name_zh": "元朗區",
         "name_en": "Yuen Long District",
         "short_en": "Yuen Long",
@@ -205,6 +231,8 @@ DISTRICTS = [
     },
     {
         "slug": "north",
+        "intro_zh": "北區包括上水、粉嶺同沙頭角，貼近邊境但生活配套完善。無論你想搵上水補習老師、粉嶺親子活動，定係區內嘅運動訓練同社區服務，Thingerz 都收錄咗相關影片，睇片了解實際內容先至最安心。",
+        "geo": [22.497, 114.147],
         "name_zh": "北區",
         "name_en": "North District",
         "short_en": "North",
@@ -220,6 +248,8 @@ DISTRICTS = [
     },
     {
         "slug": "tai-po",
+        "intro_zh": "大埔區由大埔墟伸延至吐露港沿岸，單車同戶外活動好受歡迎。想搵大埔墟單車教練、大埔攝影師或平面設計師，定係區內嘅表演教練同品牌推廣團隊，喺 Thingerz 按「大埔區」篩選即可一次過睇晒。",
+        "geo": [22.445, 114.17],
         "name_zh": "大埔區",
         "name_en": "Tai Po District",
         "short_en": "Tai Po",
@@ -235,6 +265,8 @@ DISTRICTS = [
     },
     {
         "slug": "sha-tin",
+        "intro_zh": "沙田區沿城門河兩岸發展，由沙田、大圍至馬鞍山，係成熟嘅新市鎮。無論你想搵沙田室內設計師、馬鞍山健身教練，定係區內嘅音樂學校同舞蹈班，Thingerz 都按區收錄咗相關影片同服務，睇片揀啱先聯絡。",
+        "geo": [22.382, 114.196],
         "name_zh": "沙田區",
         "name_en": "Sha Tin District",
         "short_en": "Sha Tin / Shatin",
@@ -250,6 +282,8 @@ DISTRICTS = [
     },
     {
         "slug": "sai-kung",
+        "intro_zh": "西貢區包括西貢市同將軍澳新市鎮，前者以水上活動同郊遊聞名，後者係大型住宅區。想搵西貢獨木舟教練、將軍澳室內設計師，或者區內嘅攝影師同藝術課程，喺 Thingerz 搜尋「西貢區」即可搵到相關影片。",
+        "geo": [22.381, 114.273],
         "name_zh": "西貢區",
         "name_en": "Sai Kung District",
         "short_en": "Sai Kung",
@@ -265,6 +299,8 @@ DISTRICTS = [
     },
     {
         "slug": "islands",
+        "intro_zh": "離島區涵蓋大嶼山、長洲、南丫島等外島，係遠離市區嘅悠閒社區。無論你想搵長洲水上活動班、南丫島瑜伽導師，定係區內嘅音樂演出同本地品牌工作坊，Thingerz 都收錄咗相關影片，等你可以睇片揀啱先出發。",
+        "geo": [22.268, 113.955],
         "name_zh": "離島區",
         "name_en": "Islands District",
         "short_en": "Islands",
