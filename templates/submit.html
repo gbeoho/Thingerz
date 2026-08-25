@@ -111,7 +111,7 @@
             </div>
             <div id="linkPreview" class="link-preview" style="display:none">
                 <img id="linkPreviewImg" alt="影片縮圖預覽" style="display:none">
-                <span id="linkPreviewMsg"></span>
+                <span id="linkPreviewMsg" aria-live="polite"></span>
             </div>
             <div class="step-error" id="err1">請先填寫有效嘅影片連結（揀啱平台）。</div>
         </div>
@@ -176,7 +176,7 @@
                     </label>
                     {% endfor %}
                 </div>
-                <small class="form-hint" id="districtCount">選填 — 揀咗之後會同時喺「18區搜尋」出現，方便區內居民搵到你。</small>
+                <small class="form-hint" id="districtCount" aria-live="polite">選填 — 揀咗之後會同時喺「18區搜尋」出現，方便區內居民搵到你。</small>
             </div>
             <div class="step-error" id="err3">請選擇主分類同子分類。</div>
         </div>
@@ -212,6 +212,16 @@
 {% block extra_scripts %}
 <script>
 (function() {
+    var SKEY = 'tzh_submit_v1';
+    var store = null;
+    try { store = window.localStorage; store.setItem('__t','1'); store.removeItem('__t'); } catch(e){ store = null; }
+
+    // Result pages (success/dup/invalid/blocked): clear the saved draft & stop.
+    if (document.querySelector('.success-message')) {
+        if (store) { try{ store.removeItem(SKEY); }catch(e){} }
+        return;
+    }
+
     var CURRENT = 1, TOTAL = 4;
     var form = document.getElementById('submitForm');
     var wPrev = document.getElementById('wPrev');
@@ -243,10 +253,83 @@
         return !bad;
     }
 
+    // ---- Draft persistence (中斷恢復: 離開再返嚟自動回到上一步) ----
+    function saveState(){
+        if (!store) return;
+        var state = {
+            step: CURRENT,
+            platform: document.getElementById('platform').value,
+            platform_url: document.getElementById('platform_url').value.trim(),
+            title_zh: document.getElementById('title_zh').value,
+            title_en: document.getElementById('title_en').value,
+            description_zh: document.getElementById('description_zh').value,
+            category_id: document.getElementById('category_id').value,
+            subcategory_id: document.getElementById('subcategory_id').value,
+            direction: document.getElementById('direction').value,
+            districts: Array.prototype.map.call(document.querySelectorAll('.dchip-input:checked'), function(c){ return c.value; }),
+            submitter_name: document.getElementById('submitter_name').value,
+            submitter_email: document.getElementById('submitter_email').value
+        };
+        try { store.setItem(SKEY, JSON.stringify(state)); } catch(e){}
+    }
+    function clearState(){ if (store){ try{ store.removeItem(SKEY); }catch(e){} } }
+
+    var saveTimer = null;
+    function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 300); }
+    ['platform','platform_url','title_zh','title_en','description_zh','category_id','subcategory_id','direction','submitter_name','submitter_email'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) { el.addEventListener('input', scheduleSave); el.addEventListener('change', scheduleSave); }
+    });
+    var dGrid0 = document.getElementById('districtGrid');
+    if (dGrid0) dGrid0.addEventListener('change', scheduleSave);
+
+    function restoreState(){
+        if (!store) return;
+        var st = null;
+        try { st = JSON.parse(store.getItem(SKEY) || 'null'); } catch(e){}
+        if (!st) { showStep(1); return; }
+        function setv(id){ var el=document.getElementById(id); if (el && st[id] !== undefined) el.value = st[id]; }
+        setv('platform'); setv('platform_url'); setv('title_zh'); setv('title_en'); setv('description_zh');
+        setv('category_id'); setv('direction'); setv('submitter_name'); setv('submitter_email');
+        if (st.districts && st.districts.length) {
+            document.querySelectorAll('.dchip-input').forEach(function(c){ c.checked = st.districts.indexOf(c.value) >= 0; });
+            var dc = document.getElementById('districtCount');
+            if (dc) dc.textContent = '已選 ' + st.districts.length + ' 區 — 會同時喺「18區搜尋」出現。';
+        }
+        if (st.category_id) {
+            var cat = document.getElementById('category_id');
+            if (cat) cat.dispatchEvent(new Event('change'));
+            var pendingSub = st.subcategory_id || '';
+            if (pendingSub) {
+                var trySet = setInterval(function(){
+                    var s = document.getElementById('subcategory_id');
+                    if (s && !s.disabled) {
+                        if (Array.prototype.some.call(s.options, function(o){ return o.value === pendingSub; })) s.value = pendingSub;
+                        clearInterval(trySet);
+                    }
+                }, 120);
+            }
+        }
+        if (st.platform_url) { setTimeout(doPreview, 150); }
+        showStep(parseInt(st.step,10) || 1);
+    }
+
+    // ---- Swipe navigation (左右滑動切換步驟) ----
+    var sx = 0, sy = 0;
+    form.addEventListener('touchstart', function(e){ var t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, {passive:true});
+    form.addEventListener('touchend', function(e){
+        var t = e.changedTouches[0];
+        var dx = t.clientX - sx, dy = t.clientY - sy;
+        if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        if (dx < 0) { if (validStep(CURRENT)) showStep(CURRENT + 1); }
+        else { showStep(CURRENT - 1); }
+    }, {passive:true});
+
     wNext.addEventListener('click', function(){ if (validStep(CURRENT)) showStep(CURRENT+1); });
     wPrev.addEventListener('click', function(){ showStep(CURRENT-1); });
+    form.addEventListener('submit', clearState);
 
-    // Sub-category loader (unchanged behaviour)
+    // Sub-category loader
     var categorySelect = document.getElementById('category_id');
     var subcategorySelect = document.getElementById('subcategory_id');
     if (categorySelect && subcategorySelect) {
@@ -266,7 +349,7 @@
         });
     }
 
-    // Live link preview (debounced)
+    // Live link preview (debounced, low-res first then upgrade)
     var urlInput = document.getElementById('platform_url');
     var platSel = document.getElementById('platform');
     var previewEl = document.getElementById('linkPreview');
@@ -286,7 +369,16 @@
                 if (d && d.ok && d.thumbnail_url) {
                     previewMsg.className='suc';
                     previewMsg.textContent='已認到你條片，可以繼續下一步。';
-                    if (previewImg){ previewImg.src=d.thumbnail_url; previewImg.style.display='block'; }
+                    if (previewImg) {
+                        var hi = d.thumbnail_url;
+                        var low = hi.replace(/hqdefault\.jpg/,'mqdefault.jpg').replace(/sddefault\.jpg/,'mqdefault.jpg');
+                        previewImg.onerror = function(){ previewImg.onerror=null; previewImg.src = hi; };
+                        previewImg.src = low;                // 320px first
+                        previewImg.style.display='block';
+                        var up = new Image();                 // then upgrade to hi-res
+                        up.onload = function(){ if (previewImg && previewImg.src !== hi) previewImg.src = hi; };
+                        up.src = hi;
+                    }
                 } else {
                     previewMsg.className='err';
                     previewMsg.textContent='暫時讀唔到條連結，但你都可以繼續。';
@@ -299,7 +391,8 @@
         urlInput.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(doPreview, 450); });
         platSel.addEventListener('change', function(){ clearTimeout(t); t=setTimeout(doPreview, 200); });
     }
-    // District chip grid => live 已選 X 區 counter (multi-select; backend getlist('district') still works)
+
+    // District chip grid => live 已選 X 區 counter
     var dGrid = document.getElementById('districtGrid');
     var dCount = document.getElementById('districtCount');
     if (dGrid && dCount) {
@@ -310,7 +403,7 @@
         dGrid.addEventListener('change', updDistrict);
     }
 
-    showStep(1);
+    restoreState();
 })();
 </script>
 {% endblock %}

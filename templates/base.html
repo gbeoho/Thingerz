@@ -405,7 +405,12 @@
         }
 
         .success-message{text-align:center;padding:80px 24px;background:#11111d;border-radius:18px;border:1px solid rgba(255,255,255,.05)}
-        .success-icon{margin-bottom:18px;display:flex;justify-content:center}
+        .success-icon{margin-bottom:18px;display:flex;justify-content:center;animation:popIn .55s cubic-bezier(.2,.9,.3,1.2) both}
+        .success-icon svg{animation:glowPulse 2s ease-in-out .5s infinite}
+        @keyframes popIn{0%{opacity:0;transform:scale(.4)}60%{opacity:1;transform:scale(1.08)}100%{transform:scale(1)}}
+        @keyframes glowPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(129,140,248,.25))}50%{filter:drop-shadow(0 0 14px rgba(129,140,248,.55))}}
+        .success-message{animation:msgIn .45s ease-out both}
+        @keyframes msgIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
         .success-message h2{font-size:1.5rem;margin-bottom:8px}
         .success-message p{color:#9898b0;margin-bottom:32px;max-width:400px;margin-left:auto;margin-right:auto}
         .success-message .btn{margin:6px}
