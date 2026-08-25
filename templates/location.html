@@ -99,6 +99,35 @@
 </section>
 {% endif %}
 
+{% if featured_videos %}
+<section class="section" style="padding:16px 0 0">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">本區精選 / {{ district.short_en }} Featured</h2>
+        </div>
+        <div class="masonry-grid">
+            {% for video in featured_videos %}
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}">
+                <div class="card-media">
+                    <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
+                    <div class="card-overlay">
+                        <div class="play-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </div>
+                    {% include "_platform_badge.html" %}
+                    <span style="position:absolute;top:10px;left:10px;z-index:5;font-size:.68rem;font-weight:800;color:#fff;background:linear-gradient(135deg,#6366f1,#ec4899);padding:3px 10px;border-radius:14px">★ 精選</span>
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <section class="section">
     <div class="container">
         <div class="section-header">
@@ -136,6 +165,28 @@
         {% endif %}
     </div>
 </section>
+
+{% if district_news %}
+<section class="section" style="padding-top:0">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">本區好去處 / {{ district.short_en }} 好去處</h2>
+            <a href="{{ url_for('news_list', district=district['name_zh']) }}" style="font-size:.82rem;color:#818cf8;white-space:nowrap">睇全部 &rarr;</a>
+        </div>
+        <div class="news-pick-grid">
+            {% for item in district_news %}
+            <a href="{{ url_for('news_detail', news_id=item['id']) }}" class="news-pick">
+                <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                <span class="news-pick-overlay">
+                    <span class="news-pick-title">{{ item['title_zh'] }}</span>
+                    <span class="news-pick-meta">{{ item['date'] }}{% if item.get('district') %} · {{ item['district'] }}{% endif %}</span>
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
 
 <section class="section" style="padding-top:0">
     <div class="container" style="max-width:860px">

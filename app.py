@@ -1885,10 +1885,15 @@ def location_page(slug):
     _cnt = Counter((v.get('subcategory_id') or '') for v in vids)
     hot_subs = [{'id': sid, 'name_zh': sub_names.get(sid, sid), 'n': n}
                 for sid, n in _cnt.most_common(6) if sid]
+    # 本區精選: top 3 by view count, computed BEFORE svc filtering so it's stable
+    featured = sorted(vids, key=lambda v: v.get('view_count') or 0, reverse=True)[:3]
+    # 本區好去處: district-tagged 好去處 news (already published + non-foreign + date-sorted)
+    district_news = [n for n in (get_news() or []) if n.get('district') == d['name_zh']][:3]
     return render_template('location.html', district=d, videos=vids,
                            all_districts=[x for x in geo.DISTRICTS],
                            svc_chips=svc_chips, selected_svc=svc,
-                           hot_subs=hot_subs)
+                           hot_subs=hot_subs, featured_videos=featured,
+                           district_news=district_news)
 
 
 @app.route('/contact', methods=['GET', 'POST'])
