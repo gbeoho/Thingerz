@@ -9,6 +9,7 @@ import json
 import threading
 import time
 import urllib.request
+import zlib
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response, abort
@@ -368,6 +369,7 @@ def init_db():
         crawl_count = db.execute("SELECT COUNT(*) FROM crawled_videos").fetchone()[0]
         if crawl_count == 0:
             imported = 0
+            _seed_ids = set()
             with open(seed_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     line = line.strip()
@@ -382,14 +384,23 @@ def init_db():
                     if not platform or not platform_id:
                         continue
                     try:
+                        # Stable, content-derived id (crc32 of platform_id) so the
+                        # same video always gets the same rowid on every re-seed,
+                        # independent of file order or prior deletes. This keeps
+                        # /video/cv_<id> URLs stable across Render re-deploys.
+                        pkey = str(platform_id).encode('utf-8', 'ignore')
+                        id_int = zlib.crc32(pkey)
+                        while id_int in _seed_ids:
+                            id_int = (id_int + 1) & 0xFFFFFFFF
+                        _seed_ids.add(id_int)
                         db.execute(
                             """INSERT OR IGNORE INTO crawled_videos
-                            (platform, platform_id, sub_category, district, title, url,
+                            (id, platform, platform_id, sub_category, district, title, url,
                              thumbnail_url, author_name, author_url, description,
                              view_count, like_count, comment_count, duration_sec,
                              published_at, score, updated_at, district_confirmed, sport_tag)
-                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                            (platform, platform_id,
+                            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                            (id_int, platform, platform_id,
                              str(item.get('sub_category', '')).strip(),
                              str(item.get('district', '')).strip(),
                              str(item.get('title', '')).strip(),
