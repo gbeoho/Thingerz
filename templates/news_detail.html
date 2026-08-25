@@ -6,6 +6,25 @@
 {% block og_description %}{{ _nsumm[:150] }}{% endblock %}
 {% block og_image %}{{ news_item['image_url'] or url_for('static', filename='fb_cover.jpg', _external=True) }}{% endblock %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ news_item['title_zh']|tojson }},
+  "description": {{ _nsumm[:150]|tojson }},
+  "image": {{ (news_item['image_url'] or '')|tojson }},
+  "datePublished": {{ (news_item['date'] or '2026-01-01')|tojson }},
+  "dateModified": {{ (news_item['date'] or '2026-01-01')|tojson }},
+  "author": { "@type": "Organization", "name": "Thingerz", "url": "https://thingerz.com" },
+  "publisher": { "@type": "Organization", "name": "Thingerz", "url": "https://thingerz.com",
+    "logo": { "@type": "ImageObject", "url": "https://thingerz.com/static/favicon.svg" } },
+  "mainEntityOfPage": {{ ('https://thingerz.com' + (request.path if request else ''))|tojson }},
+  "inLanguage": "zh-HK"
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <article class="news-article-page">
     <div class="container">
