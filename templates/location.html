@@ -53,6 +53,11 @@
         <h1>Services &amp; Talent in {{ district.short_en }} ({{ district.name_zh }}) | Thingerz</h1>
         <p class="page-subtitle">Micro-services, Tutors &amp; Creative Freelancers in {{ district.short_en }} — 點搵你</p>
         <p class="page-desc">{{ district.intro }}</p>
+        <div class="location-cta">
+            <a href="{{ url_for('news_list', district=district.name_zh) }}" class="btn btn-outline">睇本區好去處</a>
+            <a href="{{ url_for('track_page', track='fun') }}" class="btn btn-outline">本區 Fun 頻道</a>
+            <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交本區影片</a>
+        </div>
     </div>
 </section>
 

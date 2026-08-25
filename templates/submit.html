@@ -4,8 +4,8 @@
 {% block content %}
 <section class="page-hero">
     <div class="container">
-        <h1>提交影片</h1>
-        <p class="page-subtitle">分享你的影片，支援 YouTube / Facebook / Instagram / TikTok / Threads</p>
+        <h1>分享你的精彩影片</h1>
+        <p class="page-subtitle">支援 YouTube / Instagram / TikTok / Facebook / Threads — 貼上連結，自動抓取標題同封面</p>
     </div>
 </section>
 
@@ -107,6 +107,7 @@
             <div class="form-row">
                 <label for="platform_url">影片網址 <span class="required">*</span></label>
                 <input type="url" name="platform_url" id="platform_url" class="input" placeholder="貼上 YouTube / Facebook / Instagram / TikTok / Threads 的影片連結" required>
+                <small class="form-hint">貼上後自動抓取標題同封面 — 即時預覽。</small>
             </div>
             <div id="linkPreview" class="link-preview" style="display:none">
                 <img id="linkPreviewImg" alt="影片縮圖預覽" style="display:none">
@@ -166,14 +167,16 @@
                 </select>
             </div>
             <div class="form-row">
-                <label for="district">所在地區（可選多個）</label>
-                <select name="district" id="district" class="input" multiple size="4">
-                    <option value="">不指定（選填）</option>
+                <label for="districtGrid">所在地區（可選多個）</label>
+                <div class="district-grid" id="districtGrid">
                     {% for d in districts %}
-                    <option value="{{ d }}">{{ d }}</option>
+                    <label class="dchip" title="加入區內搜尋結果">
+                        <input type="checkbox" class="dchip-input" name="district" value="{{ d }}">
+                        <span class="dchip-label">{{ d }}</span>
+                    </label>
                     {% endfor %}
-                </select>
-                <small class="form-hint">選填，可按住 Ctrl/Cmd 揀一個以上地區。揀左嘅地區會同時喺「18區搜尋」出現。</small>
+                </div>
+                <small class="form-hint" id="districtCount">選填 — 揀咗之後會同時喺「18區搜尋」出現，方便區內居民搵到你。</small>
             </div>
             <div class="step-error" id="err3">請選擇主分類同子分類。</div>
         </div>
@@ -296,6 +299,17 @@
         urlInput.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(doPreview, 450); });
         platSel.addEventListener('change', function(){ clearTimeout(t); t=setTimeout(doPreview, 200); });
     }
+    // District chip grid => live 已選 X 區 counter (multi-select; backend getlist('district') still works)
+    var dGrid = document.getElementById('districtGrid');
+    var dCount = document.getElementById('districtCount');
+    if (dGrid && dCount) {
+        function updDistrict(){
+            var n = dGrid.querySelectorAll('.dchip-input:checked').length;
+            dCount.textContent = n>0 ? ('已選 ' + n + ' 區 — 會同時喺「18區搜尋」出現。') : '選填 — 揀咗之後會同時喺「18區搜尋」出現，方便區內居民搵到你。';
+        }
+        dGrid.addEventListener('change', updDistrict);
+    }
+
     showStep(1);
 })();
 </script>

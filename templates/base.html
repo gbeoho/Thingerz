@@ -365,6 +365,23 @@
         .step-error.show{display:block}
         @media(max-width:768px){.wstep{gap:3px;padding:6px}.ws-label{font-size:.6rem}.ws-num{width:22px;height:22px;font-size:.7rem}}
 
+        /* District multi-select chip grid (submit step 3) */
+        .district-grid{display:flex;flex-wrap:wrap;gap:8px}
+        .dchip{position:relative;cursor:pointer;user-select:none}
+        .dchip-input{position:absolute;opacity:0;pointer-events:none}
+        .dchip-label{display:inline-block;padding:9px 16px;border-radius:22px;background:#11111d;border:1px solid rgba(255,255,255,.08);font-size:.82rem;color:#9898b0;font-weight:500;transition:all .2s}
+        .dchip:hover .dchip-label{border-color:rgba(129,140,248,.4);color:#fff}
+        .dchip-input:checked + .dchip-label{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3)}
+        /* 好去處 sticky district filter on scroll */
+        .news-filter-section{padding:0}
+        .news-filter-sticky{position:sticky;top:64px;z-index:45;background:rgba(6,6,13,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:14px 0 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+        /* location hero quick CTAs */
+        .location-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+        @media(max-width:768px){
+            .wizard-nav{position:sticky;bottom:0;background:rgba(10,10,18,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);z-index:60;margin:0 -14px}
+            .dchip-label{font-size:.78rem;padding:8px 14px}
+        }
+
         .success-message{text-align:center;padding:80px 24px;background:#11111d;border-radius:18px;border:1px solid rgba(255,255,255,.05)}
         .success-icon{margin-bottom:18px;display:flex;justify-content:center}
         .success-message h2{font-size:1.5rem;margin-bottom:8px}

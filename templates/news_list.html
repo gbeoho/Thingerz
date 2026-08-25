@@ -12,7 +12,8 @@
     </div>
 </section>
 
-<section class="section" style="padding:0 0 8px">
+<section class="section news-filter-section" style="padding:0">
+    <div class="news-filter-sticky">
     <div class="container">
         <div class="sticky-categories">
             <a href="{{ url_for('news_list') }}" class="sticky-cat-chip{% if not selected_district %} active{% endif %}">全部</a>
@@ -21,6 +22,7 @@
             {% endfor %}
         </div>
         <p style="font-size:.76rem;color:#6a6a80;margin-top:10px">按 18 區搵本地景點、活動同美食好去處</p>
+    </div>
     </div>
 </section>
 
@@ -46,7 +48,8 @@
             {% endfor %}
             {% if not news_items %}
             <div class="empty-state">
-                <p>暫無好去處推介</p>
+                <p>「{{ selected_district or '呢區' }}」暫時未有好去處推介 — 你可以做第一個推薦人！</p>
+                <a href="{{ url_for('submit_video') }}" class="btn btn-primary">提交一條好去處</a>
             </div>
             {% endif %}
         </div>
