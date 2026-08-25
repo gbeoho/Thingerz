@@ -427,6 +427,21 @@
         @keyframes glowPulse{0%,100%{filter:drop-shadow(0 0 4px rgba(129,140,248,.25))}50%{filter:drop-shadow(0 0 14px rgba(129,140,248,.55))}}
         .success-message{animation:msgIn .45s ease-out both}
         @keyframes msgIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+        /* success-page share card: slide-in + staggered buttons */
+        .share-card-anim{animation:shareCardIn .5s ease-out .15s both}
+        @keyframes shareCardIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+        .share-card-anim .btn{opacity:0;transform:translateY(6px);animation:btnStagger .38s ease-out forwards}
+        .share-card-anim .btn:nth-child(1){animation-delay:.05s}
+        .share-card-anim .btn:nth-child(2){animation-delay:.15s}
+        .share-card-anim .btn:nth-child(3){animation-delay:.25s}
+        .share-card-anim .btn:nth-child(4){animation-delay:.35s}
+        .share-card-anim .btn:nth-child(5){animation-delay:.45s}
+        @keyframes btnStagger{to{opacity:1;transform:none}}
+        /* district quick-search input in submit step 3 */
+        .district-search{margin-bottom:10px}
+        .district-search .input{padding:10px 14px;font-size:.85rem}
+        .dchip.dim{opacity:.28;pointer-events:none}
+        .district-empty{display:none;font-size:.8rem;color:#f87171;margin-top:8px}
         .success-message h2{font-size:1.5rem;margin-bottom:8px}
         .success-message p{color:#9898b0;margin-bottom:32px;max-width:400px;margin-left:auto;margin-right:auto}
         .success-message .btn{margin:6px}

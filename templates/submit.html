@@ -19,7 +19,7 @@
             <h2>提交成功！</h2>
                         {% if new_video_url %}
                         <p style="margin-top:4px">你嘅影片<strong>已上架</strong>: <a href="{{ new_video_url }}" style="color:#10b981">{{ new_video_title }}</a></p>
-                        <div style="margin:18px auto 6px;max-width:420px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:14px;padding:16px">
+                        <div class="share-card-anim" style="margin:18px auto 6px;max-width:420px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:14px;padding:16px">
                             <p style="font-size:.85rem;margin-bottom:10px"><strong>叫埋朋友過嚟睇</strong> — 分享你嘅影片:</p>
                             <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
                                 <button type="button" class="btn btn-primary" data-share-title="{{ new_video_title }}" data-share-url="{{ new_video_url }}" onclick="tzhShareVideo(this)">分享到 IG / 更多</button>
@@ -169,6 +169,8 @@
             </div>
             <div class="form-row">
                 <label for="districtGrid">所在地區（可選多個）</label>
+                <input type="text" id="districtSearch" class="input" placeholder="搜尋地區（例如：觀塘、中西區…）" aria-label="搜尋地區" autocomplete="off">
+                <p class="district-empty" id="districtEmpty">搵唔到「<span id="districtEmptyQ"></span>」— 可以照提交,或揀「全部地區」。</p>
                 <div class="district-grid" id="districtGrid">
                     {% for d in districts %}
                     <label class="dchip" title="加入區內搜尋結果">
@@ -403,6 +405,25 @@
     }
 
     // District chip grid => live 已選 X 區 counter
+    // District quick-search: dim non-matching chips, show empty hint
+    var dSearch = document.getElementById('districtSearch');
+    var dEmpty = document.getElementById('districtEmpty');
+    var dEmptyQ = document.getElementById('districtEmptyQ');
+    if (dSearch) {
+        dSearch.addEventListener('input', function(){
+            var q = dSearch.value.trim().toLowerCase();
+            var gridEl = document.getElementById('districtGrid');
+            var any = false;
+            if (!gridEl) return;
+            gridEl.querySelectorAll('.dchip').forEach(function(c){
+                var hit = !q || (c.textContent || '').toLowerCase().indexOf(q) >= 0;
+                c.classList.toggle('dim', !hit);
+                if (hit) any = true;
+            });
+            if (dEmpty && dEmptyQ) { dEmpty.style.display = any ? 'none' : 'block'; dEmptyQ.textContent = dSearch.value; }
+        });
+    }
+
     var dGrid = document.getElementById('districtGrid');
     var dCount = document.getElementById('districtCount');
     if (dGrid && dCount) {
