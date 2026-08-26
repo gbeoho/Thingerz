@@ -1622,41 +1622,10 @@ def subcategory_page(subcategory_id):
     return render_template('subcategory.html', category=category, sub=sub, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
-_CRC_DBID_MAP = None
-_CRC_DBID_TS = 0
-
-
-def _crc32_dbid_map():
-    """Lazy {crc32(platform_id): db_id} for all crawled_videos, to redirect
-    legacy crc32-style cv_<crc32> URLs (which Google indexed under an old id
-    scheme) to the current cv_<db_id> URL. Rebuilt on a short TTL so a re-seed
-    (which renumbers ids) is picked up."""
-    global _CRC_DBID_MAP, _CRC_DBID_TS
-    _now = time.time()
-    if _CRC_DBID_MAP is not None and (_now - _CRC_DBID_TS) < 300:
-        return _CRC_DBID_MAP
-    m = {}
-    try:
-        db = get_db()
-        for row in db.execute("SELECT id, platform_id FROM crawled_videos WHERE platform_id != ''").fetchall():
-            m[zlib.crc32(str(row['platform_id']).encode())] = row['id']
-        db.close()
-    except Exception:
-        pass
-    _CRC_DBID_MAP, _CRC_DBID_TS = m, _now
-    return m
-
-
 @app.route('/video/<video_id>')
 def video_detail(video_id):
     video = get_video(video_id)
     if not video:
-        # Legacy crc32-style id (Google indexed cv_<crc32> under an old scheme):
-        # redirect to the current cv_<db_id> URL if we can map it back.
-        if video_id.startswith('cv_') and video_id[3:].isdigit():
-            _dbid = _crc32_dbid_map().get(int(video_id[3:]))
-            if _dbid and 'cv_' + str(_dbid) != video_id:
-                return redirect(url_for('video_detail', video_id='cv_' + str(_dbid)), code=301)
         abort(404)
     increment_view(video_id)
     category = get_category(video['category_id'])
