@@ -263,6 +263,27 @@ def init_db():
             db.execute("ALTER TABLE videos ADD COLUMN submitter_name TEXT")
         if 'author_name' not in vcols:
             db.execute("ALTER TABLE videos ADD COLUMN author_name TEXT")
+        # Optional source-contact columns: the uploader/company's channel or social
+        # link (author_url) and an optional direct WhatsApp number (contact_whatsapp),
+        # so the video-page 查詢/預約 CTA can genuinely reach the video's source.
+        # author_url reuses the field name crawled_videos already uses.
+        if 'author_url' not in vcols:
+            db.execute("ALTER TABLE videos ADD COLUMN author_url TEXT")
+        if 'contact_url' not in vcols:
+            db.execute("ALTER TABLE videos ADD COLUMN contact_url TEXT")
+        if 'contact_whatsapp' not in vcols:
+            db.execute("ALTER TABLE videos ADD COLUMN contact_whatsapp TEXT")
+    except Exception:
+        pass
+    # Migration: crawled_videos already has author_url; add optional direct-contact fields
+    try:
+        crcols = [r[1] for r in db.execute("PRAGMA table_info(crawled_videos)").fetchall()]
+        if 'author_url' not in crcols:
+            db.execute("ALTER TABLE crawled_videos ADD COLUMN author_url TEXT")
+        if 'contact_url' not in crcols:
+            db.execute("ALTER TABLE crawled_videos ADD COLUMN contact_url TEXT")
+        if 'contact_whatsapp' not in crcols:
+            db.execute("ALTER TABLE crawled_videos ADD COLUMN contact_whatsapp TEXT")
     except Exception:
         pass
     # Migration: ensure news has region column (hk/foreign) so 好去處 can stay HK-focused
@@ -306,7 +327,7 @@ def init_db():
     csv_to_table = {
         'categories.csv': ('categories', ['id','category_id','name_slug','name_zh','name_en','track','direction','description_zh','description_en']),
         'subcategories.csv': ('subcategories', ['id','category_id','name_slug','name_zh','name_en']),
-        'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name','author_name']),
+        'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name','author_name','author_url','contact_url','contact_whatsapp']),
         'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region','district']),
         'lifetips.csv': ('lifetips', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
         'comments.csv': ('comments', ['id','video_id','author','content','date','status']),
@@ -849,6 +870,9 @@ def get_video(video_id):
                     'district_confirmed': bool(r['district_confirmed']),
                     'status': 'approved', 'track': trk, 'direction': trk,
                     'author_name': r['author_name'] or '',
+                    'author_url': _resolve_author_url(r['author_url'] if 'author_url' in r.keys() else '', r['platform']),
+                    'contact_url': r['contact_url'] or '' if 'contact_url' in r.keys() else '',
+                    'contact_whatsapp': (r['contact_whatsapp'] or '' if 'contact_whatsapp' in r.keys() else '') or '',
                     'view_count': r['view_count'] or 0,
                     'duration_sec': r['duration_sec'] or 0,
                     'submitted_date': r['published_at'] or '',
@@ -866,6 +890,31 @@ def get_comments(video_id):
     comments = [c for c in read_csv('comments.csv') if c['video_id'] == video_id and c['status'] == 'approved']
     comments.sort(key=lambda c: c.get('date', ''), reverse=True)
     return comments
+
+
+_AUTHOR_URL_BASE = {
+    'youtube': 'https://www.youtube.com',
+    'bilibili': 'https://space.bilibili.com',
+    'instagram': 'https://www.instagram.com',
+    'threads': 'https://www.threads.net',
+    'facebook': 'https://www.facebook.com',
+}
+
+
+def _resolve_author_url(author_url, platform='youtube'):
+    """Turn a stored (possibly relative) uploader-channel URL into an absolute link.
+    Crawled rows store YouTube channel handles as relative paths ('/@handle',
+    '/channel/UID', '/user/name'); the videos page links them so must be absolute.
+    """
+    a = (author_url or '').strip()
+    if not a:
+        return ''
+    if re.match(r'^https?://', a, re.I):
+        return a
+    base = _AUTHOR_URL_BASE.get(platform, '')
+    if base and a.startswith('/'):
+        return base + a
+    return a
 
 
 def _strip_tags(text):
@@ -2406,7 +2455,7 @@ def admin_video_add():
         'submitted_date': datetime.now().strftime('%Y-%m-%d')
     }
     vids.append(vid)
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
+    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name', 'author_name', 'author_url', 'contact_url', 'contact_whatsapp']
     write_csv('videos.csv', vids, fieldnames)
     log_upload({'event': 'admin_add', 'id': vid['id'],
                 'platform': platform, 'platform_id': platform_id,
@@ -2435,8 +2484,12 @@ def admin_video_edit(video_id):
             v['status'] = request.form.get('status', v.get('status', 'approved'))
             v['track'] = request.form.get('track', v.get('track', 'fun'))
             v['direction'] = request.form.get('direction', v.get('direction', 'fun'))
+            v['author_name'] = request.form.get('author_name', v.get('author_name', '')) or v.get('author_name', '')
+            v['author_url'] = request.form.get('author_url', v.get('author_url', '')) or v.get('author_url', '')
+            v['contact_url'] = request.form.get('contact_url', v.get('contact_url', '')) or v.get('contact_url', '')
+            v['contact_whatsapp'] = request.form.get('contact_whatsapp', v.get('contact_whatsapp', '')) or v.get('contact_whatsapp', '')
             break
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
+    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name', 'author_name', 'author_url', 'contact_url', 'contact_whatsapp']
     write_csv('videos.csv', vids, fieldnames)
     return redirect(url_for('admin_videos'))
 

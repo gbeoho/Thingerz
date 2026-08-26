@@ -80,8 +80,11 @@ function quickEdit(id){
     var plat=prompt('平台ID');
     if(!plat)return;
     var status=prompt('狀態 (approved/pending)','approved');
+    var author=prompt('上載者/頻道名（留空不變）','');
+    var chan=prompt('頻道/來源連結 URL（留空不變）','');
+    var wa=prompt('上載者 WhatsApp（數字，含區號 852，留空不變）','');
     var f=document.createElement('form');f.method='POST';f.action='/admin/videos/edit/'+id;
-    f.innerHTML='<input name="title_zh" value="'+title+'"><input name="platform_id" value="'+plat+'"><input name="status" value="'+status+'"><input name="subcategory_id" value=""><input name="category_id" value=""><input name="platform" value="youtube"><input name="title_en" value=""><input name="thumbnail_url" value=""><input name="aspect_ratio" value="16:9"><input name="tags" value=""><input name="track" value="fun"><input name="direction" value="fun"><input name="description_zh" value=""><input name="description_en" value="">';
+    f.innerHTML='<input name="title_zh" value="'+title+'"><input name="platform_id" value="'+plat+'"><input name="status" value="'+status+'"><input name="subcategory_id" value=""><input name="category_id" value=""><input name="platform" value="youtube"><input name="title_en" value=""><input name="thumbnail_url" value=""><input name="aspect_ratio" value="16:9"><input name="tags" value=""><input name="track" value="fun"><input name="direction" value="fun"><input name="description_zh" value=""><input name="description_en" value=""><input name="author_name" value="'+author+'"><input name="author_url" value="'+chan+'"><input name="contact_url" value=""><input name="contact_whatsapp" value="'+wa+'">';
     document.body.appendChild(f);f.submit();
 }
 </script>

@@ -160,18 +160,29 @@
         </div>
 
         <aside class="video-sidebar">
+            {% set _chan = (video.get('contact_url') or video.get('author_url') or '').strip() %}
+            {% set _wa = (video.get('contact_whatsapp') or '').strip().replace('+', '').replace(' ', '').replace('-', '') %}
             {% if video.get('author_name') %}
             <div class="sidebar-card creator-card">
                 <h3>頻道 / Creator</h3>
                 <p style="font-size:1rem;font-weight:700;margin-bottom:12px">{{ video['author_name'] }}</p>
                 <a href="{{ url_for('search', q=video['author_name']) }}" class="btn btn-outline btn-block">睇佢更多作品 &rarr;</a>
+                {% if _chan %}
+                <a href="{{ _chan }}" target="_blank" rel="noopener" class="btn btn-outline btn-block">📺 {{ video['author_name'] }}嘅頻道</a>
+                {% endif %}
             </div>
             {% endif %}
             <div class="sidebar-card action-card">
                 <h3>有冇興趣？</h3>
-                <p>你睇嘅係「{{ video['title_zh'] }}」。想搵返入面嗰種服務／商品？可以直接查詢。</p>
-                {% set wa_msg = '你好！我喺 Thingerz 見到「' ~ video['title_zh'] ~ '」( ' ~ (request.url if request else 'https://thingerz.com') ~ ' )，想查詢／了解更多呢類服務。' %}
+                <p>你睇嘅係「{{ video['title_zh'] }}」。想搵返入面嗰種服務／商品？可以直接聯絡條片嘅上載者（{{ video.get('author_name') or '來源渠道' }}）。</p>
+                {% set wa_msg = '你好！我喺 Thingerz 見到「' ~ video['title_zh'] ~ '」( ' ~ (request.url if request else 'https://thingerz.com') ~ ' )，想查詢／預約呢個服務/商品。' %}
+                {% if _wa %}
+                <a href="https://wa.me/{{ _wa }}?text={{ wa_msg | urlencode }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">💬 WhatsApp 查詢 / 預約（上載者）</a>
+                {% elif _chan %}
+                <a href="{{ _chan }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">💬 聯絡{{ video.get('author_name') or '上載者' }}</a>
+                {% else %}
                 <a href="https://wa.me/?text={{ wa_msg | urlencode }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">💬 WhatsApp 查詢 / 預約</a>
+                {% endif %}
                 {% if sub %}
                 <a href="{{ url_for('subcategory_page', subcategory_id=sub['id']) }}" class="btn btn-outline btn-block">🔍 搵更多同類內容 &rarr;</a>
                 {% elif category %}
