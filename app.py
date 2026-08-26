@@ -212,7 +212,7 @@ TABLE_SCHEMAS = {
         id TEXT UNIQUE, subcategory_id TEXT, category_id TEXT, platform TEXT, platform_id TEXT,
         title_zh TEXT, title_en TEXT, description_zh TEXT, description_en TEXT,
         thumbnail_url TEXT, aspect_ratio TEXT, tags TEXT, status TEXT,
-        track TEXT, direction TEXT, submitted_date TEXT, submitter_name TEXT)''',
+        track TEXT, direction TEXT, submitted_date TEXT, submitter_name TEXT, author_name TEXT)''',
     'news': '''CREATE TABLE IF NOT EXISTS news (
         id TEXT UNIQUE, title_zh TEXT, title_en TEXT, content_zh TEXT, content_en TEXT,
         summary_zh TEXT, summary_en TEXT, date TEXT, image_url TEXT, status TEXT, region TEXT, district TEXT)''',
@@ -260,6 +260,8 @@ def init_db():
         vcols = [r[1] for r in db.execute("PRAGMA table_info(videos)").fetchall()]
         if 'submitter_name' not in vcols:
             db.execute("ALTER TABLE videos ADD COLUMN submitter_name TEXT")
+        if 'author_name' not in vcols:
+            db.execute("ALTER TABLE videos ADD COLUMN author_name TEXT")
     except Exception:
         pass
     # Migration: ensure news has region column (hk/foreign) so 好去處 can stay HK-focused
@@ -303,7 +305,7 @@ def init_db():
     csv_to_table = {
         'categories.csv': ('categories', ['id','category_id','name_slug','name_zh','name_en','track','direction','description_zh','description_en']),
         'subcategories.csv': ('subcategories', ['id','category_id','name_slug','name_zh','name_en']),
-        'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name']),
+        'videos.csv': ('videos', ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name','author_name']),
         'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region','district']),
         'lifetips.csv': ('lifetips', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
         'comments.csv': ('comments', ['id','video_id','author','content','date','status']),

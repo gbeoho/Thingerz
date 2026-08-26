@@ -17,9 +17,18 @@
   "description": {{ _vmeta[:150]|tojson }},
   "thumbnailUrl": {{ video['thumbnail_url']|tojson }},
   "uploadDate": {{ (video['submitted_date'] or '2026-01-01')|tojson }},
-  "url": "https://thingerz.com/video/{{ video['id'] }}"
-  {% if video['platform'] and video['url'] %},
-  "embedUrl": {{ video['url']|tojson }}
+  "url": "https://thingerz.com/video/{{ video['id'] }}",
+  {% if video['platform'] == 'youtube' and video['platform_id'] %}
+  "embedUrl": {{ ('https://www.youtube.com/embed/' + video['platform_id'])|tojson }},
+  {% endif %}
+  {% if video.get('author_name') %}
+  "author": { "@type": "Person", "name": {{ video['author_name']|tojson }} },
+  {% endif %}
+  {% if video_district is not none %}
+  "contentLocation": {
+    "@type": "Place",
+    "name": {{ video_district['name_zh']|tojson }}
+  }
   {% endif %}
 }
 </script>
