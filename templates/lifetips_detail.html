@@ -10,7 +10,7 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Article",
+  "@type": ["Article", "HowTo"],
   "headline": {{ tip['title_zh']|tojson }},
   "description": {{ _tsumm[:150]|tojson }},
   "image": {{ (tip['image_url'] or '')|tojson }},
@@ -19,8 +19,9 @@
   "author": { "@type": "Organization", "name": "Thingerz", "url": "https://thingerz.com" },
   "publisher": { "@type": "Organization", "name": "Thingerz", "url": "https://thingerz.com",
     "logo": { "@type": "ImageObject", "url": "https://thingerz.com/static/favicon.svg" } },
-  "mainEntityOfPage": {{ ('https://thingerz.com' + (request.path if request else ''))|tojson }},
-  "inLanguage": "zh-HK"
+  "inLanguage": "zh-HK",
+  "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["{{ ('.quick-answer') if tip.get('summary_zh') else '.article-header' }}"] },
+  "mainEntityOfPage": {{ ('https://thingerz.com' + (request.path if request else ''))|tojson }}
 }
 </script>
 {% endblock %}
@@ -48,6 +49,13 @@
                 <h1>{{ tip['title_zh'] }}</h1>
                 <p class="article-subtitle">{{ tip['title_en'] }}</p>
             </header>
+
+            {% if tip.get('summary_zh') %}
+            <div class="quick-answer" style="margin:0 0 24px;padding:18px 20px;background:rgba(34,211,238,.07);border-left:4px solid #22d3ee;border-radius:12px">
+                <p style="font-size:.72rem;font-weight:800;letter-spacing:.08em;color:#22d3ee;text-transform:uppercase;margin:0 0 8px">快速答案</p>
+                <p style="font-size:.98rem;line-height:1.7;color:#e4e4ed;margin:0">{{ tip['summary_zh'] }}</p>
+            </div>
+            {% endif %}
 
             {% if tip.get('video_id') %}
             <div class="video-player-wrapper" style="margin-bottom:28px">

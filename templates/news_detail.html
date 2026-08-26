@@ -20,7 +20,8 @@
   "publisher": { "@type": "Organization", "name": "Thingerz", "url": "https://thingerz.com",
     "logo": { "@type": "ImageObject", "url": "https://thingerz.com/static/favicon.svg" } },
   "mainEntityOfPage": {{ ('https://thingerz.com' + (request.path if request else ''))|tojson }},
-  "inLanguage": "zh-HK"
+  "inLanguage": "zh-HK",
+  "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["{{ ('.quick-answer') if news_item.get('summary_zh') else '.article-header' }}"] }
 }
 </script>
 {% endblock %}
@@ -48,6 +49,13 @@
                 <h1>{{ news_item['title_zh'] }}</h1>
                 <p class="article-subtitle">{{ news_item['title_en'] }}</p>
             </header>
+
+            {% if news_item.get('summary_zh') %}
+            <div class="quick-answer" style="margin:0 0 24px;padding:18px 20px;background:rgba(34,211,238,.07);border-left:4px solid #22d3ee;border-radius:12px">
+                <p style="font-size:.72rem;font-weight:800;letter-spacing:.08em;color:#22d3ee;text-transform:uppercase;margin:0 0 8px">快速答案</p>
+                <p style="font-size:.98rem;line-height:1.7;color:#e4e4ed;margin:0">{{ news_item['summary_zh'] }}</p>
+            </div>
+            {% endif %}
 
             {% if news_item.get('video_id') %}
             <div class="video-player-wrapper" style="margin-bottom:28px">
