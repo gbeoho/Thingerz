@@ -21,7 +21,17 @@
     "logo": { "@type": "ImageObject", "url": "https://thingerz.com/static/favicon.svg" } },
   "mainEntityOfPage": {{ ('https://thingerz.com' + (request.path if request else ''))|tojson }},
   "inLanguage": "zh-HK",
-  "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["{{ ('.quick-answer') if news_item.get('summary_zh') else '.article-header' }}"] }
+  "speakable": { "@type": "SpeakableSpecification", "cssSelector": ["{{ ('.quick-answer') if news_item.get('summary_zh') else '.article-header' }}"] }{% if news_district %},
+  "contentLocation": {
+    "@type": "Place",
+    "name": {{ set_district_zh|tojson }},
+    "url": {{ ('https://thingerz.com' + url_for('location_page', slug=news_district))|tojson }}
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Thingerz {{ set_district_zh }}",
+    "url": {{ ('https://thingerz.com' + url_for('location_page', slug=news_district))|tojson }}
+  }{% endif %}
 }
 </script>
 {% endblock %}
@@ -54,6 +64,16 @@
             <div class="quick-answer" style="margin:0 0 24px;padding:18px 20px;background:rgba(34,211,238,.07);border-left:4px solid #22d3ee;border-radius:12px">
                 <p style="font-size:.72rem;font-weight:800;letter-spacing:.08em;color:#22d3ee;text-transform:uppercase;margin:0 0 8px">快速答案</p>
                 <p style="font-size:.98rem;line-height:1.7;color:#e4e4ed;margin:0">{{ news_item['summary_zh'] }}</p>
+            </div>
+            {% endif %}
+
+            {% if news_district %}
+            <div style="margin:0 0 24px;padding:16px 20px;background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(236,72,153,.07));border:1px solid rgba(129,140,248,.28);border-radius:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+                <div>
+                    <p style="font-size:.72rem;font-weight:800;letter-spacing:.08em;color:#818cf8;text-transform:uppercase;margin:0 0 4px">本區探索 / {{ set_district_zh }}</p>
+                    <p style="font-size:.95rem;color:#e4e4ed;margin:0;line-height:1.6">{{ set_district_zh }}嘅更多課程、服務、導師同好去處夾埋一齊睇。</p>
+                </div>
+                <a href="{{ url_for('location_page', slug=news_district) }}" class="btn btn-outline" style="white-space:nowrap">探索{{ set_district_zh }} &rarr;</a>
             </div>
             {% endif %}
 
@@ -94,6 +114,23 @@
         </div>
 
         <div class="article-footer">
+            {% if related_videos %}
+            <h3>{{ set_district_zh }}相關影片 / Related Videos</h3>
+            <div class="news-grid">
+                {% for item in related_videos %}
+                <article class="news-card">
+                    <div class="news-image">
+                        <img src="{{ item['thumbnail_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                    </div>
+                    <div class="news-info">
+                        <h3><a href="{{ url_for('video_detail', video_id=item['id']) }}">{{ item['title_zh'] }}</a></h3>
+                        <p>{% if item.get('author_name') %}{{ item['author_name'] }}{% endif %}{% if (item.get('view_count') or 0) > 0 %} · {{ item['view_count'] }} 次觀看{% endif %}</p>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <h3>更多好去處</h3>
             <div class="news-grid">
                 {% for item in all_news %}

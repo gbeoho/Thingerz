@@ -216,6 +216,28 @@
 </section>
 {% endif %}
 
+{% if district_tips %}
+<section class="section" style="padding-top:0">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">{{ district.name_zh }} 生活小知識 / {{ district.short_en }} Life Tips</h2>
+            <a href="{{ url_for('lifetips_list') }}" style="font-size:.82rem;color:#818cf8;white-space:nowrap">睇全部 &rarr;</a>
+        </div>
+        <div class="news-pick-grid">
+            {% for item in district_tips %}
+            <a href="{{ url_for('lifetips_detail', tip_id=item['id']) }}" class="news-pick">
+                <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                <span class="news-pick-overlay">
+                    <span class="news-pick-title">{{ item['title_zh'] }}</span>
+                    <span class="news-pick-meta">{{ item['date'] }}</span>
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <section class="section" style="padding-top:0">
     <div class="container" style="max-width:860px">
         <h2 class="section-title">{{ district.name_zh }} 常見問題 / {{ district.short_en }} FAQ</h2>

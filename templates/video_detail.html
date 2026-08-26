@@ -252,6 +252,13 @@
                 <p>睇返{{ video_district['name_zh'] }}其他本地課程、服務同好去處。</p>
                 <span class="btn btn-outline">睇{{ video_district['name_zh'] }}內容 &rarr;</span>
             </a>
+            {% if district_news %}
+            <a href="{{ url_for('news_list', district=video_district['name_zh']) }}" class="cont-card">
+                <h3>本區好去處 / {{ video_district['name_zh'] }} 好去處</h3>
+                <p>{{ district_news[0]['title_zh'] }}{% if district_news|length > 1 %} 等 {{ district_news|length }} 篇{% endif %} — 順便睇埋{{ video_district['name_zh'] }}有咩好玩。</p>
+                <span class="btn btn-outline">睇{{ video_district['name_zh'] }}好去處 &rarr;</span>
+            </a>
+            {% endif %}
             {% else %}
             <a href="{{ url_for('track_page', track=video.get('track', 'fun')) }}" class="cont-card">
                 <h3>探索更多同類影片</h3>

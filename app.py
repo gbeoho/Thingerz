@@ -1646,7 +1646,9 @@ def video_detail(video_id):
         if d.get('name_zh') in _tok:
             v_district = d
             break
-    return render_template('video_detail.html', video=video, category=category, sub=sub, comments=comments, related_videos=related, platform=platform, platform_config=PLATFORM_CONFIG, views=views, video_district=v_district)
+    # AEO/SEO coupling: same-district 好去處 (answers/hub content) surfaced on the video page.
+    district_news = [n for n in (get_news() or []) if v_district and n.get('district') == v_district['name_zh']][:3]
+    return render_template('video_detail.html', video=video, category=category, sub=sub, comments=comments, related_videos=related, platform=platform, platform_config=PLATFORM_CONFIG, views=views, video_district=v_district, district_news=district_news)
 
 
 _GENERIC_QUERY_DROP = {'香港'}
@@ -1910,7 +1912,20 @@ def news_detail(news_id):
     item = get_news(news_id)
     if not item:
         return redirect(url_for('news_list'))
-    return render_template('news_detail.html', news_item=item, all_news=get_news())
+    # GEO coupling: derive the district entity (slug+geo) this article is tagged with.
+    news_district = None
+    dname = (item.get('district') or '').strip()
+    if dname:
+        news_district = geo.DISTRICT_SLUG_BY_NAME.get(dname)
+    # AEO/SEO sibling blocks: same-district 好去處 + related videos tagged to the same district.
+    district_news = []
+    related_videos = []
+    if news_district:
+        district_news = [n for n in get_news() if n.get('district', '') == dname and n['id'] != news_id]
+        related_videos = get_videos(district=dname)[:6]
+    return render_template('news_detail.html', news_item=item, all_news=get_news(),
+                           news_district=news_district, set_district_zh=dname,
+                           district_news=district_news, related_videos=related_videos)
 
 
 @app.route('/life-tips')
@@ -2010,11 +2025,18 @@ def location_page(slug):
                                      -(v.get('view_count') or 0)))[:3]
     # 本區好去處: district-tagged 好去處 news (already published + non-foreign + date-sorted)
     district_news = [n for n in (get_news() or []) if n.get('district') == d['name_zh']][:3]
+    # AEO coupling: life-tips (HowTo/answer content) relevant to this district, matched on
+    # district name or a district neighbourhood keyword in title/summary.
+    tips = get_lifetips() or []
+    district_tips = [t for t in tips
+                     if district in ((t.get('title_zh') or '') + ' ' + (t.get('summary_zh') or ''))] or [
+                     t for t in tips if any(k in ((t.get('title_zh') or '') + (t.get('summary_zh') or ''))
+                                            for k in (d.get('tip_keywords') or []))][:3]
     return render_template('location.html', district=d, videos=vids,
                            all_districts=[x for x in geo.DISTRICTS],
                            svc_chips=svc_chips, selected_svc=svc,
                            hot_subs=hot_subs, featured_videos=featured,
-                           district_news=district_news)
+                           district_news=district_news, district_tips=district_tips[:3])
 
 
 @app.route('/contact', methods=['GET', 'POST'])
