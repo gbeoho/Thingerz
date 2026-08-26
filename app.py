@@ -17,6 +17,7 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response, abort
 
 import geo  # 18-district GEO landing pages
+import topics  # 情境式專題策展頁 (monthly topics)
 
 try:
     import screening  # restricted-word upload screening (self-contained, works on Render)
@@ -1923,6 +1924,36 @@ def lifetips_detail(tip_id):
     if not it:
         return redirect(url_for('lifetips_list'))
     return render_template('lifetips_detail.html', tip=it, all_tips=get_lifetips())
+
+
+@app.route('/topics')
+def topics_list():
+    topic_pages = []
+    for t in topics.TOPICS:
+        try:
+            vs = [get_video(vid) for vid in t.get('video_ids', [])]
+        except Exception:
+            vs = []
+        topic_pages.append({
+            'slug': t['slug'], 'title_zh': t['title_zh'], 'title_en': t['title_en'],
+            'intro': t.get('intro', ''), 'video_count': sum(1 for v in vs if v),
+            'cover': (next((v['thumbnail_url'] for v in vs if v), None)),
+        })
+    return render_template('topics_list.html', topics=topic_pages)
+
+
+@app.route('/topic/<slug>')
+def topic_page(slug):
+    t = topics.TOPICS_BY_SLUG.get(slug)
+    if not t:
+        abort(404)
+    videos = []
+    for vid in t.get('video_ids', []):
+        v = get_video(vid)
+        if v:
+            v['topic_rank'] = len(videos) + 1
+            videos.append(v)
+    return render_template('topic.html', topic=t, videos=videos)
 
 
 @app.route('/location/<slug>')

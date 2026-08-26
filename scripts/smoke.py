@@ -36,7 +36,8 @@ def main():
 
     # ---- key public routes render ----
     routes_200 = ["/", "/news", "/life-tips", "/submit", "/search?q=婚禮",
-                  "/category/commercial", "/subcategory/s002"]
+                  "/category/commercial", "/subcategory/s002",
+                  "/topics", "/topic/hk-small-shops"]
     for r in routes_200:
         ck(f"200 {r}", c.get(r).status_code == 200, str(c.get(r).status_code))
     # empty /search redirects to home by design

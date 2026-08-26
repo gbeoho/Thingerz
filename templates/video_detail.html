@@ -167,10 +167,17 @@
                 <a href="{{ url_for('search', q=video['author_name']) }}" class="btn btn-outline btn-block">睇佢更多作品 &rarr;</a>
             </div>
             {% endif %}
-            <div class="sidebar-card contact-card">
-                <h3>想了解更多？</h3>
-                <p>對這個主題感興趣？聯絡我們獲取更多資訊或專業服務</p>
-                <a href="{{ url_for('contact') }}" class="btn btn-outline btn-block">聯絡我們</a>
+            <div class="sidebar-card action-card">
+                <h3>有冇興趣？</h3>
+                <p>你睇嘅係「{{ video['title_zh'] }}」。想搵返入面嗰種服務／商品？可以直接查詢。</p>
+                {% set wa_msg = '你好！我喺 Thingerz 見到「' ~ video['title_zh'] ~ '」( ' ~ (request.url if request else 'https://thingerz.com') ~ ' )，想查詢／了解更多呢類服務。' %}
+                <a href="https://wa.me/?text={{ wa_msg | urlencode }}" target="_blank" rel="noopener" class="btn btn-primary btn-block">💬 WhatsApp 查詢 / 預約</a>
+                {% if sub %}
+                <a href="{{ url_for('subcategory_page', subcategory_id=sub['id']) }}" class="btn btn-outline btn-block">🔍 搵更多同類內容 &rarr;</a>
+                {% elif category %}
+                <a href="{{ url_for('category_page', slug=category['name_slug']) }}" class="btn btn-outline btn-block">🔍 搵同類內容 &rarr;</a>
+                {% endif %}
+                <a href="{{ url_for('contact') }}" class="btn btn-outline btn-block">📋 聯絡我們</a>
             </div>
             <p style="font-size:.7rem;color:#6a6a80;margin-top:12px;text-align:center"><a href="{{ url_for('contact') }}" style="color:#6a6a80;text-decoration:underline">有問題？回報錯誤內容／申請移除</a></p>
 

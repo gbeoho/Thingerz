@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% set _intro = (topic['intro'] or '') | truncate(150, True, '') %}
+{% block title %}{{ topic['title_zh'] }}｜Thingerz 專題{% endblock %}
+{% block meta_description %}{{ topic['intro'] }} ～ {{ topic['title_zh'] }} 精選專題，用影片了解香港小店、老字號同本地服務嘅故事。{% endblock %}
+{% block og_title %}{{ topic['title_zh'] }} - Thingerz 專題{% endblock %}
+{% block og_description %}{{ topic['intro'] }}{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": {{ (topic['title_zh'] ~ " - Thingerz 專題")|tojson }},
+  "description": {{ topic['intro']|tojson }},
+  "url": "https://thingerz.com/topic/{{ topic['slug'] }}",
+  "about": "香港小店・本地服務・主題策展"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <span>/</span>
+            <a href="{{ url_for('topics_list') }}">專題策展</a>
+            <span>/</span>
+            <span class="current">{{ topic['title_zh'] }}</span>
+        </div>
+        <h1>{{ topic['title_zh'] }}</h1>
+        <p class="page-subtitle">{{ topic['title_en'] }}</p>
+        <p class="page-desc">{{ topic['intro'] }}</p>
+    </div>
+</section>
+
+<section class="section" style="padding:24px 0 8px">
+    <div class="container">
+        <h2 class="section-title"><span class="title-accent"></span>專題影片（{{ videos|length }}）</h2>
+        <div class="masonry-grid">
+            {% for video in videos %}
+            <a href="{{ url_for('video_detail', video_id=video['id']) }}" class="video-card {{ 'portrait' if video['aspect_ratio'] == '9:16' else 'landscape' }}">
+                <div class="card-media">
+                    <img src="{{ video['thumbnail_url'] }}" alt="{{ video['title_zh'] }}" loading="lazy" class="card-thumb">
+                    <div class="card-overlay"><div class="play-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div></div>
+                    {% include "_platform_badge.html" %}
+                    {% if (video.get('duration_sec') or 0) > 0 %}<span class="card-duration">{{ (video['duration_sec']|int // 60) }}:{{ '%02d' % (video['duration_sec']|int % 60) }}</span>{% endif %}
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ video['title_zh'] }}</h3>
+                    <div class="card-meta">
+                        {% if video.get('author_name') %}<span class="card-author">{{ video['author_name'] }}</span>{% endif %}
+                        {% if video.get('district') %}<span class="card-author">・{{ video['district'] }}</span>{% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% if not videos %}
+        <div class="empty-state"><p>呢個專題暫時未有影片，遲啲會加返。</p></div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section" style="padding-top:0">
+    <div class="container">
+        <h2 class="section-title"><span class="title-accent"></span>繼續探索</h2>
+        <div class="continue-cta">
+            <a href="{{ url_for('topics_list') }}" class="cont-card">
+                <h3>睇其他專題</h3>
+                <p>小店故事、週末好去處、本地品牌……一個主題一次過睇晒。</p>
+                <span class="btn btn-outline">睇全部專題 &rarr;</span>
+            </a>
+            <a href="{{ url_for('submit_video') }}" class="cont-card">
+                <h3>推薦影片入專題</h3>
+                <p>有相關嘅好片？提交埋入嚟，可能成為下個專題嘅一分子。</p>
+                <span class="btn btn-primary">提交影片</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Thingerz 專題策展｜小店故事・週末好去處・本地品牌{% endblock %}
+{% block meta_description %}Thingerz 每月精選專題策展：香港小店・老字號故事、週末好去處、本地品牌與服務，用影片一次過畫出一個主題嘅故事。{% endblock %}
+{% block og_title %}Thingerz 專題策展｜用影片睇主題故事{% endblock %}
+{% block og_description %}每月主題策展：小店故事・好去處・本地品牌・課程服務，影片一次過睇晒。{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <h1>Thingerz 專題策展</h1>
+        <p class="page-subtitle">每年每月精選一個主題，用影片一次過睇晒一個故事</p>
+    </div>
+</section>
+
+{% if topics %}
+<section class="section" style="padding:28px 0 8px">
+    <div class="container">
+        <p style="font-size:.95rem;color:#a9a9c0;line-height:1.8;margin-bottom:24px">與其逐條分類片慢慢篩，不如跟住一個主題行：了解香港小店同老字號嘅背後故事、計劃週末好去處、或者揀啱想學嘅技能同服務。每個專題都係由 Thingerz 編輯揀出嚟嘅 6-12 條相關影片，配一段粵語介紹。</p>
+        <div class="masonry-grid">
+            {% for topic in topics %}
+            <a href="{{ url_for('topic_page', slug=topic['slug']) }}" class="video-card landscape">
+                <div class="card-media">
+                    {% if topic['cover'] %}
+                    <img src="{{ topic['cover'] }}" alt="{{ topic['title_zh'] }}" loading="lazy" class="card-thumb">
+                    {% endif %}
+                    <div class="card-overlay"><div class="play-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div></div>
+                    <div class="card-stamp">專題</div>
+                </div>
+                <div class="card-info">
+                    <h3 class="card-title">{{ topic['title_zh'] }}</h3>
+                    <p class="card-submitter" style="margin-top:6px">{{ topic['video_count'] }} 條影片</p>
+                    <p style="font-size:.82rem;color:#a9a9c0;line-height:1.6;margin-top:8px">{{ topic['intro'] }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <h2>下次專題想睇咩？</h2>
+            <p>你有冇一條「香港小店」或「好去處」主題嘅片想推薦埋入嚟？話俾我哋知。</p>
+            <a href="{{ url_for('contact') }}" class="btn btn-primary btn-lg">話俾我哋知</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
