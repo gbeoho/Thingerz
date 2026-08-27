@@ -216,7 +216,7 @@
             本月好去處
             <a href="{{ url_for('news_list') }}" class="section-link">查看全部 &rarr;</a>
         </h2>
-        <div class="news-grid">
+        <div class="news-grid news-grid-4">
             {% for item in latest_news %}
             <article class="news-card">
                 <div class="news-image">
@@ -242,7 +242,7 @@
             生活小知識
             <a href="{{ url_for('lifetips_list') }}" class="section-link">查看全部 &rarr;</a>
         </h2>
-        <div class="news-grid">
+        <div class="news-grid news-grid-4">
             {% for tip in latest_lifetips %}
             <article class="news-card">
                 <div class="news-image">
