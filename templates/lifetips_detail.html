@@ -94,14 +94,14 @@
 
         <div class="article-footer">
             <h3>更多生活小知識</h3>
-            <ul class="tzh-related-list">
+            <div class="tzh-thumb-grid">
                 {% for item in related_tips %}
-                <li>
-                    <a href="{{ url_for('lifetips_detail', tip_id=item['id']) }}" style="font-weight:600;color:#e4e4ed;text-decoration:none;display:block;line-height:1.45">{{ item['title_zh'] }}</a>
-                    <span style="font-size:.78rem;color:#8a8aa0;display:block;margin-top:2px"><time>{{ item['date'] }}</time>{% if item['summary_zh'] %} — {{ item['summary_zh'] }}{% endif %}</span>
-                </li>
+                <a class="tzh-thumb" href="{{ url_for('lifetips_detail', tip_id=item['id']) }}">
+                    <span class="tzh-thumb-img"><img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy"></span>
+                    <span class="tzh-thumb-cap"><time>{{ item['date'] }}</time>{{ item['title_zh'] }}</span>
+                </a>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
     </div>
 </article>
