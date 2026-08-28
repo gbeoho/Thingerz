@@ -95,8 +95,7 @@
         <div class="article-footer">
             <h3>更多生活小知識</h3>
             <div class="news-grid">
-                {% for item in all_tips %}
-                {% if item['id'] != tip['id'] %}
+                {% for item in related_tips %}
                 <article class="news-card">
                     <div class="news-image">
                         <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
@@ -107,7 +106,6 @@
                         <p>{{ item['summary_zh'] }}</p>
                     </div>
                 </article>
-                {% endif %}
                 {% endfor %}
             </div>
         </div>

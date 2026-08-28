@@ -133,8 +133,7 @@
 
             <h3>更多好去處</h3>
             <div class="news-grid">
-                {% for item in all_news %}
-                {% if item['id'] != news_item['id'] %}
+                {% for item in related_news %}
                 <article class="news-card">
                     <div class="news-image">
                         <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
@@ -145,7 +144,6 @@
                         <p>{{ item['summary_zh'] }}</p>
                     </div>
                 </article>
-                {% endif %}
                 {% endfor %}
             </div>
         </div>
