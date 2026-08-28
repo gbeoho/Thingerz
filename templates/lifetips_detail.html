@@ -97,7 +97,7 @@
             <div class="tzh-thumb-grid">
                 {% for item in related_tips %}
                 <a class="tzh-thumb" href="{{ url_for('lifetips_detail', tip_id=item['id']) }}">
-                    <span class="tzh-thumb-img"><img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy"></span>
+                    <span class="tzh-thumb-img"><img src="{% if item.get('video_id') %}https://img.youtube.com/vi/{{ item['video_id'] }}/hqdefault.jpg{% else %}{{ item['image_url'] }}{% endif %}" alt="{{ item['title_zh'] }}" loading="lazy"></span>
                     <span class="tzh-thumb-cap"><time>{{ item['date'] }}</time>{{ item['title_zh'] }}</span>
                 </a>
                 {% endfor %}
