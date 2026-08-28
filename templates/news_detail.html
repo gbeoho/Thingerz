@@ -4,7 +4,7 @@
 {% block meta_description %}{{ _nsumm[:150] }}{% endblock %}
 {% block og_title %}{{ news_item['title_zh'] }} - 好去處 - Thingerz{% endblock %}
 {% block og_description %}{{ _nsumm[:150] }}{% endblock %}
-{% block og_image %}{{ news_item['image_url'] or url_for('static', filename='fb_cover.jpg', _external=True) }}{% endblock %}
+{% block og_image %}{% if news_item.get('video_id') %}https://img.youtube.com/vi/{{ news_item['video_id'] }}/hqdefault.jpg{% else %}{{ news_item['image_url'] or url_for('static', filename='fb_cover.jpg', _external=True) }}{% endif %}{% endblock %}
 
 {% block extra_head %}
 <script type="application/ld+json">
@@ -49,7 +49,7 @@
     </div>
     <div class="news-article-hero">
         <div class="container">
-            <img src="{{ news_item['image_url'] }}" alt="{{ news_item['title_zh'] }}" class="news-hero-image">
+            <img src="{% if news_item.get('video_id') %}https://img.youtube.com/vi/{{ news_item['video_id'] }}/hqdefault.jpg{% else %}{{ news_item['image_url'] }}{% endif %}" alt="{{ news_item['title_zh'] }}" class="news-hero-image">
         </div>
     </div>
     <div class="container">
