@@ -1972,9 +1972,10 @@ def news_detail(news_id):
     if news_district:
         district_news = [n for n in get_news() if n.get('district', '') == dname and n['id'] != news_id]
         related_videos = get_videos(district=dname)[:6]
-    # Cap the 更多好去處 block so the page doesn't run on forever: prefer
-    # same-district items, fall back to the newest few, always max 6.
-    related_news = district_news[:6] if district_news else [n for n in get_news() if n['id'] != news_id][:6]
+    # Cap the 更多好去處 block to 3 compact two-line rows so the page footer
+    # stays short and doesn't run on forever. Prefer same-district items,
+    # fall back to the newest few.
+    related_news = district_news[:3] if district_news else [n for n in get_news() if n['id'] != news_id][:3]
     return render_template('news_detail.html', news_item=item, all_news=get_news(),
                            news_district=news_district, set_district_zh=dname,
                            district_news=district_news, related_videos=related_videos,
@@ -1991,8 +1992,8 @@ def lifetips_detail(tip_id):
     it = get_lifetips(tip_id)
     if not it:
         return redirect(url_for('lifetips_list'))
-    # Cap the 更多生活小知識 block to the newest 6 so the page doesn't run on forever.
-    related_tips = [t for t in get_lifetips() if t['id'] != it['id']][:6]
+    # Cap the 更多生活小知識 block to 3 compact two-line rows.
+    related_tips = [t for t in get_lifetips() if t['id'] != it['id']][:3]
     return render_template('lifetips_detail.html', tip=it, all_tips=get_lifetips(),
                            related_tips=related_tips)
 

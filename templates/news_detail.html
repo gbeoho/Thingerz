@@ -132,20 +132,14 @@
             {% endif %}
 
             <h3>更多好去處</h3>
-            <div class="news-grid">
+            <ul class="tzh-related-list">
                 {% for item in related_news %}
-                <article class="news-card">
-                    <div class="news-image">
-                        <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
-                    </div>
-                    <div class="news-info">
-                        <time class="news-date">{{ item['date'] }}</time>
-                        <h3><a href="{{ url_for('news_detail', news_id=item['id']) }}">{{ item['title_zh'] }}</a></h3>
-                        <p>{{ item['summary_zh'] }}</p>
-                    </div>
-                </article>
+                <li>
+                    <a href="{{ url_for('news_detail', news_id=item['id']) }}" style="font-weight:600;color:#e4e4ed;text-decoration:none;display:block;line-height:1.45">{{ item['title_zh'] }}</a>
+                    <span style="font-size:.78rem;color:#8a8aa0;display:block;margin-top:2px"><time>{{ item['date'] }}</time>{% if item.get('district') %} · {{ item['district'] }}{% endif %}{% if item['summary_zh'] %} — {{ item['summary_zh'] }}{% endif %}</span>
+                </li>
                 {% endfor %}
-            </div>
+            </ul>
         </div>
     </div>
 </article>
