@@ -13,7 +13,7 @@
   "@type": "Article",
   "headline": {{ news_item['title_zh']|tojson }},
   "description": {{ _nsumm[:150]|tojson }},
-  "image": {{ (news_item['image_url'] or '')|tojson }},
+  "image": {% if news_item.get('video_id') %}{{ ('https://img.youtube.com/vi/' + news_item['video_id'] + '/hqdefault.jpg')|tojson }}{% else %}{{ (news_item['image_url'] or '')|tojson }}{% endif %},
   "datePublished": {{ (news_item['date'] or '2026-01-01')|tojson }},
   "dateModified": {{ (news_item['date'] or '2026-01-01')|tojson }},
   "author": { "@type": "Organization", "name": "Thingerz", "url": "https://thingerz.com" },

@@ -220,7 +220,7 @@
             {% for item in latest_news %}
             <article class="news-card">
                 <div class="news-image">
-                    <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                    <img src="{% if item.get('video_id') %}https://img.youtube.com/vi/{{ item['video_id'] }}/hqdefault.jpg{% else %}{{ item['image_url'] }}{% endif %}" alt="{{ item['title_zh'] }}" loading="lazy">
                 </div>
                 <div class="news-info">
                     <time class="news-date">{{ item['date'] }}</time>
@@ -246,7 +246,7 @@
             {% for tip in latest_lifetips %}
             <article class="news-card">
                 <div class="news-image">
-                    <img src="{{ tip['image_url'] }}" alt="{{ tip['title_zh'] }}" loading="lazy">
+                    <img src="{% if tip.get('video_id') %}https://img.youtube.com/vi/{{ tip['video_id'] }}/hqdefault.jpg{% else %}{{ tip['image_url'] }}{% endif %}" alt="{{ tip['title_zh'] }}" loading="lazy">
                 </div>
                 <div class="news-info">
                     <time class="news-date">{{ tip['date'] }}</time>

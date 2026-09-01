@@ -314,6 +314,24 @@ def init_db():
                             (dist, nid))
     except Exception:
         pass
+    # Migration: replace stale picsum placeholder image_url on news rows with the
+    # real YouTube cover derived from content_zh (fetcher wrote picsum when its
+    # platform_id regex failed — 2026-09-01). Only touches rows whose image_url
+    # still points at picsum; leaves admin-set covers alone.
+    try:
+        ncols = [r[1] for r in db.execute("PRAGMA table_info(news)").fetchall()]
+        if 'image_url' in ncols:
+            for row in db.execute("SELECT id, content_zh, image_url FROM news").fetchall():
+                iu = row['image_url'] or ''
+                if 'picsum' not in iu:
+                    continue
+                hay = str(row['content_zh'] or '') + iu
+                m = re.search(r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/|youtube\.com/embed/|m\.youtube\.com/watch\?v=)([a-zA-Z0-9_-]{11})', hay)
+                if m:
+                    db.execute("UPDATE news SET image_url=? WHERE id=?",
+                               (f'https://img.youtube.com/vi/{m.group(1)}/hqdefault.jpg', row['id']))
+    except Exception:
+        pass
     # Migration: ensure submissions has district column (pre-existing DBs created
     # before the field was added — without this every /submit POST crashes)
     try:

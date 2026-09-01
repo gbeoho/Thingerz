@@ -13,7 +13,7 @@
   "@type": ["Article", "HowTo"],
   "headline": {{ tip['title_zh']|tojson }},
   "description": {{ _tsumm[:150]|tojson }},
-  "image": {{ (tip['image_url'] or '')|tojson }},
+  "image": {% if tip.get('video_id') %}{{ ('https://img.youtube.com/vi/' + tip['video_id'] + '/hqdefault.jpg')|tojson }}{% else %}{{ (tip['image_url'] or '')|tojson }}{% endif %},
   "datePublished": {{ (tip['date'] or '2026-01-01')|tojson }},
   "dateModified": {{ (tip['date'] or '2026-01-01')|tojson }},
   "author": { "@type": "Organization", "name": "Thingerz", "url": "https://thingerz.com" },
@@ -39,7 +39,7 @@
     </div>
     <div class="news-article-hero">
         <div class="container">
-            <img src="{{ tip['image_url'] }}" alt="{{ tip['title_zh'] }}" class="news-hero-image">
+            <img src="{% if tip.get('video_id') %}https://img.youtube.com/vi/{{ tip['video_id'] }}/hqdefault.jpg{% else %}{{ tip['image_url'] }}{% endif %}" alt="{{ tip['title_zh'] }}" class="news-hero-image">
         </div>
     </div>
     <div class="container">

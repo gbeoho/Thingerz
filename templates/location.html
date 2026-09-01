@@ -204,7 +204,7 @@
         <div class="news-pick-grid">
             {% for item in district_news %}
             <a href="{{ url_for('news_detail', news_id=item['id']) }}" class="news-pick">
-                <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                <img src="{% if item.get('video_id') %}https://img.youtube.com/vi/{{ item['video_id'] }}/hqdefault.jpg{% else %}{{ item['image_url'] }}{% endif %}" alt="{{ item['title_zh'] }}" loading="lazy">
                 <span class="news-pick-overlay">
                     <span class="news-pick-title">{{ item['title_zh'] }}</span>
                     <span class="news-pick-meta">{{ item['date'] }}{% if item.get('district') %} · {{ item['district'] }}{% endif %}</span>
@@ -226,7 +226,7 @@
         <div class="news-pick-grid">
             {% for item in district_tips %}
             <a href="{{ url_for('lifetips_detail', tip_id=item['id']) }}" class="news-pick">
-                <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                <img src="{% if item.get('video_id') %}https://img.youtube.com/vi/{{ item['video_id'] }}/hqdefault.jpg{% else %}{{ item['image_url'] }}{% endif %}" alt="{{ item['title_zh'] }}" loading="lazy">
                 <span class="news-pick-overlay">
                     <span class="news-pick-title">{{ item['title_zh'] }}</span>
                     <span class="news-pick-meta">{{ item['date'] }}</span>

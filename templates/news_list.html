@@ -20,7 +20,7 @@
         <div class="news-pick-grid">
             {% for item in news_items[:4] %}
             <a href="{{ url_for('news_detail', news_id=item['id']) }}" class="news-pick">
-                <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                <img src="{% if item.get('video_id') %}https://img.youtube.com/vi/{{ item['video_id'] }}/hqdefault.jpg{% else %}{{ item['image_url'] }}{% endif %}" alt="{{ item['title_zh'] }}" loading="lazy">
                 <span class="news-pick-overlay">
                     <span class="news-pick-title">{{ item['title_zh'] }}</span>
                     <span class="news-pick-meta">{{ item['date'] }}{% if item.get('district') %} · {{ item['district'] }}{% endif %}</span>
@@ -56,7 +56,7 @@
             {% for item in news_items %}
             <article class="news-card-full{% if loop.index > 6 %} news-hidden{% endif %}">
                 <div class="news-image">
-                    <img src="{{ item['image_url'] }}" alt="{{ item['title_zh'] }}" loading="lazy">
+                    <img src="{% if item.get('video_id') %}https://img.youtube.com/vi/{{ item['video_id'] }}/hqdefault.jpg{% else %}{{ item['image_url'] }}{% endif %}" alt="{{ item['title_zh'] }}" loading="lazy">
                 </div>
                 <div class="news-info">
                     <time class="news-date">{{ item['date'] }}{% if item.get('district') %} · <span class="district-tag">{{ item['district'] }}</span>{% endif %}</time>
