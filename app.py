@@ -330,6 +330,28 @@ def init_db():
                 if m:
                     db.execute("UPDATE news SET image_url=? WHERE id=?",
                                (f'https://img.youtube.com/vi/{m.group(1)}/hqdefault.jpg', row['id']))
+        # For persisted live DBs whose news rows still carry the OLD content_zh
+        # (no YouTube link) + picsum image_url, sync content_zh AND image_url
+        # from the curated news.csv (e.g. hand-written n001-n009 got video links
+        # added 2026-09-01 — a CSV-only change never reaches the live table).
+        # Guarded: only rows whose DB image_url still contains picsum, and only
+        # when the CSV row actually carries a non-picsum cover.
+        if ncols and 'image_url' in ncols and 'content_zh' in ncols:
+            _csv = os.path.join(DATA_DIR, 'news.csv')
+            if os.path.exists(_csv):
+                _picsum_rows = {r['id']: r for r in db.execute(
+                    "SELECT id FROM news WHERE image_url LIKE '%picsum%'").fetchall()}
+                if _picsum_rows:
+                    with open(_csv, 'r', encoding='utf-8-sig', newline='') as f:
+                        for row in csv.DictReader(f):
+                            nid = (row.get('id') or '').strip()
+                            if nid not in _picsum_rows:
+                                continue
+                            cimg = (row.get('image_url') or '').strip()
+                            if 'picsum' in cimg or 'youtube.com' not in cimg:
+                                continue
+                            db.execute("UPDATE news SET image_url=?, content_zh=? WHERE id=?",
+                                       (cimg, row.get('content_zh') or '', nid))
     except Exception:
         pass
     # Migration: ensure submissions has district column (pre-existing DBs created
