@@ -716,6 +716,8 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
             elif sub_num == 76: cat_id = 'cat003'  # Roblox Studio 遊戲製作
             elif sub_num == 77: cat_id = 'cat002'  # 程式編程教學
+            elif sub_num == 78: cat_id = 'cat008'  # 升學準備
+            elif sub_num == 79: cat_id = 'cat002'  # 手語教學
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
             thumb = cr['thumbnail_url'] or ''
@@ -800,6 +802,8 @@ def get_videos(subcategory_id=None, category_id=None, track=None, direction=None
             elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
             elif sub_num == 76: cat_id = 'cat003'  # Roblox Studio 遊戲製作
             elif sub_num == 77: cat_id = 'cat002'  # 程式編程教學
+            elif sub_num == 78: cat_id = 'cat008'  # 升學準備
+            elif sub_num == 79: cat_id = 'cat002'  # 手語教學
             else: cat_id = 'cat001'
             trk = 'fun' if cat_id in ('cat003', 'cat004', 'cat005', 'cat007') else 'learning'
             seen = {v['id'] for v in result}
@@ -906,6 +910,8 @@ def get_video(video_id):
                 elif sub_num == 75: cat_id = 'cat004'  # 空間/打卡場地
                 elif sub_num == 76: cat_id = 'cat003'  # Roblox Studio 遊戲製作
                 elif sub_num == 77: cat_id = 'cat002'  # 程式編程教學
+                elif sub_num == 78: cat_id = 'cat008'  # 升學準備
+                elif sub_num == 79: cat_id = 'cat002'  # 手語教學
                 else: cat_id = 'cat001'
                 trk = 'fun' if cat_id in ('cat003','cat004','cat005','cat007') else 'learning'
                 return {
@@ -1588,6 +1594,8 @@ def _map_subcat(sub_num):
     elif sub_num == 75: return 'cat004'  # 空間/打卡場地
     elif sub_num == 76: return 'cat003'  # Roblox Studio 遊戲製作
     elif sub_num == 77: return 'cat002'  # 程式編程教學
+    elif sub_num == 78: return 'cat008'  # 升學準備
+    elif sub_num == 79: return 'cat002'  # 手語教學
     return 'cat001'
 
 
@@ -2084,7 +2092,7 @@ def location_page(slug):
     users can find a tutor/coach per district without a new top-level category."""
     TEACHING_SUBS = {
         's009', 's010', 's011', 's012', 's013', 's014', 's023', 's024', 's026',
-        's029', 's030', 's058', 's059', 's062', 's070',
+        's029', 's030', 's058', 's059', 's062', 's070', 's079',
     }
     d = geo.DISTRICTS_BY_SLUG.get(slug)
     if not d:

@@ -5,7 +5,7 @@
 <section class="home-hero">
     <div class="container">
         <h1 class="home-h1">Thingerz 點搵你 — 探索香港18區</h1>
-        <p class="home-h1-sub">用影片搵香港本地好去處、服務同創作者</p>
+        <p class="home-h1-sub">學嘢・搵服務，睇片見真章 — 質素一眼睇清</p>
         <div class="hero-quick">
             <form class="hero-search" action="{{ url_for('search') }}" method="GET" role="search">
                 <input type="search" name="q" placeholder="搜尋地區、服務、主題或關鍵字 — 例如：觀塘咖啡店、婚禮攝影、香港品牌" aria-label="搜尋 Thingerz">
@@ -52,6 +52,38 @@
             <span class="hero-cat-hints">技能 · 語言 · 音樂 · 健身 · 商業 · 更多</span>
         </div>
     </a>
+</section>
+
+<section class="why-band">
+    <div class="container">
+        <h2 class="section-title">
+            <span class="title-accent"></span>
+            點解用影片學嘢？
+        </h2>
+        <div class="why-grid">
+            <div class="why-card">
+                <span class="why-icon">👀</span>
+                <h3>眼睛睇真質素</h3>
+                <p>老師點教、環境點樣、手工成果點樣 — 一睇就知，唔使靠估</p>
+            </div>
+            <div class="why-card">
+                <span class="why-icon">🇭🇰</span>
+                <h3>香港本地 18 區</h3>
+                <p>課程、師傅、服務全部香港本地，按區搵、按區睇，唔使盲試</p>
+            </div>
+            <div class="why-card">
+                <span class="why-icon">⚡</span>
+                <h3>免費即睇</h3>
+                <p>唔使登記、唔使下載，睇啱先決定 — 慳番晒試錯時間</p>
+            </div>
+        </div>
+        <div class="why-subs">
+            <span class="why-subs-label">想學啲咩？</span>
+            <a href="{{ url_for('subcategory_page', subcategory_id='s078') }}" class="why-chip">🎓 升學準備（升小・升中）</a>
+            <a href="{{ url_for('subcategory_page', subcategory_id='s079') }}" class="why-chip">🖐️ 手語教學</a>
+            <a href="{{ url_for('track_page', track='learning') }}" class="why-chip">深入 Learning 頻道 →</a>
+        </div>
+    </div>
 </section>
 
 <section class="hero-strip">
