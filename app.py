@@ -1149,7 +1149,7 @@ def sitemap():
     video_ids = set()
     try:
         db = get_db()
-        rows = db.execute("SELECT id, platform, platform_id, title, description, thumbnail_url, updated_at FROM crawled_videos WHERE district_confirmed=1 LIMIT 2000").fetchall()
+        rows = db.execute("SELECT id, platform, platform_id, title, description, thumbnail_url, updated_at FROM crawled_videos WHERE district_confirmed=1 ORDER BY view_count DESC LIMIT 6000").fetchall()
         for r in rows:
             video_ids.add('cv_' + str(r['id']))
             add(f"/video/cv_{r['id']}", priority=0.4,
