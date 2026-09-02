@@ -243,6 +243,14 @@ def get_db():
     return db
 
 
+# Canonical column list for the curated videos table/CSV — MUST stay in sync
+# with TABLE_SCHEMAS['videos'] and csv_to_table['videos.csv']. After commit
+# ae81211 added author_name/author_url/contact_url/contact_whatsapp, every
+# write_csv('videos.csv', ...) must use THIS list, or csv.DictWriter raises
+# ValueError ("dict contains fields not in fieldnames") -> 500 on /submit.
+VIDEO_FIELDNAMES = ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name','author_name','author_url','contact_url','contact_whatsapp']
+
+
 def init_db():
     db = get_db()
     for table, schema in TABLE_SCHEMAS.items():
@@ -371,7 +379,7 @@ def init_db():
         'news.csv': ('news', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region','district']),
         'lifetips.csv': ('lifetips', ['id','title_zh','title_en','content_zh','content_en','summary_zh','summary_en','date','image_url','status','region']),
         'comments.csv': ('comments', ['id','video_id','author','content','date','status']),
-        'submissions.csv': ('submissions', ['id','platform','platform_url','title_zh','title_en','category_id','subcategory_id','submitter_name','submitter_email','description_zh','direction','status','submitted_date']),
+        'submissions.csv': ('submissions', ['id','platform','platform_url','title_zh','title_en','category_id','subcategory_id','submitter_name','submitter_email','description_zh','direction','status','submitted_date','district']),
         'contacts.csv': ('contacts', ['id','name','email','subject','message','date','status']),
     }
 
@@ -1966,7 +1974,7 @@ def submit_video():
             'submitted_date': datetime.now().strftime('%Y-%m-%d'),
             'submitter_name': submission['submitter_name']
         })
-        vfieldnames = ['id','subcategory_id','category_id','platform','platform_id','title_zh','title_en','description_zh','description_en','thumbnail_url','aspect_ratio','tags','status','track','direction','submitted_date','submitter_name']
+        vfieldnames = VIDEO_FIELDNAMES
         write_csv('videos.csv', vids, vfieldnames)
         log_upload({'event': 'submit_approved', 'id': vids[-1]['id'],
                     'platform': platform, 'platform_url': url,
@@ -2502,7 +2510,7 @@ def admin_video_add():
         'submitted_date': datetime.now().strftime('%Y-%m-%d')
     }
     vids.append(vid)
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name', 'author_name', 'author_url', 'contact_url', 'contact_whatsapp']
+    fieldnames = VIDEO_FIELDNAMES
     write_csv('videos.csv', vids, fieldnames)
     log_upload({'event': 'admin_add', 'id': vid['id'],
                 'platform': platform, 'platform_id': platform_id,
@@ -2536,7 +2544,7 @@ def admin_video_edit(video_id):
             v['contact_url'] = request.form.get('contact_url', v.get('contact_url', '')) or v.get('contact_url', '')
             v['contact_whatsapp'] = request.form.get('contact_whatsapp', v.get('contact_whatsapp', '')) or v.get('contact_whatsapp', '')
             break
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name', 'author_name', 'author_url', 'contact_url', 'contact_whatsapp']
+    fieldnames = VIDEO_FIELDNAMES
     write_csv('videos.csv', vids, fieldnames)
     return redirect(url_for('admin_videos'))
 
@@ -2545,7 +2553,7 @@ def admin_video_edit(video_id):
 @admin_required
 def admin_video_delete(video_id):
     vids = [v for v in read_csv('videos.csv') if v['id'] != video_id]
-    fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
+    fieldnames = VIDEO_FIELDNAMES
     write_csv('videos.csv', vids, fieldnames)
     return redirect(url_for('admin_videos'))
 
@@ -2615,7 +2623,7 @@ def admin_approve_submission(submission_id):
             'submitted_date': datetime.now().strftime('%Y-%m-%d'),
             'submitter_name': submission.get('submitter_name', '')
         })
-        fieldnames = ['id', 'subcategory_id', 'category_id', 'platform', 'platform_id', 'title_zh', 'title_en', 'description_zh', 'description_en', 'thumbnail_url', 'aspect_ratio', 'tags', 'status', 'track', 'direction', 'submitted_date', 'submitter_name']
+        fieldnames = VIDEO_FIELDNAMES
         write_csv('videos.csv', vids, fieldnames)
     return redirect(url_for('admin_submissions'))
 
