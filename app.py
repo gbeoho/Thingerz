@@ -1728,10 +1728,43 @@ def subcategory_page(subcategory_id):
     return render_template('subcategory.html', category=category, sub=sub, subcategories=subcategories, videos=videos, platform_config=PLATFORM_CONFIG, selected_district=district)
 
 
+_LEGACY_CV_MAP = None
+_LEGACY_CV_TS = 0
+
+
+def _legacy_cv_map():
+    """Lazy {old_autoincrement_id: current_cv_id} loaded from
+    data/legacy_cv_map.json (built from the pre-crc32 DB backup). The Aug-25
+    id-scheme change (autoincrement -> crc32(platform_id)) left every old
+    /video/cv_<smallint> URL (which Google had indexed) returning 404, so
+    Google deindexed them. Redirect old ids to their current cv_<crc32> URL.
+    Rebuilt on a short TTL so a re-seed is picked up."""
+    global _LEGACY_CV_MAP, _LEGACY_CV_TS
+    _now = time.time()
+    if _LEGACY_CV_MAP is not None and (_now - _LEGACY_CV_TS) < 300:
+        return _LEGACY_CV_MAP
+    m = {}
+    try:
+        _path = os.path.join(DATA_DIR, 'legacy_cv_map.json')
+        with open(_path, encoding='utf-8') as f:
+            m = json.load(f)
+    except Exception:
+        pass
+    _LEGACY_CV_MAP, _LEGACY_CV_TS = m, _now
+    return m
+
+
 @app.route('/video/<video_id>')
 def video_detail(video_id):
     video = get_video(video_id)
     if not video:
+        # Legacy pre-crc32 autoincrement id (Google indexed cv_<smallint> under
+        # the old scheme, which the Aug-25 crc32 change broke): 301 to the
+        # current cv_<crc32> URL when a mapping exists; unknown ids stay 404.
+        if video_id.startswith('cv_') and video_id[3:].isdigit():
+            _new = _legacy_cv_map().get(video_id[3:])
+            if _new and 'cv_' + str(_new) != video_id:
+                return redirect(url_for('video_detail', video_id='cv_' + str(_new)), code=301)
         abort(404)
     increment_view(video_id)
     category = get_category(video['category_id'])
