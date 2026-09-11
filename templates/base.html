@@ -37,7 +37,15 @@
       "alternateName": "Thingerz 點搵你",
       "url": "https://thingerz.com",
       "inLanguage": "zh-HK",
-      "description": "探索香港18區嘅興趣與行業精彩影音"
+      "description": "探索香港18區嘅興趣與行業精彩影音",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://thingerz.com/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
     }
     </script>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">

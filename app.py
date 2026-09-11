@@ -370,6 +370,27 @@ def init_db():
             db.execute("ALTER TABLE submissions ADD COLUMN district TEXT")
     except Exception:
         pass
+    # Migration: backfill EMPTY summary_zh on news/lifetips rows from the curated
+    # CSVs (AEO quick-answer pack 2026-09-11). These tables are count0_only-seeded,
+    # so a CSV-only change never reaches a persisted live DB — same guard pattern
+    # as the district backfill above. Never overwrites a value already set.
+    for _tbl, _csvf, _idcol in (('news', 'news.csv', 'id'), ('lifetips', 'lifetips.csv', 'id')):
+        try:
+            _ncols = [r[1] for r in db.execute(f"PRAGMA table_info({_tbl})").fetchall()]
+            if 'summary_zh' not in _ncols:
+                continue
+            _csv = os.path.join(DATA_DIR, _csvf)
+            if os.path.exists(_csv):
+                with open(_csv, 'r', encoding='utf-8-sig', newline='') as f:
+                    for row in csv.DictReader(f):
+                        _rid = (row.get(_idcol) or '').strip()
+                        _summ = (row.get('summary_zh') or '').strip()
+                        if _rid and _summ:
+                            db.execute(
+                                f"UPDATE {_tbl} SET summary_zh=? WHERE {_idcol}=? AND (summary_zh IS NULL OR summary_zh='')",
+                                (_summ, _rid))
+        except Exception:
+            pass
     db.commit()
 
     csv_to_table = {
@@ -2049,7 +2070,7 @@ def news_list():
 def news_detail(news_id):
     item = get_news(news_id)
     if not item:
-        return redirect(url_for('news_list'))
+        abort(404)
     # GEO coupling: derive the district entity (slug+geo) this article is tagged with.
     news_district = None
     dname = (item.get('district') or '').strip()
@@ -2079,7 +2100,7 @@ def lifetips_list():
 def lifetips_detail(tip_id):
     it = get_lifetips(tip_id)
     if not it:
-        return redirect(url_for('lifetips_list'))
+        abort(404)
     # 更多生活小知識: 6 small thumbnails in a 3-column x 2-row grid.
     related_tips = [t for t in get_lifetips() if t['id'] != it['id']][:6]
     return render_template('lifetips_detail.html', tip=it, all_tips=get_lifetips(),

@@ -17,12 +17,13 @@
   "description": {{ _vmeta[:150]|tojson }},
   "thumbnailUrl": {{ video['thumbnail_url']|tojson }},
   "uploadDate": {{ (video['submitted_date'] or '2026-01-01')|tojson }},
-  "url": "https://thingerz.com/video/{{ video['id'] }}",
+  {% if (video.get('duration_sec') or 0) > 0 %}"duration": "PT{{ (video['duration_sec'] // 3600) }}H{{ ((video['duration_sec'] % 3600) // 60) }}M{{ (video['duration_sec'] % 60) }}S",{% endif %}
+  "url": "https://thingerz.com/video/{{ video['id'] }}"{% if (video['platform'] == 'youtube' and video['platform_id']) or video.get('author_name') or video_district is not none %},{% endif %}
   {% if video['platform'] == 'youtube' and video['platform_id'] %}
-  "embedUrl": {{ ('https://www.youtube.com/embed/' + video['platform_id'])|tojson }},
+  "embedUrl": {{ ('https://www.youtube.com/embed/' + video['platform_id'])|tojson }}{% if video.get('author_name') or video_district is not none %},{% endif %}
   {% endif %}
   {% if video.get('author_name') %}
-  "author": { "@type": "Person", "name": {{ video['author_name']|tojson }} },
+  "author": { "@type": "Person", "name": {{ video['author_name']|tojson }} }{% if video_district is not none %},{% endif %}
   {% endif %}
   {% if video_district is not none %}
   "contentLocation": {

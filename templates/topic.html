@@ -13,7 +13,29 @@
   "name": {{ (topic['title_zh'] ~ " - Thingerz 專題")|tojson }},
   "description": {{ topic['intro']|tojson }},
   "url": "https://thingerz.com/topic/{{ topic['slug'] }}",
-  "about": "香港小店・本地服務・主題策展"
+  "about": "香港小店・本地服務・主題策展",
+  "mainEntity": {
+    "@type": "ItemList",
+    "name": {{ (topic['title_zh'] ~ " 專題影片")|tojson }},
+    "itemListElement": [
+      {% for video in videos %}
+      {
+        "@type": "ListItem",
+        "position": {{ loop.index }},
+        "name": {{ video['title_zh']|tojson }},
+        "url": "https://thingerz.com/video/{{ video['id'] }}"
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "首頁", "item": "https://thingerz.com/" },
+      { "@type": "ListItem", "position": 2, "name": "專題策展", "item": "https://thingerz.com/topics" },
+      { "@type": "ListItem", "position": 3, "name": {{ topic['title_zh']|tojson }}, "item": "https://thingerz.com/topic/{{ topic['slug'] }}" }
+    ]
+  }
 }
 </script>
 {% endblock %}

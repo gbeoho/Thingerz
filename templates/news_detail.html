@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% set _nsumm = (news_item['summary_zh'] or news_item['title_zh'] or 'Thingerz 好去處') | replace('\n', ' ') | replace('\r', ' ') %}
+{% set _nsumm_raw = (news_item['summary_zh'] or '').strip() %}
+{% set _nsumm = ((_nsumm_raw if _nsumm_raw|length >= 40 else ((news_item['title_zh'] or '') + ' ｜ Thingerz 香港好去處')) | replace('\n', ' ') | replace('\r', ' ')) %}
 {% block title %}{{ news_item['title_zh'] }} - 本月好去處 - Thingerz{% endblock %}
 {% block meta_description %}{{ _nsumm[:150] }}{% endblock %}
 {% block og_title %}{{ news_item['title_zh'] }} - 好去處 - Thingerz{% endblock %}
