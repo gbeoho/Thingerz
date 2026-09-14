@@ -16,7 +16,7 @@
   "name": {{ video['title_zh']|tojson }},
   "description": {{ _vmeta[:150]|tojson }},
   "thumbnailUrl": {{ video['thumbnail_url']|tojson }},
-  "uploadDate": {{ (video['submitted_date'] or '2026-01-01')|tojson }},
+  "uploadDate": {{ (video.get('upload_date_iso') or video['submitted_date'] or '2026-01-01')|tojson }},
   {% if (video.get('duration_sec') or 0) > 0 %}"duration": "PT{{ (video['duration_sec'] // 3600) }}H{{ ((video['duration_sec'] % 3600) // 60) }}M{{ (video['duration_sec'] % 60) }}S",{% endif %}
   "url": "https://thingerz.com/video/{{ video['id'] }}"{% if (video['platform'] == 'youtube' and video['platform_id']) or video.get('author_name') or video_district is not none %},{% endif %}
   {% if video['platform'] == 'youtube' and video['platform_id'] %}

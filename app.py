@@ -11,7 +11,7 @@ import time
 import urllib.request
 import urllib.parse
 import zlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import Counter
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response, abort
@@ -677,6 +677,32 @@ def _published_ago_days(s):
         return float('inf')
 
 
+def _published_at_iso(s):
+    """Normalize any stored published_at into ISO-8601 YYYY-MM-DD, for schema
+    VideoObject.uploadDate. Google rejects YouTube's relative strings
+    ("1 年前", "3 個月前", "11 個月前曾經串流") as not ISO-8601; convert them to
+    an approximate calendar date (now minus the relative span). Absolute
+    ISO/datetime values are reduced to their date part. Empty -> '' so callers
+    keep their own fallback.
+    """
+    t = str(s or '').strip()
+    if not t:
+        return ''
+    try:
+        if 'T' in t:
+            parsed = datetime.fromisoformat(t.replace('Z', '+00:00'))
+        else:
+            parsed = datetime.combine(datetime.fromisoformat(t[:10]), datetime.min.time())
+        return parsed.date().isoformat()
+    except Exception:
+        pass
+    m = _AGO_RE.search(t)
+    if m:
+        days = int(m.group(1)) * _AGO_MULT[m.group(2)]
+        return (datetime.now().date() - timedelta(days=days)).isoformat()
+    return ''
+
+
 def get_videos(subcategory_id=None, category_id=None, track=None, direction=None, status='approved', district=None, limit=None):
     videos = read_csv('videos.csv')
     result = [v for v in videos if v.get('status', '') == status]
@@ -951,6 +977,7 @@ def get_video(video_id):
                     'view_count': r['view_count'] or 0,
                     'duration_sec': r['duration_sec'] or 0,
                     'submitted_date': r['published_at'] or '',
+                    'upload_date_iso': _published_at_iso(r['published_at']),
                 }
         except:
             pass
