@@ -101,18 +101,17 @@
         .hot-chip{font-size:.72rem;color:#9898b0;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.14);padding:5px 12px;border-radius:16px;transition:all .2s}
         .hot-chip:hover{color:#fff;border-color:rgba(129,140,248,.45);background:rgba(129,140,248,.08)}
         @media(max-width:600px){
-            .hero-search{flex-direction:column}
-            .hero-search button{width:100%}
+            .hero-search button{flex-shrink:0}
             .home-h1{font-size:1.15rem;line-height:1.3;margin-bottom:6px}
-            .home-h1-sub{font-size:.85rem}
-            .hero-quick{gap:12px;margin-top:18px}
+            .home-h1-sub{font-size:.78rem}
+            .hero-quick{gap:10px;margin-top:14px}
             .hero-entries{gap:8px}
-            .hero-entry{font-size:.75rem;padding:8px 14px}
-            .hero-search input{font-size:.85rem;padding:11px 16px}
-            .hero-search button{font-size:.8rem;padding:11px 16px}
-            .hero-hots{gap:6px;padding:9px 12px}
-            .hero-hot-label{font-size:.66rem}
-            .hot-chip{font-size:.66rem;padding:4px 10px}
+            .hero-entry{font-size:.7rem;padding:7px 12px}
+            .hero-search input{font-size:.85rem;padding:10px 14px}
+            .hero-search button{font-size:.8rem;padding:10px 18px}
+            .hero-hots{gap:6px;padding:7px 10px}
+            .hero-hot-label{font-size:.62rem}
+            .hot-chip{font-size:.62rem;padding:3px 8px}
         }
         /* 18區香港地圖視圖 (Grok UI review: 地圖式探索) */
         .map-band-label{font-size:.72rem;font-weight:800;color:#7c7c96;letter-spacing:.06em;margin:16px 0 8px;display:flex;align-items:center;gap:10px}
@@ -619,7 +618,6 @@
             .nav-container{padding:0 12px}
             .masonry-grid{grid-template-columns:1fr 1fr;gap:8px}
             .video-card .card-info{padding:12px}
-            .video-card .card-title{font-size:.82rem}
             .news-grid{grid-template-columns:1fr}
             .news-info{padding:16px}
             .footer-grid{grid-template-columns:1fr;gap:20px}
@@ -632,7 +630,10 @@
             .section{padding:36px 0}
             .section-title{font-size:1.15rem}
             .page-hero h1{font-size:1.5rem}
-            .sticky-cat-chip{font-size:.76rem;padding:7px 14px}
+            .sticky-cat-chip{font-size:.7rem;padding:5px 10px;border-radius:16px}
+            .sticky-categories{gap:6px}
+            .map-district{padding:8px 10px;font-size:.7rem}
+            .news-filter-sticky{padding:6px 0 4px}
             .form-section h3{font-size:1rem}
             .input{padding:12px 14px;font-size:.88rem}
             .contact-layout{gap:20px}
@@ -651,6 +652,26 @@
             .breadcrumb{font-size:.75rem;flex-wrap:wrap;justify-content:center}
             .external-link{font-size:.7rem;padding:5px 12px}
             .tag-lg{font-size:.7rem;padding:4px 10px}
+        }
+        /* mobile polish 2026-09-16: image-forward cards + compact filters (参考 weekendhk 版面) */
+        @media(max-width:600px){
+            .masonry-grid{grid-template-columns:1fr;gap:14px}
+            .video-card.portrait{grid-row:auto}
+            .video-card.portrait .card-media{aspect-ratio:16/9}
+            .video-card .card-info{padding:12px 14px 10px}
+            .video-card .card-title{font-size:.9rem;line-height:1.35}
+            .video-card .card-submitter{font-size:.68rem;margin:-2px 0 6px}
+            .video-card .tag{font-size:.62rem;padding:3px 9px}
+            .video-card .card-platform-badge{font-size:.58rem;padding:4px 10px;top:8px;left:8px}
+            .section-title{font-size:1.05rem;margin-bottom:18px}
+            .section-title::before{height:22px}
+            .news-filter-sticky{padding:8px 0 6px}
+            .news-filter-sticky .sticky-cat-chip{font-size:.7rem;padding:5px 10px;border-radius:16px}
+            .news-pick-title{font-size:.8rem}
+            .news-pick-overlay{padding:10px}
+            .news-card-full .news-info h2{font-size:1.05rem}
+            .news-card-full .news-info{padding:14px 16px 12px}
+            .fstrip-title{font-size:.74rem}
         }
         @supports(padding:max(0px)){
             .navbar{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
