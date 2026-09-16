@@ -16,11 +16,11 @@
   "name": {{ video['title_zh']|tojson }},
   "description": {{ _vmeta[:150]|tojson }},
   "thumbnailUrl": {{ video['thumbnail_url']|tojson }},
-  "uploadDate": {{ (video.get('upload_date_iso') or video['submitted_date'] or '2026-01-01')|tojson }},
+  "uploadDate": {{ (video.get('upload_date_iso') or '2026-01-01T00:00:00+08:00')|tojson }},
   {% if (video.get('duration_sec') or 0) > 0 %}"duration": "PT{{ (video['duration_sec'] // 3600) }}H{{ ((video['duration_sec'] % 3600) // 60) }}M{{ (video['duration_sec'] % 60) }}S",{% endif %}
-  "url": "https://thingerz.com/video/{{ video['id'] }}"{% if (video['platform'] == 'youtube' and video['platform_id']) or video.get('author_name') or video_district is not none %},{% endif %}
-  {% if video['platform'] == 'youtube' and video['platform_id'] %}
-  "embedUrl": {{ ('https://www.youtube.com/embed/' + video['platform_id'])|tojson }}{% if video.get('author_name') or video_district is not none %},{% endif %}
+  "url": "https://thingerz.com/video/{{ video['id'] }}"{% if video.get('platform_id') or video.get('author_name') or video_district is not none %},{% endif %}
+  {% if video.get('platform_id') %}
+  "embedUrl": {{ (platform_config.get(video['platform'], platform_config['youtube'])['embed_base'] | replace('{id}', video['platform_id']) | replace('{user}', ''))|tojson }}{% if video.get('author_name') or video_district is not none %},{% endif %}
   {% endif %}
   {% if video.get('author_name') %}
   "author": { "@type": "Person", "name": {{ video['author_name']|tojson }} }{% if video_district is not none %},{% endif %}

@@ -11,7 +11,7 @@ import time
 import urllib.request
 import urllib.parse
 import zlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import Counter
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_file, Response, abort
@@ -678,12 +678,14 @@ def _published_ago_days(s):
 
 
 def _published_at_iso(s):
-    """Normalize any stored published_at into ISO-8601 YYYY-MM-DD, for schema
-    VideoObject.uploadDate. Google rejects YouTube's relative strings
-    ("1 年前", "3 個月前", "11 個月前曾經串流") as not ISO-8601; convert them to
-    an approximate calendar date (now minus the relative span). Absolute
-    ISO/datetime values are reduced to their date part. Empty -> '' so callers
-    keep their own fallback.
+    """Normalize any stored published_at into a full ISO-8601 datetime with
+    timezone (YYYY-MM-DDTHH:MM:SS+08:00), for schema VideoObject.uploadDate.
+    Google rejects YouTube's relative strings ("1 年前", "3 個月前",
+    "11 個月前曾經串流") as not ISO-8601, and flags timezone-less dates
+    ("YYYY-MM-DD only") as "missing a timezone". Convert relative strings to
+    an approximate local calendar datetime (now minus the relative span, HK
+    timezone +08:00). Absolute ISO/datetime values are kept; naive values get
+    +08:00 attached. Empty -> '' so callers keep their own fallback.
     """
     t = str(s or '').strip()
     if not t:
@@ -692,14 +694,18 @@ def _published_at_iso(s):
         if 'T' in t:
             parsed = datetime.fromisoformat(t.replace('Z', '+00:00'))
         else:
-            parsed = datetime.combine(datetime.fromisoformat(t[:10]), datetime.min.time())
-        return parsed.date().isoformat()
+            parsed = datetime.combine(datetime.fromisoformat(t[:10]).date(), datetime.min.time())
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone(timedelta(hours=8)))
+        else:
+            parsed = parsed.astimezone(timezone(timedelta(hours=8)))
+        return parsed.replace(microsecond=0).isoformat()
     except Exception:
         pass
     m = _AGO_RE.search(t)
     if m:
         days = int(m.group(1)) * _AGO_MULT[m.group(2)]
-        return (datetime.now().date() - timedelta(days=days)).isoformat()
+        return (datetime.now(timezone(timedelta(hours=8))) - timedelta(days=days)).replace(microsecond=0).isoformat()
     return ''
 
 
@@ -977,13 +983,15 @@ def get_video(video_id):
                     'view_count': r['view_count'] or 0,
                     'duration_sec': r['duration_sec'] or 0,
                     'submitted_date': r['published_at'] or '',
-                    'upload_date_iso': _published_at_iso(r['published_at']),
+                    'upload_date_iso': _published_at_iso(r['published_at']) or '2026-01-01T00:00:00+08:00',
                 }
         except:
             pass
         return None
     for v in read_csv('videos.csv'):
         if v['id'] == video_id:
+            if 'upload_date_iso' not in v:
+                v['upload_date_iso'] = _published_at_iso(v.get('submitted_date', '')) or '2026-01-01T00:00:00+08:00'
             return v
     return None
 
