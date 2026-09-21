@@ -1178,16 +1178,32 @@ def sitemap():
     def video_meta(v, platform_key='platform', id_key='platform_id',
                    title_key='title_zh', desc_key='description_zh',
                    thumb_key='thumbnail_url', **kw):
-        """Build video:video extension dict when the platform has a player URL."""
+        """Build video:video extension dict when the platform has a player URL.
+
+        video:description is REQUIRED non-empty by Google's video sitemap
+        spec — an empty <video:description/> makes the whole sitemap fail
+        validation in GSC ("Validation Failed"). Fall back to the title so
+        the tag always carries content; skip the block only when nothing
+        usable remains.
+        """
         plat = v.get(platform_key, '')
         pid = v.get(id_key, '')
-        if plat != 'youtube' or not pid:
+        thumb = (v.get(thumb_key, '') or '').strip()
+        if plat != 'youtube' or not pid or not thumb:
             return None
         player = f'https://www.youtube.com/embed/{pid}'
+        title = (v.get(title_key, '') or '').strip()[:100]
+        desc = (v.get(desc_key, '') or '').strip()[:2000]
+        if not desc:
+            desc = title[:2000]
+        if not title and not desc:
+            return None
+        if not title:
+            title = desc[:100]
         return {
-            'thumbnail_loc': v.get(thumb_key, ''),
-            'title': (v.get(title_key, '') or '')[:100],
-            'description': (v.get(desc_key, '') or '')[:2000],
+            'thumbnail_loc': thumb,
+            'title': title,
+            'description': desc,
             'player_loc': player,
         }
 
@@ -1268,13 +1284,15 @@ def sitemap():
         SubElement(u, 'changefreq').text = e['changefreq']
         SubElement(u, 'priority').text = str(e['priority'])
         if e['video']:
-            v = SubElement(u, 'video:video')
-            thumb = e['video'].get('thumbnail_loc') or ''
-            if thumb:
-                SubElement(v, 'video:thumbnail_loc').text = thumb
-            SubElement(v, 'video:title').text = e['video']['title']
-            SubElement(v, 'video:description').text = e['video']['description']
-            SubElement(v, 'video:player_loc').text = e['video']['player_loc']
+            vd = e['video']
+            required = [vd.get(k) for k in
+                        ('thumbnail_loc', 'title', 'description', 'player_loc')]
+            if all(required):
+                v = SubElement(u, 'video:video')
+                SubElement(v, 'video:thumbnail_loc').text = vd['thumbnail_loc']
+                SubElement(v, 'video:title').text = vd['title']
+                SubElement(v, 'video:description').text = vd['description']
+                SubElement(v, 'video:player_loc').text = vd['player_loc']
     xml_str = minidom.parseString(tostring(urlset)).toprettyxml(indent='  ')
     return Response(xml_str, mimetype='application/xml')
 
