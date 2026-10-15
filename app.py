@@ -1678,13 +1678,31 @@ def _map_subcat(sub_num):
 
 
 def get_top_viewed(limit=100):
-    """Homepage 精選影片 pool: top N videos by view count across crawled_videos."""
+    """Homepage 精選影片 pool: recent videos (last ~2 yrs) with high view counts.
+
+    Old/dated videos (published_at empty or older than 2024) are deprioritised
+    so 2019-era posts no longer dominate the homepage featured rail.
+    """
     result = []
     try:
         db = get_db()
+        # Recency-first tier: videos with a known recent published_at (>=2024),
+        # ordered by view count — the featured rail prefers fresh content.
         rows = db.execute(
-            "SELECT * FROM crawled_videos ORDER BY view_count DESC LIMIT ?",
+            "SELECT * FROM crawled_videos "
+            "WHERE (published_at IS NOT NULL AND published_at != '' "
+            "       AND published_at >= '2024-01-01') "
+            "ORDER BY view_count DESC LIMIT ?",
             (limit,)).fetchall()
+        # Fallback tier: undated videos (published_at empty) fill remainder so
+        # the rail is never empty — but only after the recent tier.
+        remaining = max(0, limit - len(rows))
+        if remaining > 0:
+            rows += db.execute(
+                "SELECT * FROM crawled_videos "
+                "WHERE (published_at IS NULL OR published_at = '') "
+                "ORDER BY view_count DESC LIMIT ?",
+                (remaining,)).fetchall()
         db.close()
     except Exception:
         return result
