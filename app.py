@@ -1308,14 +1308,82 @@ def indexnow_key():
 
 @app.route('/robots.txt')
 def robots():
+    # AIyet / AI-readiness: explicit AI-bot groups + Content-Signals (2026-10-15).
+    # AI bots are ALLOWED (we want to be cited) — rules are declarative, not blocking.
     content = (
         'User-agent: *\n'
         'Disallow: /admin\n'
         'Disallow: /api/\n'
         'Allow: /\n\n'
+        # ---- AI crawlers: explicit allow (ready for AI search) ----
+        'User-agent: GPTBot\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        'User-agent: ClaudeBot\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        'User-agent: PerplexityBot\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        'User-agent: Google-Extended\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        'User-agent: ChatGPT-User\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        'User-agent: OAI-SearchBot\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        'User-agent: Applebot-Extended\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        'User-agent: Bytespider\n'
+        'Allow: /\n'
+        'Disallow: /admin\n\n'
+        # ---- Content Signals (emerging standard) ----
+        'Content-Signal: search=yes, ai-input=yes, ai-train=no\n\n'
         'Sitemap: https://thingerz.com/sitemap.xml\n'
     )
     return Response(content, mimetype='text/plain')
+
+
+@app.route('/.well-known/ard.json')
+def ard_json():
+    """ARD (Agent Resource Discovery) catalog — tells AI agents what the site offers (AIyet +5 pts)."""
+    import json as _json
+    data = {
+        "@context": "https://ard.smwhr.net/contexts/ard-v1.jsonld",
+        "@id": "https://thingerz.com/",
+        "name": "Thingerz",
+        "description": "17 區香港服務、課程、創作者與好去處影音目錄",
+        "resources": [
+            {"@type": "Resource", "name": "首頁", "url": "https://thingerz.com/"},
+            {"@type": "Resource", "name": "18 區導覽", "url": "https://thingerz.com/location/tai-po"},
+            {"@type": "Resource", "name": "本月好去處", "url": "https://thingerz.com/news"},
+            {"@type": "Resource", "name": "生活小知識", "url": "https://thingerz.com/life-tips"},
+            {"@type": "Resource", "name": "站點地圖", "url": "https://thingerz.com/sitemap.xml"},
+        ],
+    }
+    return Response(_json.dumps(data, ensure_ascii=False), mimetype='application/json')
+
+
+@app.route('/llms.txt')
+def llms_txt():
+    """Markdown guide for AI tools (llms.txt standard, AIyet +10-12 pts)."""
+    content = (
+        '# Thingerz\n\n'
+        '> Thingerz 點搵你 — 探索香港 18 區嘅興趣與行業影音。\n'
+        '> Find Hong Kong services, courses, creators and things to do in all 18 districts, '
+        'backed by real video proof.\n\n'
+        '## Key pages\n\n'
+        '- [首頁 Home](https://thingerz.com/): 18 區分類入口\n'
+        '- [18 區導覽 Districts](https://thingerz.com/location/tai-po): 每區服務、導師、好去處\n'
+        "- [本月好去處 What's on](https://thingerz.com/news): 香港最新好去處\n"
+        '- [生活小知識 Life tips](https://thingerz.com/life-tips): 香港生活實用知識\n\n'
+        '## Sitemap\n\n'
+        '- [XML sitemap](https://thingerz.com/sitemap.xml): 全站頁面清單\n'
+    )
+    return Response(content, mimetype='text/markdown; charset=utf-8')
 
 
 def extract_youtube_id(url):
@@ -3386,6 +3454,18 @@ def api_content():
                     'duplicates_skipped': duplicates, 'errors': errors})
 
 
+@app.before_request
+def _markdown_negotiation():
+    """AIyet Top fix (+12 pts): serve Markdown to agents that ask for it.
+
+    If an AI crawler sends `Accept: text/markdown` for the homepage, return
+    the llms-style Markdown summary instead of HTML — cheaper for LLMs to read.
+    """
+    if request.path == '/' and request.accept_mimetypes.best_match(
+            ['text/markdown', 'text/html']) == 'text/markdown':
+        return llms_txt()
+
+
 @app.after_request
 def add_security_headers(response):
     # Security headers — XSS/clickjacking/sniffing/mixed-content hardening
@@ -3394,6 +3474,9 @@ def add_security_headers(response):
     response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
     response.headers.setdefault('Permissions-Policy',
                                 'camera=(), microphone=(), geolocation=()')
+    # AI-agent discovery: Link header → ARD catalog (AIyet +6 pts)
+    response.headers.setdefault(
+        'Link', '<https://thingerz.com/.well-known/ard.json>; rel="service-desc"')
     response.headers.setdefault(
         'Content-Security-Policy',
         "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; "
